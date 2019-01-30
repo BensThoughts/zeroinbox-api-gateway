@@ -1,0 +1,42 @@
+{
+  "name": "zero-inbox-backend",
+  "version": "1.0.0",
+  "description": "Backend for zero inbox",
+  "main": "/src/index.js",
+  "directories": {
+    "src": "src"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd ./src && node index.js",
+    "start:dev": "cd ./src && nodemon",
+    "dev": "cd ./src && node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^1.4.1",
+    "batchelor": "^2.0.2",
+    "body-parser": "^1.18.3",
+    "chalk": "^2.4.2",
+    "connect-redis": "^3.4.0",
+    "connect-rest": "^3.0.29",
+    "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-request-id": "^1.4.1",
+    "express-session": "^1.15.6",
+    "googleapis": "^36.0.0",
+    "mongodb": "^3.1.13",
+    "mongoose": "^5.4.6",
+    "morgan": "^1.9.1",
+    "nodemon": "^1.18.9",
+    "request": "^2.88.0",
+    "uid-safe": "^2.1.5"
+  },
+  "devDependencies": {
+    "eslint": "^4.12.0",
+    "eslint-plugin-promise": "^3.6.0"
+  },
+  "private": true
+}
