@@ -144,9 +144,9 @@ exports.email_profile = function (req, res) {
     let email_profile = JSON.parse(email_profile_response);
     let userId = req.session.user_info.userId;
 
-    mongoose.connect(configDB.url, {useNewUrlParser: true});
+    // mongoose.connect(configDB.url, {useNewUrlParser: true});
 
-    let db = mongoose.connection;
+    // let db = mongoose.connection;
 
     let md5sum = crypto.createHash('md5');
 
@@ -163,9 +163,9 @@ exports.email_profile = function (req, res) {
     // other route called after
     res.json({ email_profile: email_profile });
 
-    db.on('error', console.error.bind(console, 'connection error:'));
+    // db.on('error', console.error.bind(console, 'connection error:'));
 
-    db.once('open', function() {
+    // db.once('open', function() {
 
       let conditions = { userId: userId };
       let profileUpdate = {
@@ -188,7 +188,7 @@ exports.email_profile = function (req, res) {
         console.log('email profile updated');
       });
 
-    });
+    // });
 
 
   }).catch((err) => {
