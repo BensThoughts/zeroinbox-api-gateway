@@ -18,6 +18,7 @@ const mongoose = require('mongoose');
 
 const Suggestion = require('../models/suggestion.model');
 const History = require('../models/history.model');
+const ThreadIds = require('../models/thread_IDs.model');
 
 /*******************************************************************************
  BATCHELOR INIT
@@ -317,13 +318,6 @@ class Results {
 
 exports.threads_batch = function (req, res) {
 
-  if (!req.body.body) {
-    res.status(400).send('Error: request body missing!');
-  }
-  if (!Array.isArray(req.body.body)) {
-    res.status(400).send('Error: request body is not of type Array<string>!');
-  } else {
-
     let access_token = req.session.token.access_token;
     let user_info = req.session.user_info;
     let alreadyInDb = false;
@@ -338,11 +332,7 @@ exports.threads_batch = function (req, res) {
       let conditions = { userId: user_info.userId };
 
 
-      let findPromise = History.findOne(conditions);
-
-
-      
-      findPromise.then((doc) => {
+      History.findOne(conditions, (err, doc) => {
         // console.log(doc);
         if (doc.passive.firstRun === false) {
           res.json({ loading_status: false })
@@ -362,7 +352,7 @@ exports.threads_batch = function (req, res) {
             console.log('History: Active: Loading set to true');
           });
 
-
+          ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
 
           const start = async () => {
 
@@ -370,7 +360,8 @@ exports.threads_batch = function (req, res) {
 
           let newResults = new Results();
 
-          let threadIdChunks = chunkThreadIds(req.body.body, []);
+          // console.log(res);
+          let threadIdChunks = chunkThreadIds(threadIds, []);
 
           await asyncForEach(threadIdChunks, async (threadIdsChunk) => {
             let batchResult = await newBatchThreadRequest(threadIdsChunk, access_token);
@@ -391,6 +382,7 @@ exports.threads_batch = function (req, res) {
             }
             batchResult = undefined;
           });
+
           Suggestion.insertMany(newResults.getResults());
           console.log('DONE')
 
@@ -416,11 +408,12 @@ exports.threads_batch = function (req, res) {
             res.status(500).send('Error: ' + error);
           });
 
-        }
+        }) // ThreadIds.find()
 
-    });
+        } // else
+
+    }); // History.findOne()
       
     })
-  }
 }
 

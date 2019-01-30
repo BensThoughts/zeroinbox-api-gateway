@@ -8,7 +8,7 @@ const threadsBatchController = require('./threads_batch.controller')
 
 threadsRouter.get('/threads', threadsIdsController.get_threads_ids);
 
-threadsRouter.post('/batch', threadsBatchController.threads_batch);
+threadsRouter.get('/batch', threadsBatchController.threads_batch);
 
 
 module.exports = threadsRouter;

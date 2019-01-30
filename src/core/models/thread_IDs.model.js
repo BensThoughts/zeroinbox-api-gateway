@@ -12,6 +12,6 @@ const threadIdSchema = new Schema({
   threadId: String
 });
 
-const ThreadId = mongoose.model('ThreadIds', threadIdSchema);
+const ThreadId = mongoose.model('Thread_Ids', threadIdSchema);
 
 module.exports = ThreadId;
