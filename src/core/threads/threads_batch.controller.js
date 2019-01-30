@@ -318,53 +318,44 @@ class Results {
 
 exports.threads_batch = function (req, res) {
 
-    let access_token = req.session.token.access_token;
-    let user_info = req.session.user_info;
-    let alreadyInDb = false;
+  let access_token = req.session.token.access_token;
+  let user_info = req.session.user_info;
+  let alreadyInDb = false;
 
-    // mongoose.connect(configDB.url, {useNewUrlParser: true});
+  let conditions = { userId: user_info.userId };
 
-    // let db = mongoose.connection;
-
-    // db.on('error', console.error.bind(console, 'connection error:'));
-
-    // db.once('open', function() {
-      let conditions = { userId: user_info.userId };
-
-
-      History.findOne(conditions, (err, doc) => {
-        // console.log(doc);
-        if (doc.passive.firstRun === false) {
-          res.json({ loading_status: false })
-        } else {
+  History.findOne(conditions, (err, doc) => {
+    // console.log(doc);
+    if (doc.passive.firstRun === false) {
+      res.json({ loading_status: false })
+    } else {
  
-          let update = {
-            // userId: user_info.userId,
-            "active.loadingStatus": true
-          };
-          let options = {
-            multi: false,
-            upsert: true
-          };
-          // console.log(threads.id);
-          History.updateOne(conditions, update, options, (err, raw) => {
-            if(err) return console.error(chalk.red(err));
-            console.log('History: Active: Loading set to true');
+      let update = {
+        // userId: user_info.userId,
+        "active.loadingStatus": true
+      };
+      let options = {
+        multi: false,
+        upsert: true
+      };
+      // console.log(threads.id);
+      History.updateOne(conditions, update, options, (err, raw) => {
+        if(err) return console.error(chalk.red(err));
+        console.log('History: Active: Loading set to true');
 
-            // wait until we update loading status then client can
-            // start polling for loading
-            res.json({ loading_status: true }); 
-          });
+        // wait until we update loading status then client can
+        // start polling for loading
+        res.json({ loading_status: true }); 
+      });
 
-          ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
+      ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
 
-          const start = async () => {
-
+        const startBatchProccess = async () => {
+  
           let inter_response_count = 0;
 
           let newResults = new Results();
 
-          // console.log(res);
           let threadIdChunks = chunkThreadIds(threadIds, []);
 
           await asyncForEach(threadIdChunks, async (threadIdsChunk) => {
@@ -406,18 +397,17 @@ exports.threads_batch = function (req, res) {
             });
           });
           console.log('DONE')
-          }
-          start().catch((error) => {
-            console.log(error);
-            res.status(500).send('Error: ' + error);
-          });
+        }
+        startBatchProccess().catch((error) => {
+          console.log(error);
+          res.status(500).send('Error: ' + error);
+        });
 
-        }) // ThreadIds.find()
+      }) // ThreadIds.find()
 
-        } // else
+    } // else
 
-    }); // History.findOne()
-      
-    // })
+  }); // History.findOne()
+  
 }
 

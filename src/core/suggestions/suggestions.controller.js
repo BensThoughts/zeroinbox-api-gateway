@@ -31,8 +31,6 @@ exports.suggestions = function (req, res) {
 
     Suggestion.find(conditions, projection, (err, raw) => {
       if (err) return console.error(chalk.red(err));
-      // console.log(raw);
-      // console.log(raw);
       let suggestions = raw;
       res.json({ suggestions: suggestions });
     })
