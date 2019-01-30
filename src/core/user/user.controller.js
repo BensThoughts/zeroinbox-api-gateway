@@ -1,16 +1,14 @@
 
 /*******************************************************************************
-  INIT CHALK
+  INIT DEPS
 *******************************************************************************/
 const chalk = require('chalk');
-
 const request = require('request');
-
-/*******************************************************************************
- HASHING INIT
-*******************************************************************************/
 const crypto = require('crypto');
 
+/*******************************************************************************
+ MONGOOSE INIT
+*******************************************************************************/
 const configDB = require('../../config/database');
 const mongoose = require('mongoose');
 
@@ -18,7 +16,7 @@ var Profile = require('../models/profile.model');
 const History = require('../models/history.model');
 
 /*******************************************************************************
-Get Basic Profile and Email Profile
+Get Basic Profile
 *******************************************************************************/
 
 exports.basic_profile = function (req, res) {
@@ -117,10 +115,13 @@ exports.basic_profile = function (req, res) {
 
 };
 
+
+/*******************************************************************************
+Get Email Profile
+*******************************************************************************/
 exports.email_profile = function (req, res) {
-  // console.log('test: ' + req.session.test);
+
   let access_token = req.session.token.access_token;
-  // console.log('email userId: ' + userId)
 
   const options = {
     url: 'https://www.googleapis.com/gmail/v1/users/me/profile',
@@ -147,12 +148,9 @@ exports.email_profile = function (req, res) {
 
     let db = mongoose.connection;
 
-
     let md5sum = crypto.createHash('md5');
 
     md5sum.update(email_profile.emailAddress);
-    // console.log(x);
-    // console.log(md5sum.digest('hex'));
     let emailId = md5sum.digest('hex');
 
     req.session.user_info = {
@@ -168,7 +166,6 @@ exports.email_profile = function (req, res) {
     db.on('error', console.error.bind(console, 'connection error:'));
 
     db.once('open', function() {
-
 
       let conditions = { userId: userId };
       let profileUpdate = {

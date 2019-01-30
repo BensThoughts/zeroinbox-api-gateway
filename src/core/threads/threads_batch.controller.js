@@ -346,8 +346,7 @@ exports.threads_batch = function (req, res) {
         // console.log(doc);
         if (doc.passive.firstRun === false) {
           res.json({ loading_status: false })
-        }
-        if (doc.passive.firstRun === true) {
+        } else {
           res.json({ loading_status: true }); 
           let update = {
             // userId: user_info.userId,

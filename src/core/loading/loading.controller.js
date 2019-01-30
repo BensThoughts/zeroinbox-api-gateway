@@ -1,14 +1,17 @@
-// const mongoose = require('mongoose');
+/*******************************************************************************
+ INIT DEPS
+*******************************************************************************/
+const chalk = require('chalk');
+
+/*******************************************************************************
+ INIT MONGOOSE
+*******************************************************************************/
 const configDB = require('../../config/database');
-// const mongodb = require('mongodb');
 const mongoose = require('mongoose');
-// const client = mongodb.MongoClient;
-
-
 const History = require('../models/history.model');
 
 /*******************************************************************************
- CHECK LOADING STATUS
+ Check Loading Status
 *******************************************************************************/
 
 exports.loading_status = function (req, res) {

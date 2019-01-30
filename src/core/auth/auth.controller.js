@@ -1,13 +1,18 @@
 /*******************************************************************************
-GOOGLE GMAIL AND OAUTH SETUP
+ * INIT DEPS
 *******************************************************************************/
-
 const fs = require('fs');
 const {google} = require('googleapis');
 const gmail = google.gmail('v1');
+
+// seems that when you use readFileSync it takes whatever dir node was started
+// in as the base dir
 const clientSecretJson = JSON.parse(fs.readFileSync('./config/client_secret.json'));
 
 
+/*******************************************************************************
+ * OAuth2 Init
+*******************************************************************************/
 exports.oauthinit = function(req, res) {
 
   const oauth2Client = new google.auth.OAuth2(
@@ -36,6 +41,9 @@ exports.oauthinit = function(req, res) {
 
 };
 
+/*******************************************************************************
+ * OAuth2 Callback
+*******************************************************************************/
 exports.oauth2callback = function(req, res) {
 
   const code = req.query.code;

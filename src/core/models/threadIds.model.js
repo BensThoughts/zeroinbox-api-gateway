@@ -7,11 +7,11 @@ const mongoose = require('mongoose');
 // const client = mongodb.MongoClient;
 let Schema = mongoose.Schema;
 
-const threadIdsSchema = new Schema({
+const threadIdSchema = new Schema({
   userId: String,
-  threadIds: [String]
+  threadId: [String]
 });
 
-const ThreadIds = mongoose.model('ThreadIds', threadIdsSchema);
+const ThreadId = mongoose.model('ThreadIds', threadIdSchema);
 
-module.exports = ThreadIds;
+module.exports = ThreadId;

@@ -11,7 +11,9 @@ const configDB = require('../../config/database');
 // const mongodb = require('mongodb');
 const mongoose = require('mongoose');
 
-const ThreadIds = require('../models/threadIds.model');
+const ThreadId = require('../models/threadIds.model');
+
+let LABEL_IDS = 'INBOX';
 
 exports.get_threads_ids = function (req, res) {
 
@@ -27,16 +29,16 @@ exports.get_threads_ids = function (req, res) {
 
     let conditions = { userId: user_info.userId };
 
-    let findPromise = ThreadIds.findOne(conditions);
+    let findPromise = ThreadId.findOne(conditions);
 
     findPromise.then((doc) => {
       if (doc !== null) {
-          res.json({ threadIds: doc.threadIds })
+          res.json({ threadIds: doc.threadId })
       } else {
 
         let access_token = req.session.token.access_token;
 
-        let labelIds = 'INBOX';
+
       
         let maxResults = 500;
       
@@ -49,7 +51,7 @@ exports.get_threads_ids = function (req, res) {
           },
           qs: {
             maxResults: maxResults,
-            labelIds: labelIds
+            labelIds: LABEL_IDS
           }
         };
       
@@ -67,7 +69,7 @@ exports.get_threads_ids = function (req, res) {
               }
               if (body.nextPageToken) {
                 console.log(chalk.yellow('Next Page Token 0: ' + body.nextPageToken));
-                  getPages(body.nextPageToken, labelIds, threadIds, access_token)
+                  getPages(body.nextPageToken, threadIds, access_token)
                     .then(threadIds => {
                       resolve(threadIds);
                     }).catch((err) => {
@@ -88,9 +90,13 @@ exports.get_threads_ids = function (req, res) {
       
         getAllThreadIds
           .then((result) => {
-            threadIds = new ThreadIds({
+            conditions = { userId: user_info.userId }
+            threadIdsUpdate = {
+              threadIds: 'test'
+            }
+            threadIds = new ThreadId({
               userId: user_info.userId,
-              threadIds: result
+              threadId: result
             })
             threadIds.save((err) => {
               if (err) console.error(chalk.red(err));
@@ -110,7 +116,7 @@ exports.get_threads_ids = function (req, res) {
 }
 
 
-async function getPages(nextPageToken, labelIds, result, access_token) {
+async function getPages(nextPageToken, result, access_token) {
 
   let pageCount = 1;
 
@@ -118,7 +124,7 @@ async function getPages(nextPageToken, labelIds, result, access_token) {
 
     console.log(chalk.yellow('Next page token ' + (pageCount++) + ': ' + nextPageToken));
 
-    let response = await getPageOfThreads(nextPageToken, labelIds, access_token).catch((error) => {
+    let response = await getPageOfThreads(nextPageToken, access_token).catch((error) => {
       console.error(chalk.red('Error in getPageOfThreads!' + error));
     });
 
@@ -134,7 +140,7 @@ async function getPages(nextPageToken, labelIds, result, access_token) {
 }
 
 
-function getPageOfThreads(pageToken, labelIds, access_token) {
+function getPageOfThreads(pageToken, access_token) {
 
   let maxResults = 500;
 
@@ -145,7 +151,7 @@ function getPageOfThreads(pageToken, labelIds, access_token) {
     },
     qs: {
       maxResults: 500,
-      labelIds: labelIds,
+      labelIds: LABEL_IDS,
       pageToken: pageToken
     }
   };
@@ -167,4 +173,11 @@ function getPageOfThreads(pageToken, labelIds, access_token) {
 
   })
 
+}
+
+function createThreadId(threadId) {
+  return new ThreadId({
+    userId: 'Test',
+    threadId: 'Test'
+  })
 }
