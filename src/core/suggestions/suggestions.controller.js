@@ -9,13 +9,13 @@ const chalk = require('chalk');
 exports.suggestions = function (req, res) {
   let userId = req.session.user_info.userId;
 
-  mongoose.connect(configDB.url, {useNewUrlParser: true});
+  // mongoose.connect(configDB.url, {useNewUrlParser: true});
 
-  let db = mongoose.connection;
+  // let db = mongoose.connection;
 
-  db.on('error', console.error.bind(console, 'connection error:'));
+  // db.on('error', console.error.bind(console, 'connection error:'));
 
-  db.once('open', function() {
+  // db.once('open', function() {
 
     let conditions = { userId: userId };
 
@@ -37,6 +37,6 @@ exports.suggestions = function (req, res) {
       res.json({ suggestions: suggestions });
     })
 
-  });
+  // });
 
 }

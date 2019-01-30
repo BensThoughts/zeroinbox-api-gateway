@@ -55,13 +55,13 @@ exports.basic_profile = function (req, res) {
     // when we call every other route
     res.json({ basic_profile: basic_profile });
 
-    mongoose.connect(configDB.url, {useNewUrlParser: true});
+    // mongoose.connect(configDB.url, {useNewUrlParser: true});
 
-    let db = mongoose.connection;
+    // let db = mongoose.connection;
 
-    db.on('error', console.error.bind(console, 'connection error:'));
+    // db.on('error', console.error.bind(console, 'connection error:'));
 
-    db.once('open', function() {
+    // db.once('open', function() {
 
       const conditions = { userId: userId };
       let options = {
@@ -106,7 +106,7 @@ exports.basic_profile = function (req, res) {
         console.log(chalk.yellow('basic profile updated: ' + raw));
       })
 
-    })
+    // })
 
   }).catch((err) => {
     console.error(chalk.red(err));

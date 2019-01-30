@@ -19,13 +19,13 @@ exports.get_threads_ids = function (req, res) {
   let user_info = req.session.user_info;
   let userId = user_info.userId;
 
-  mongoose.connect(configDB.url, {useNewUrlParser: true});
+  // mongoose.connect(configDB.url, {useNewUrlParser: true});
 
-  let db = mongoose.connection;
+  // let db = mongoose.connection;
 
-  db.on('error', console.error.bind(console, 'connection error:'));
+  // db.on('error', console.error.bind(console, 'connection error:'));
 
-  db.once('open', function() {
+  // db.once('open', function() {
 
     let conditions = { userId: user_info.userId };
 
@@ -98,7 +98,7 @@ exports.get_threads_ids = function (req, res) {
 
    
     
-    })
+    // })
 
   }
 

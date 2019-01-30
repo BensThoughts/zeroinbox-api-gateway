@@ -10,8 +10,8 @@ let Schema = mongoose.Schema;
 const historySchema = new Schema({
   userId: String,
   active: {
-    loading: Boolean,
-    loaded: Number
+    loadingStatus: Boolean,
+    percentLoaded: Number
   },
   passive: {
     firstRun: Boolean,

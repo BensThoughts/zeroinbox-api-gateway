@@ -183,7 +183,7 @@ function extractNameAndAddress(headers) {
 
       if (header.name === 'From' || header.name === 'from') {
         if (header.name === 'from') {
-          console.log(chalk.blue(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
+          console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
         }
         if (header.value.search('<+') !== -1) {
           fromAddress = header.value.slice(header.value.search('<+')+1, -1);
@@ -322,13 +322,13 @@ exports.threads_batch = function (req, res) {
     let user_info = req.session.user_info;
     let alreadyInDb = false;
 
-    mongoose.connect(configDB.url, {useNewUrlParser: true});
+    // mongoose.connect(configDB.url, {useNewUrlParser: true});
 
-    let db = mongoose.connection;
+    // let db = mongoose.connection;
 
-    db.on('error', console.error.bind(console, 'connection error:'));
+    // db.on('error', console.error.bind(console, 'connection error:'));
 
-    db.once('open', function() {
+    // db.once('open', function() {
       let conditions = { userId: user_info.userId };
 
 
@@ -337,10 +337,10 @@ exports.threads_batch = function (req, res) {
         if (doc.passive.firstRun === false) {
           res.json({ loading_status: false })
         } else {
-          res.json({ loading_status: true }); 
+ 
           let update = {
             // userId: user_info.userId,
-            "active.loading": true
+            "active.loadingStatus": true
           };
           let options = {
             multi: false,
@@ -350,6 +350,10 @@ exports.threads_batch = function (req, res) {
           History.updateOne(conditions, update, options, (err, raw) => {
             if(err) return console.error(chalk.red(err));
             console.log('History: Active: Loading set to true');
+
+            // wait until we update loading status then client can
+            // start polling for loading
+            res.json({ loading_status: true }); 
           });
 
           ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
@@ -383,25 +387,25 @@ exports.threads_batch = function (req, res) {
             batchResult = undefined;
           });
 
-          Suggestion.insertMany(newResults.getResults());
-          console.log('DONE')
-
-          conditions = { userId: user_info.userId }
-          update = {
-            // userId: user_info.userId,
-            "active.loading": false,
-            "passive.firstRun": false
-          };
-          options = {
-            multi: false,
-            upsert: true
-          };
-  
-          History.updateOne(conditions, update, options, (err, raw) => {
-            if(err) return console.error(chalk.red(err));
-            console.log('History: Active: Loading: set to false');
+          Suggestion.insertMany(newResults.getResults(), (err, docs) => {
+            conditions = { userId: user_info.userId }
+            update = {
+              // userId: user_info.userId,
+              "active.loadingStatus": false,
+              "passive.firstRun": false
+            };
+            options = {
+              multi: false,
+              upsert: true
+            };
+    
+            // change loading status only after the insert is done
+            History.updateOne(conditions, update, options, (err, raw) => {
+              if(err) return console.error(chalk.red(err));
+              console.log('History: Active: Loading: set to false');
+            });
           });
-
+          console.log('DONE')
           }
           start().catch((error) => {
             console.log(error);
@@ -414,6 +418,6 @@ exports.threads_batch = function (req, res) {
 
     }); // History.findOne()
       
-    })
+    // })
 }
 

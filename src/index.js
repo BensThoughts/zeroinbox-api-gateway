@@ -155,6 +155,18 @@ googleApi.use('/', suggestionsRouter);
 
 googleApi.use('/', loadingRouter);
 
+/*******************************************************************************
+ MONGOOSE INIT
+*******************************************************************************/
+const configDB = require('./config/database');
+const mongoose = require('mongoose');
 
-googleApi.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+mongoose.connect(configDB.url, {useNewUrlParser: true}, (err, db) => {;
+  if (err) {
+    console.error(err)
+  } else {
+    googleApi.locals.db = db;
+    googleApi.listen(PORT, HOST);
+    console.log(`Running on http://${HOST}:${PORT}`);
+  }
+});
