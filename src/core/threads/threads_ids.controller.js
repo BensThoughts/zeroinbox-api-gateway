@@ -13,7 +13,8 @@ const mongoose = require('mongoose');
 
 const ThreadId = require('../models/threadIds.model');
 
-let LABEL_IDS = 'INBOX';
+const LABEL_IDS = 'INBOX';
+const MAX_RESULTS = 500;
 
 exports.get_threads_ids = function (req, res) {
 
@@ -37,10 +38,6 @@ exports.get_threads_ids = function (req, res) {
       } else {
 
         let access_token = req.session.token.access_token;
-
-
-      
-        let maxResults = 500;
       
         let threadIds = [];
       
@@ -50,7 +47,7 @@ exports.get_threads_ids = function (req, res) {
             'Authorization': 'Bearer ' + access_token
           },
           qs: {
-            maxResults: maxResults,
+            maxResults: MAX_RESULTS,
             labelIds: LABEL_IDS
           }
         };
@@ -150,7 +147,7 @@ function getPageOfThreads(pageToken, access_token) {
       'Authorization': 'Bearer ' + access_token
     },
     qs: {
-      maxResults: 500,
+      maxResults: MAX_RESULTS,
       labelIds: LABEL_IDS,
       pageToken: pageToken
     }
@@ -180,4 +177,19 @@ function createThreadId(threadId) {
     userId: 'Test',
     threadId: 'Test'
   })
+}
+
+class ThreadIdsResult {
+  constructor() {
+    this.results = [];
+    this.empty = false;
+  }
+
+  getResults() {
+    return this.results;
+  }
+
+  addToResults(threadId) {
+    this.results.push(threadId);
+  }
 }
