@@ -7,12 +7,19 @@ const mongoose = require('mongoose');
 // const client = mongodb.MongoClient;
 let Schema = mongoose.Schema;
 
-const loadingSchema = new Schema({
+const historySchema = new Schema({
   userId: String,
-  loading: Boolean,
-  loaded: Number
+  active: {
+    loading: Boolean,
+    loaded: Number
+  },
+  passive: {
+    firstRun: Boolean,
+    firstRunDate: Date,
+    lastRunDate: Date
+  }
 });
 
-const Loading = mongoose.model('Loading', loadingSchema);
+const History = mongoose.model('History', historySchema);
 
-module.exports = Loading;
+module.exports = History;

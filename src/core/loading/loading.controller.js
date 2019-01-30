@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 // const client = mongodb.MongoClient;
 
 
-const Loading = require('../models/loading.model');
+const History = require('../models/history.model');
 
 /*******************************************************************************
  CHECK LOADING STATUS
@@ -25,11 +25,12 @@ exports.loading_status = function (req, res) {
 
     let conditions = { userId: userId }
 
-    Loading.findOne(conditions, (err, raw) => {
+    History.findOne(conditions, (err, raw) => {
       if (err) return console.error(chalk.red(err));
-      let loading = raw.loading;
-      res.json({ loading: loading });
-    })
+      let loading = raw.active.loading;
+      res.json({ loading_status: loading });
+    });
+
 
   });
 

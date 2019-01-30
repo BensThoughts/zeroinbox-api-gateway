@@ -4,7 +4,6 @@
 *******************************************************************************/
 const chalk = require('chalk');
 
-
 const request = require('request');
 
 /*******************************************************************************
@@ -12,13 +11,11 @@ const request = require('request');
 *******************************************************************************/
 const crypto = require('crypto');
 
-
-var Profile = require('../models/profile.schema');
-// const mongoose = require('mongoose');
 const configDB = require('../../config/database');
-// const mongodb = require('mongodb');
 const mongoose = require('mongoose');
-// const client = mongodb.MongoClient;
+
+var Profile = require('../models/profile.model');
+const History = require('../models/history.model');
 
 /*******************************************************************************
 Get Basic Profile and Email Profile
@@ -68,8 +65,32 @@ exports.basic_profile = function (req, res) {
 
     db.once('open', function() {
 
-      let conditions = { userId: userId };
-      let update = {
+      const conditions = { userId: userId };
+      let options = {
+        multi: false,
+        upsert: true
+      };
+      History.findOne(conditions, (err, res) => {
+        let historyUpdate = {
+        }
+        if (res === null) {
+          historyUpdate = {
+            passive: {
+              firstRun: true,
+              firstRunDate: new Date(),
+              lastRunDate: new Date()
+            }
+          }
+        } else {
+          historyUpdate = {
+            "passive.lastRunDate": new Date()
+          }
+        }
+        History.updateOne(conditions, historyUpdate, options, (err, raw) => {
+          console.log(chalk.yellow('HISTORY UPDATED'));
+        });
+      });
+      let profileUpdate = {
         userId: userId,
         basic: {
           id: basic_profile.id,
@@ -81,19 +102,13 @@ exports.basic_profile = function (req, res) {
           locale: basic_profile.locale
         }
       };
-      let options = {
-        multi: false,
-        upsert: true
-      };
+     
+      Profile.updateOne(conditions, profileUpdate, options, (err, raw) => {
+        if (err) return console.error(chalk.red(err));
+        console.log(chalk.yellow('basic profile updated: ' + raw));
+      })
 
-      Profile.findOneAndUpdate(conditions, update, options, (err, raw) => {
-        if(err) return console.error(chalk.red(err));
-        console.log('basic profile updated');
-      });
-
-    });
-
-
+    })
 
   }).catch((err) => {
     console.error(chalk.red(err));
@@ -156,7 +171,7 @@ exports.email_profile = function (req, res) {
 
 
       let conditions = { userId: userId };
-      let update = {
+      let profileUpdate = {
         userId: userId,
         email: {
           emailId: emailId,
@@ -171,7 +186,7 @@ exports.email_profile = function (req, res) {
         upsert: true
       };
 
-      Profile.findOneAndUpdate(conditions, update, options, (err, raw) => {
+      Profile.findOneAndUpdate(conditions, profileUpdate, options, (err, raw) => {
         if(err) return console.error(chalk.red(err));
         console.log('email profile updated');
       });

@@ -17,7 +17,7 @@ const configDB = require('../../config/database');
 const mongoose = require('mongoose');
 
 const Suggestion = require('../models/suggestion.model');
-const Loading = require('../models/loading.model');
+const History = require('../models/history.model');
 
 /*******************************************************************************
  BATCHELOR INIT
@@ -105,7 +105,7 @@ function chunkThreadIds(array, result) {
  * @return {Promise}                    The actual batch request to be executed
  */
 
-function newBatchThreadRequest(subArray, access_token) {
+function newBatchThreadRequest(threadIdsChunk, access_token) {
   var batch = new Batchelor({
     'uri': GMAIL_BATCH_ENDPOINT,
     'method': 'POST',
@@ -117,7 +117,7 @@ function newBatchThreadRequest(subArray, access_token) {
 
   let query = '?format=metadata ';
 
-  subArray.forEach((threadId) => {
+  threadIdsChunk.forEach((threadId) => {
     batch.add({
       'method': 'GET',
       'path': '/gmail/v1/users/me/threads/' + threadId + query,
@@ -268,6 +268,12 @@ class Results {
   }
 
   addToResults(new_suggestion) {
+    let conditions = {
+      $and: [
+        { userId: new_suggestion.userId },
+        { senderId: new_suggestion.senderId }
+      ]
+    };
     let found = false;
     if (this.empty) {
       this.results.push(new_suggestion);
@@ -329,30 +335,36 @@ exports.threads_batch = function (req, res) {
     db.on('error', console.error.bind(console, 'connection error:'));
 
     db.once('open', function() {
-
       let conditions = { userId: user_info.userId };
-      let update = {
-        userId: user_info.userId,
-        loading: true
-      };
-      let options = {
-        multi: false,
-        upsert: true
-      };
-      // console.log(threads.id);
-      Loading.findOneAndUpdate(conditions, update, options, (err, raw) => {
-        if(err) return console.error(chalk.red(err));
-        console.log('Loading set to true');
-      });
-
-      res.json({ loading_threads: true });
 
 
-      let findPromise = Suggestion.findOne(conditions);
+      let findPromise = History.findOne(conditions);
+
+
       
       findPromise.then((doc) => {
         // console.log(doc);
-        if (doc === null) {
+        if (doc.passive.firstRun === false) {
+          res.json({ loading_status: false })
+        }
+        if (doc.passive.firstRun === true) {
+          res.json({ loading_status: true }); 
+          let update = {
+            // userId: user_info.userId,
+            "active.loading": true
+          };
+          let options = {
+            multi: false,
+            upsert: true
+          };
+          // console.log(threads.id);
+          History.updateOne(conditions, update, options, (err, raw) => {
+            if(err) return console.error(chalk.red(err));
+            console.log('History: Active: Loading set to true');
+          });
+
+
+
           const start = async () => {
 
           let inter_response_count = 0;
@@ -361,8 +373,8 @@ exports.threads_batch = function (req, res) {
 
           let threadIdChunks = chunkThreadIds(req.body.body, []);
 
-          await asyncForEach(threadIdChunks, async (chunkOfThreadIds) => {
-            let batchResult = await newBatchThreadRequest(chunkOfThreadIds, access_token);
+          await asyncForEach(threadIdChunks, async (threadIdsChunk) => {
+            let batchResult = await newBatchThreadRequest(threadIdsChunk, access_token);
             console.log(chalk.yellow('Inter response done: ' + inter_response_count++));
 
             if (batchResult.parts !== undefined) {
@@ -371,6 +383,7 @@ exports.threads_batch = function (req, res) {
                 if (checkPartBatchResponse(part_batch_response)) {
                   let newSuggestion = createSuggestion(part_batch_response.body.messages[0], user_info);
                   newResults.addToResults(newSuggestion);
+                  newSuggestion = undefined;
                 }
               });
 
@@ -384,43 +397,29 @@ exports.threads_batch = function (req, res) {
 
           conditions = { userId: user_info.userId }
           update = {
-            userId: user_info.userId,
-            loading: false
+            // userId: user_info.userId,
+            "active.loading": false,
+            "passive.firstRun": false
           };
           options = {
             multi: false,
             upsert: true
           };
   
-          Loading.findOneAndUpdate(conditions, update, options, (err, raw) => {
+          History.updateOne(conditions, update, options, (err, raw) => {
             if(err) return console.error(chalk.red(err));
-            console.log('Loading set to false');
-          })
+            console.log('History: Active: Loading: set to false');
+          });
+
           }
           start().catch((error) => {
             console.log(error);
             res.status(500).send('Error: ' + error);
           });
 
-        } else {
+        }
 
-        conditions = { userId: user_info.userId }
-        update = {
-          userId: user_info.userId,
-          loading: false
-        };
-        options = {
-          multi: false,
-          upsert: true
-        };
-
-        Loading.findOneAndUpdate(conditions, update, options, (err, raw) => {
-          if(err) return console.error(chalk.red(err));
-          console.log('Loading set to false');
-        })
-
-      }
-      });
+    });
       
     })
   }
