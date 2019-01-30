@@ -9,7 +9,7 @@ let Schema = mongoose.Schema;
 
 const threadIdSchema = new Schema({
   userId: String,
-  threadId: [String]
+  threadId: String
 });
 
 const ThreadId = mongoose.model('ThreadIds', threadIdSchema);
