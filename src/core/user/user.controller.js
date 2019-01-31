@@ -51,27 +51,15 @@ exports.basic_profile = function (req, res) {
       emailAddress: '',
     }
 
-    // respond after writing userId to the session so it is avail
-    // when we call every other route
-    res.json({ basic_profile: basic_profile });
-
-    // mongoose.connect(configDB.url, {useNewUrlParser: true});
-
-    // let db = mongoose.connection;
-
-    // db.on('error', console.error.bind(console, 'connection error:'));
-
-    // db.once('open', function() {
-
       const conditions = { userId: userId };
       let options = {
         multi: false,
         upsert: true
       };
-      History.findOne(conditions, (err, res) => {
+      History.findOne(conditions, (err, doc) => {
         let historyUpdate = {
         }
-        if (res === null) {
+        if (doc === null) { // doc === null indicates first run
           historyUpdate = {
             passive: {
               firstRun: true,
@@ -84,8 +72,11 @@ exports.basic_profile = function (req, res) {
             "passive.lastRunDate": new Date()
           }
         }
-        History.updateOne(conditions, historyUpdate, options, (err, raw) => {
+        History.updateOne(conditions, historyUpdate, options, (err, doc) => {
           console.log(chalk.yellow('HISTORY UPDATED'));
+
+          // need to make sure firstRun is in db before client proceeds
+          res.json({ basic_profile: basic_profile });
         });
       });
       let profileUpdate = {
@@ -101,12 +92,10 @@ exports.basic_profile = function (req, res) {
         }
       };
      
-      Profile.updateOne(conditions, profileUpdate, options, (err, raw) => {
+      Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
         if (err) return console.error(chalk.red(err));
-        console.log(chalk.yellow('basic profile updated: ' + raw));
+        console.log(chalk.blue.bold('Basic profile updated!'));
       })
-
-    // })
 
   }).catch((err) => {
     console.error(chalk.red(err));
@@ -144,10 +133,6 @@ exports.email_profile = function (req, res) {
     let email_profile = JSON.parse(email_profile_response);
     let userId = req.session.user_info.userId;
 
-    // mongoose.connect(configDB.url, {useNewUrlParser: true});
-
-    // let db = mongoose.connection;
-
     let md5sum = crypto.createHash('md5');
 
     md5sum.update(email_profile.emailAddress);
@@ -163,33 +148,26 @@ exports.email_profile = function (req, res) {
     // other route called after
     res.json({ email_profile: email_profile });
 
-    // db.on('error', console.error.bind(console, 'connection error:'));
+    let conditions = { userId: userId };
+    let profileUpdate = {
+      userId: userId,
+      email: {
+        emailId: emailId,
+        emailAddress: email_profile.emailAddress,
+        messagesTotal: email_profile.messagesTotal,
+        threadsTotal: email_profile.threadsTotal,
+        historyId: email_profile.historyId
+      }
+    };
+    let options = {
+      multi: false,
+      upsert: true
+    };
 
-    // db.once('open', function() {
-
-      let conditions = { userId: userId };
-      let profileUpdate = {
-        userId: userId,
-        email: {
-          emailId: emailId,
-          emailAddress: email_profile.emailAddress,
-          messagesTotal: email_profile.messagesTotal,
-          threadsTotal: email_profile.threadsTotal,
-          historyId: email_profile.historyId
-        }
-      };
-      let options = {
-        multi: false,
-        upsert: true
-      };
-
-      Profile.findOneAndUpdate(conditions, profileUpdate, options, (err, raw) => {
-        if(err) return console.error(chalk.red(err));
-        console.log('email profile updated');
-      });
-
-    // });
-
+    Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
+      if(err) return console.error(chalk.red(err));
+      console.log(chalk.blue.bold('Email profile updated!'));
+    });
 
   }).catch((err) => {
     console.error(chalk.red(err));

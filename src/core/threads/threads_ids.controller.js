@@ -13,135 +13,74 @@ const History = require('../models/history.model');
 
 const LABEL_IDS = 'INBOX';
 const MAX_RESULTS = 500;
+const GMAIL_THREADS_URL = 'https://www.googleapis.com/gmail/v1/users/me/threads';
 
 exports.get_threads_ids = function (req, res) {
 
   let user_info = req.session.user_info;
   let userId = user_info.userId;
 
-  // mongoose.connect(configDB.url, {useNewUrlParser: true});
+  let conditions = { userId: user_info.userId };
 
-  // let db = mongoose.connection;
-
-  // db.on('error', console.error.bind(console, 'connection error:'));
-
-  // db.once('open', function() {
-
-    let conditions = { userId: user_info.userId };
-
-    History.findOne(conditions, (err, doc) => {
-      if (!doc.passive.firstRun) {
-        res.json({ loading_status: false });
-      } else {
-        let access_token = req.session.token.access_token;
-      
-        let threadIdsResults = new ThreadIdsResults();
-      
-        const options = {
-          url: 'https://www.googleapis.com/gmail/v1/users/me/threads',
-          headers: {
-            'Authorization': 'Bearer ' + access_token
-          },
-          qs: {
-            maxResults: MAX_RESULTS,
-            labelIds: LABEL_IDS
-          }
-        };
-      
-        let getAllThreadIds = new Promise((resolve, reject) => {
-          request.get(options, (error, response, body) => {
-      
-            if (!error && response.statusCode == 200) {
-              body = JSON.parse(body);
-      
-              if (body.threads) {
-                body.threads.forEach((thread) => {
-                  let threadId = createThreadId(thread.id, userId);
-                  threadIdsResults.addToResults(threadId)
-                });
-              }
-              if (body.nextPageToken) {
-                console.log(chalk.yellow('Next Page Token 0: ' + body.nextPageToken));
-                  getPages(body.nextPageToken, threadIdsResults, access_token, userId)
-                    .then(() => {
-                      resolve();
-                    }).catch((err) => {
-                      console.error(chalk.red(err));
-                      reject(err);
-                    });
-              } else {
-                console.log(chalk.yellow('No Next Page Token'));
-                resolve();
-              }
-            } else {
-              console.error(chalk.red(error));
-              reject(error);
-            }
-          })
-        })
-      
-      
-        getAllThreadIds
-          .then(() => {
-            conditions = { userId: user_info.userId }
-            ThreadId.insertMany(threadIdsResults.getResults(), (err, docs) => {
-              if (err) return console.error(chalk.red('Error inserting threadIds: ' + err));
-              res.json({ loading_status: true })
-            });
-          })
-          .catch((err) => {
-            console.error(chalk.red(err));
-            res.status(500).send({ error: 'Request failed with error: ' + err })
-          });
-      }
-    })
-
-   
+  History.findOne(conditions, (err, doc) => {
     
-    // })
+    if (err) return console.error(chalk.red('Error in History.findOne: thread_ids.controller: ' + err));
+    
+    if (!doc.passive.firstRun) {
+      res.json({ loading_status: false });
+    } else {
+    
+      let access_token = req.session.token.access_token;
+      
+      let threadIdsResults = new ThreadIdsResults();
 
-  }
+      getPages(access_token, []).then((results) => {
 
+        console.log(chalk.yellow('Total number of threads: ' + results.length));
 
-async function getPages(nextPageToken, threadIdsResults, access_token, userId) {
+        results.forEach((thread) => {
+          let threadId = createThreadId(thread.id, userId);
+          threadIdsResults.addToResults(threadId);
+        });
 
-  let pageCount = 1;
+        ThreadId.insertMany(threadIdsResults.getResults(), (err, docs) => {
+          if (err) return console.error(chalk.red('Error in ThreadId.insertMany(): threadids_controller: ' + err));
+          console.log(chalk.blue.bold('Thread Ids Updated!'));
 
-  while (nextPageToken) {
+          // make sure threadIds are inserted before proceeding to batch get
+          res.json({ loading_status: true })
+        });
 
-    console.log(chalk.yellow('Next page token ' + (pageCount++) + ': ' + nextPageToken));
+      }).catch((err) => {
+        console.error(chalk.red(err));
+        res.status(500).send({ error: 'Request failed with error: ' + err })
+      });
 
-    let response = await getPageOfThreads(nextPageToken, access_token).catch((error) => {
-      console.error(chalk.red('Error in getPageOfThreads!' + error));
-    });
+    }
 
-    response.threads.forEach((thread) => {
-      let threadId = createThreadId(thread.id, userId);
-      threadIdsResults.addToResults(threadId);
-    });
+  });
 
-
-    nextPageToken = response.nextPageToken;
-
-  }
 }
 
+async function getPages(access_token, results, nextPageToken) {
 
-function getPageOfThreads(pageToken, access_token) {
+  let response = await getPageOfThreads(access_token, nextPageToken).catch((error) => {
+    console.error(chalk.red('Error in getPageOfThreads!' + error));
+  });
 
-  let maxResults = 500;
+  results = results.concat(response.threads);
+  nextPageToken = response.nextPageToken;
 
-  const options = {
-    url: 'https://www.googleapis.com/gmail/v1/users/me/threads',
-    headers: {
-      'Authorization': 'Bearer ' + access_token
-    },
-    qs: {
-      maxResults: MAX_RESULTS,
-      labelIds: LABEL_IDS,
-      pageToken: pageToken
-    }
-  };
+  if (nextPageToken) {
+    // maybe return await?
+    return getPages(access_token, results, nextPageToken);
+  }
+  return results;
+}
+
+function getPageOfThreads(access_token, pageToken) {
+
+  let options = createOptions(access_token, pageToken);
 
   return new Promise((resolve, reject) => {
 
@@ -150,6 +89,7 @@ function getPageOfThreads(pageToken, access_token) {
       if (!error && response.statusCode == 200) {
         body = JSON.parse(body);
         // console.log('body: ' + body.threads);
+        console.log(chalk.yellow('Next page token: ' + body.nextPageToken));
         resolve(body)
       } else {
         console.error(chalk.red('Error in request.get: ' + error));
@@ -160,6 +100,33 @@ function getPageOfThreads(pageToken, access_token) {
 
   })
 
+}
+
+function createOptions(access_token, pageToken) {
+  if (pageToken) {
+    return {
+        url: GMAIL_THREADS_URL,
+        headers: {
+          'Authorization': 'Bearer ' + access_token
+        },
+        qs: {
+          maxResults: MAX_RESULTS,
+          labelIds: LABEL_IDS,
+          pageToken: pageToken
+        }
+    };
+  } else {
+    return {
+        url: GMAIL_THREADS_URL,
+        headers: {
+          'Authorization': 'Bearer ' + access_token
+        },
+        qs: {
+          maxResults: MAX_RESULTS,
+          labelIds: LABEL_IDS,
+        }   
+    }
+  }
 }
 
 function createThreadId(threadId, userId) {

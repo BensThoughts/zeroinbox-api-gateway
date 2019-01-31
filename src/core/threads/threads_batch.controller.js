@@ -179,44 +179,50 @@ function extractNameAndAddress(headers) {
   let fromAddress, fromName, id;
   let return_headers = undefined;
   // console.log(headers);
-    headers.forEach((header) => {
+  // headers.forEach((header) => {
+  try {
 
-      if (header.name === 'From' || header.name === 'from') {
-        if (header.name === 'from') {
-          console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
-        }
-        if (header.value.search('<+') !== -1) {
-          fromAddress = header.value.slice(header.value.search('<+')+1, -1);
-          fromName = header.value.slice(0, header.value.search('<+')-1);
-        } else {
-          console.log(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`));
-          fromAddress = header.value;
-          fromName = header.value.slice(0, header.value.search('@'));
-        }
-
-        if (fromName.search('"') === 0) {
-          fromName = fromName.slice(1,-1);
-        }
-        if (fromAddress.search('"') === 0) {
-          fromAddress = fromAddress.slice(1,-1);
-        }
-
-        let md5sum = crypto.createHash('md5');
-        md5sum.update(fromAddress);
-        // console.log(x);
-        // console.log(md5sum.digest('hex'));
-        id = md5sum.digest('hex');
-        // console.log(fromAddress);
-        return_headers = { fromAddress: fromAddress, fromName: fromName, id: id };
+  for (let header of headers) {
+    if (header.name === 'From' || header.name === 'from') {
+      if (header.name === 'from') {
+        console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
+      }
+      if (header.value.search('<+') !== -1) {
+        fromAddress = header.value.slice(header.value.search('<+')+1, -1);
+        fromName = header.value.slice(0, header.value.search('<+')-1);
+      } else {
+        console.log(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`));
+        fromAddress = header.value;
+        fromName = header.value.slice(0, header.value.search('@'));
       }
 
-    });
-    if (return_headers === undefined) {
-      throw new Error('From or from not found in headers!');
-    } else {
-      return return_headers;
+      if (fromName.search('"') === 0) {
+        fromName = fromName.slice(1,-1);
+      }
+      if (fromAddress.search('"') === 0) {
+        fromAddress = fromAddress.slice(1,-1);
+      }
+
+      let md5sum = crypto.createHash('md5');
+      md5sum.update(fromAddress);
+
+      id = md5sum.digest('hex');
+
+      return_headers = { fromAddress: fromAddress, fromName: fromName, id: id };
+      break;
     }
-    // throw new Error('No From or from found!');
+
+  }; // headers.ForEach()
+  
+  if (return_headers === undefined) {
+    throw new Error('From or from not found in headers!');
+  } else {
+    return return_headers;
+  }
+
+  } catch (err) {
+    console.error(chalk.red(err));
+  }
 }
 
 function extractMetaData(message) {
@@ -227,7 +233,7 @@ function extractMetaData(message) {
     threadId: message.threadId,
     internalDate: message.internalDate
   }
-  let single_thread_result = {
+  let messageMetaData = {
     id: headers.id,
     fromAddress: headers.fromAddress,
     fromName: headers.fromName,
@@ -238,8 +244,7 @@ function extractMetaData(message) {
     // headers: part_batch_response.body.messages[0].payload.headers
   }
 
-  return single_thread_result;
-
+  return messageMetaData;
 }
 
 function createSuggestion(message, user_info) {
@@ -269,12 +274,6 @@ class Results {
   }
 
   addToResults(new_suggestion) {
-    let conditions = {
-      $and: [
-        { userId: new_suggestion.userId },
-        { senderId: new_suggestion.senderId }
-      ]
-    };
     let found = false;
     if (this.empty) {
       this.results.push(new_suggestion);
@@ -325,23 +324,23 @@ exports.threads_batch = function (req, res) {
   let conditions = { userId: user_info.userId };
 
   History.findOne(conditions, (err, doc) => {
+    if (err) return console.error(chalk.red('Error in History.findOne: ' + err));
     // console.log(doc);
     if (doc.passive.firstRun === false) {
       res.json({ loading_status: false })
     } else {
  
       let update = {
-        // userId: user_info.userId,
         "active.loadingStatus": true
       };
       let options = {
         multi: false,
         upsert: true
       };
-      // console.log(threads.id);
+
       History.updateOne(conditions, update, options, (err, raw) => {
-        if(err) return console.error(chalk.red(err));
-        console.log('History: Active: Loading set to true');
+        if(err) return console.error(chalk.red('Error in History.updateOne: attempt to change loading to true' + err));
+        console.log(chalk.blue.bold('History: Active: Loading set to true'));
 
         // wait until we update loading status then client can
         // start polling for loading
@@ -349,7 +348,7 @@ exports.threads_batch = function (req, res) {
       });
 
       ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
-
+        if (err) return console.error(chalk.red('Error in ThreadIds.find().distinct(): ' + err));
         const startBatchProccess = async () => {
   
           let inter_response_count = 0;
@@ -379,6 +378,8 @@ exports.threads_batch = function (req, res) {
           });
 
           Suggestion.insertMany(newResults.getResults(), (err, docs) => {
+            if (err) return console.error(chalk.red('Error in Suggestion.insertMany(): ' + err));
+            console.log(chalk.blue.bold('Suggestions inserted'));
             conditions = { userId: user_info.userId }
             update = {
               // userId: user_info.userId,
@@ -392,15 +393,15 @@ exports.threads_batch = function (req, res) {
     
             // change loading status only after the insert is done
             History.updateOne(conditions, update, options, (err, raw) => {
-              if(err) return console.error(chalk.red(err));
-              console.log('History: Active: Loading: set to false');
+              if(err) return console.error(chalk.red('Error in History.updateOne: attempt to change loading to false' + err));
+              console.log(chalk.blue.bold('History: Active: Loading: set to false'));
             });
           });
           console.log('DONE')
         }
         startBatchProccess().catch((error) => {
           console.log(error);
-          res.status(500).send('Error: ' + error);
+          res.status(500).send('Error in startBatchProccess(): ' + error);
         });
 
       }) // ThreadIds.find()
@@ -408,6 +409,6 @@ exports.threads_batch = function (req, res) {
     } // else
 
   }); // History.findOne()
-  
+
 }
 
