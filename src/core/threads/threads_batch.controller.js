@@ -168,7 +168,7 @@ function checkPartBatchResponse(part_batch_response) {
 }
 
 function extractNameAndAddress(headers) {
-  let fromAddress, fromName, id;
+  let fromAddress, fromName;
   let return_headers = undefined;
   // console.log(headers);
   // headers.forEach((header) => {
@@ -209,12 +209,7 @@ function extractNameAndAddress(headers) {
         fromAddress = fromAddress.slice(1,-1);
       }
 
-      let md5sum = crypto.createHash('md5');
-      md5sum.update(fromAddress);
-
-      id = md5sum.digest('hex');
-
-      return_headers = { fromAddress: fromAddress, fromName: fromName, id: id };
+      return_headers = { fromAddress: fromAddress, fromName: fromName };
       break;
     }
 
@@ -243,7 +238,7 @@ function extractMetaData(message) {
       internalDate: message.internalDate
     }
     messageMetaData = {
-      id: headers.id,
+      // id: headers.id,
       fromAddress: headers.fromAddress,
       fromName: headers.fromName,
 
@@ -261,20 +256,17 @@ function createSuggestion(message, user_info) {
 
   let senderMetaData = extractMetaData(message);
 
+  let senderId = Suggestion.createSenderId(senderMetaData.fromAddress);
+
   if (senderMetaData !== undefined) {
     suggestion = new Suggestion({
       userId: user_info.userId,
-      emailAddress: user_info.emailAddress,
-      emailId: user_info.emailId,
-      senderId: senderMetaData.id,
-      sender: {
-        id: senderMetaData.id,
-        fromNames: [senderMetaData.fromName],
-        fromAddress: senderMetaData.fromAddress,
-        threadIds_internalDates: [senderMetaData.threadId_internalDate],
-        totalSizeEstimate: senderMetaData.sizeEstimate,
-        count: 1
-      }
+      senderId: senderId,
+      senderNames: [senderMetaData.fromName],
+      senderAddress: senderMetaData.fromAddress,
+      threadIds_internalDates: [senderMetaData.threadId_internalDate],
+      totalSizeEstimate: senderMetaData.sizeEstimate,
+      count: 1
     })
   }
 
@@ -315,18 +307,18 @@ class Results {
   // Private
   mergeSuggestion(previous_suggestion, new_suggestion) {
     let found_same_name = false;
-    previous_suggestion.sender.fromNames.forEach((name) => {
-      if (name === new_suggestion.sender.fromNames[0]) {
+    previous_suggestion.senderNames.forEach((name) => {
+      if (name === new_suggestion.senderNames[0]) {
         found_same_name = true;
       }
     });
     if (!found_same_name) {
-      previous_suggestion.sender.concatNames(new_suggestion.sender.fromNames);
+      previous_suggestion.concatNames(new_suggestion.senderNames);
     }
     
-    previous_suggestion.sender.concatThreadIds_internalDates(new_suggestion.sender.threadIds_internalDates);
-    previous_suggestion.sender.addOneToCount();
-    previous_suggestion.sender.addToTotalSizeEstimate(new_suggestion.sender.totalSizeEstimate);
+    previous_suggestion.concatThreadIds_internalDates(new_suggestion.threadIds_internalDates);
+    previous_suggestion.addOneToCount();
+    previous_suggestion.addToTotalSizeEstimate(new_suggestion.totalSizeEstimate);
   }
 
 }

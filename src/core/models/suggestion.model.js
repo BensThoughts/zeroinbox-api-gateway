@@ -3,45 +3,63 @@
  ******************************************************************************/
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const crypto = require('crypto');
 
 
-const sendersSchema = new Schema({
-  id: String,
-  fromNames: [String],
-  fromAddress: String,
-  threadIds_internalDates: [{threadId: String, internalDate: Number}],
-  totalSizeEstimate: Number,
-  count: Number
-})
-
-sendersSchema.methods.addOneToCount = function() {
-  this.count++
-};
-
-sendersSchema.methods.getId = function() {
-  return this.id;
-}
-
-sendersSchema.methods.concatNames = function(name) {
-  this.fromNames = this.fromNames.concat(name);
-}
-
-sendersSchema.methods.concatThreadIds_internalDates = function(threadIds_internalDates) {
-  this.threadIds_internalDates = this.threadIds_internalDates.concat(threadIds_internalDates);
-}
-
-sendersSchema.methods.addToTotalSizeEstimate = function(totalSizeEstimate) {
-  this.totalSizeEstimate = this.totalSizeEstimate + totalSizeEstimate;
+var notEmpty = function(features){
+  if(features.length === 0){return false}
+  else {return true};
 }
 
 const suggestionSchema = new Schema({
-  userId: String,
-  emailAddress: String,
-  emailId: String,
-  senderId: String,
-  sender: sendersSchema
+  userId: { type: String, required: true },
+  senderId: { type: String, required: true },
+  // senderNames: [{ type: String, required: true }],
+  senderNames: { type: [String], required: true, validate: [notEmpty, 'Please add at least one threadId'] },
+  senderAddress: { type: String, required: true },
+  // threadIds_internalDates: { type: [{threadId: String, internalDate: Number}], required: true },
+  threadIds_internalDates: { type: [{ 
+    threadId: {type: String, required: true}, 
+    internalDate: {type: Number, required: true } }
+  ], required: true, validate: [notEmpty, 'Please add a threadId_internalDate'] },
+  totalSizeEstimate: { type: Number, required: true },
+  count: { type: Number, required: true },
 });
+
+
+suggestionSchema.methods.addOneToCount = function() {
+  this.count++
+};
+
+suggestionSchema.methods.getId = function() {
+  return this.senderId;
+}
+
+suggestionSchema.methods.concatNames = function(name) {
+  this.senderNames = this.senderNames.concat(name);
+}
+
+suggestionSchema.methods.concatThreadIds_internalDates = function(threadIds_internalDates) {
+  this.threadIds_internalDates = this.threadIds_internalDates.concat(threadIds_internalDates);
+}
+
+suggestionSchema.methods.addToTotalSizeEstimate = function(totalSizeEstimate) {
+  this.totalSizeEstimate = this.totalSizeEstimate + totalSizeEstimate;
+}
+
+suggestionSchema.statics.createSenderId = function(senderAddress) {
+  let md5sum = crypto.createHash('md5');
+  md5sum.update(senderAddress);
+
+  let id = md5sum.digest('hex');
+  // this.senderId = id;
+  return id;
+}
+
+
+
 
 const Suggestion = mongoose.model('suggestions', suggestionSchema);
 
-module.exports = Suggestion;
+
+module.exports = Suggestion

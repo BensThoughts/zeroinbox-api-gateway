@@ -8,12 +8,12 @@ exports.suggestions = function (req, res) {
     let conditions = { userId: userId };
 
     let projection = {
-      sender: 1,
-      "sender.fromAddress": 1,
-      "sender.fromNames": 1,
-      "sender.totalSizeEstimate": 1,
-      "sender.id": 1,
-      "sender.count": 1,
+      // sender: 1,
+      "senderAddress": 1,
+      "senderNames": 1,
+      "totalSizeEstimate": 1,
+      "senderId": 1,
+      "count": 1,
       _id: 0
     }
 

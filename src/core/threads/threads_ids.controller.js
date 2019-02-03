@@ -174,6 +174,8 @@ if (node_env === 'production' || node_env === 'development') {
 if (node_env === 'test') {
   module.exports = {
     get_threads_ids,
-    createOptions
+    createOptions,
+    createThreadId,
+    ThreadIdsResults
   }
 }

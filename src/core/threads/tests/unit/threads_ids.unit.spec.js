@@ -12,11 +12,16 @@ const request = require('request');
 const threadsRouter = require('../../threads.routes');
 
 const threads_ids = require('../../threads_ids.controller');
+const ThreadId = require('../../../models/thread_IDs.model');
 
-describe('routes: threads_ids', function() {
+describe('controllers: threads_ids', function() {
 
 
-    describe('threads_ids createOptions', () => {
+    describe('static methods:', () => {
+        it('should have createOptions', () => {
+            expect(threads_ids.createOptions).to.exist;
+        })
+        
         it('should create options with no pageToken', () => {
             let options = threads_ids.createOptions('access_token');
             expect(options).to.exist;
@@ -48,7 +53,29 @@ describe('routes: threads_ids', function() {
             expect(qs.maxResults).to.equal(500);
             expect(qs.labelIds).to.equal('INBOX');
             expect(qs.pageToken).to.equal('pageToken');
+        });
+  
+
+        it('should have createThreadId', () => {
+            expect(threads_ids.createThreadId).to.exist;
         })
+        it('should create a new ThreadId', (done) => {
+            let threadId = threads_ids.createThreadId('threadId', 'userId');
+            // console.log(threadId);
+            expect(threadId).to.be.an('object');
+            expect(threadId).to.have.property('validate');
+            threadId.validate((err) => {
+                expect(err).not.to.exist;
+                done();
+            })
+        })
+
     });
 
-})
+    describe('classes:', () => {
+        it('should have ThreadIdsResult', () => {
+            expect(threads_ids.ThreadIdsResults).to.exist;
+        })
+    });
+});
+

@@ -5,8 +5,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const threadIdSchema = new Schema({
-  userId: String,
-  threadId: String
+  userId: { type: String, required: true },
+  threadId: { type: String, required: true },
 });
 
 const ThreadId = mongoose.model('Thread_Ids', threadIdSchema);
