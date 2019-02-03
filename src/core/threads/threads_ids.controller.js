@@ -5,29 +5,34 @@ Get All ThreadIds
 const request = require('request');
 const chalk = require('chalk');
 
-const configDB = require('../../config/database');
-const mongoose = require('mongoose');
-
 const ThreadId = require('../models/thread_IDs.model');
 const History = require('../models/history.model');
 
+const GMAIL_THREADS_ENDPOINT = 'https://www.googleapis.com/gmail/v1/users/me/threads';
 const LABEL_IDS = 'INBOX';
 const MAX_RESULTS = 500;
-const GMAIL_THREADS_URL = 'https://www.googleapis.com/gmail/v1/users/me/threads';
 
-exports.get_threads_ids = function (req, res) {
 
-  let user_info = req.session.user_info;
-  let userId = user_info.userId;
+get_threads_ids = function (req, res) {
 
-  let conditions = { userId: user_info.userId };
+  // console.log(req);
+
+  let userId = req.session.user_info.userId;
+
+  let conditions = { userId: userId };
 
   History.findOne(conditions, (err, doc) => {
     
     if (err) return console.error(chalk.red('Error in History.findOne: thread_ids.controller: ' + err));
     
     if (!doc.passive.firstRun) {
-      res.json({ loading_status: false });
+      res.json({ 
+        status: 'success',
+        status_message: 'OK',
+        data: {
+          loading_status: false 
+        }  
+      });
     } else {
     
       let access_token = req.session.token.access_token;
@@ -48,7 +53,13 @@ exports.get_threads_ids = function (req, res) {
           console.log(chalk.blue.bold('Thread Ids Updated!'));
 
           // make sure threadIds are inserted before proceeding to batch get
-          res.json({ loading_status: true })
+          res.json({ 
+            status: 'success',
+            status_message: 'OK',
+            data: {
+              loading_status: true 
+            }
+          })
         });
 
       }).catch((err) => {
@@ -72,7 +83,7 @@ async function getPages(access_token, results, nextPageToken) {
   nextPageToken = response.nextPageToken;
 
   if (nextPageToken) {
-    // maybe return await?
+    // QUESTION: maybe return await getPages()?
     return getPages(access_token, results, nextPageToken);
   }
   return results;
@@ -103,9 +114,10 @@ function getPageOfThreads(access_token, pageToken) {
 }
 
 function createOptions(access_token, pageToken) {
+  // QUESTION: is it better to return a map?
   if (pageToken) {
     return {
-        url: GMAIL_THREADS_URL,
+        url: GMAIL_THREADS_ENDPOINT,
         headers: {
           'Authorization': 'Bearer ' + access_token
         },
@@ -113,11 +125,11 @@ function createOptions(access_token, pageToken) {
           maxResults: MAX_RESULTS,
           labelIds: LABEL_IDS,
           pageToken: pageToken
-        }
+        },
     };
   } else {
     return {
-        url: GMAIL_THREADS_URL,
+        url: GMAIL_THREADS_ENDPOINT,
         headers: {
           'Authorization': 'Bearer ' + access_token
         },
@@ -138,7 +150,7 @@ function createThreadId(threadId, userId) {
 
 class ThreadIdsResults {
   constructor() {
-    this.results = [];
+    this.results = []; // Array<ThreadId>
     this.empty = false;
   }
 
@@ -148,5 +160,20 @@ class ThreadIdsResults {
 
   addToResults(threadId) {
     this.results.push(threadId);
+  }
+}
+
+let node_env = process.env.NODE_ENV;
+
+if (node_env === 'production' || node_env === 'development') {
+  module.exports = {
+    get_threads_ids
+  }
+}
+
+if (node_env === 'test') {
+  module.exports = {
+    get_threads_ids,
+    createOptions
   }
 }

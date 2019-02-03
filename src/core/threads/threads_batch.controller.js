@@ -13,9 +13,6 @@ const crypto = require('crypto');
 /*******************************************************************************
  MONGOOSE INIT
 *******************************************************************************/
-const configDB = require('../../config/database');
-const mongoose = require('mongoose');
-
 const Suggestion = require('../models/suggestion.model');
 const History = require('../models/history.model');
 const ThreadIds = require('../models/thread_IDs.model');
@@ -45,13 +42,8 @@ const Batchelor = require('batchelor');
  * @type {Array}
  */
 
-
-
-
 const GMAIL_BATCH_ENDPOINT = 'https://www.googleapis.com/batch/gmail/v1';
 const BATCH_SIZE = 100;
-
-
 
 /**
  * An implementation of asyncForEach such that each run of a batchelor request
@@ -184,16 +176,30 @@ function extractNameAndAddress(headers) {
 
   for (let header of headers) {
     if (header.name === 'From' || header.name === 'from') {
-      if (header.name === 'from') {
-        console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
-      }
-      if (header.value.search('<+') !== -1) {
-        fromAddress = header.value.slice(header.value.search('<+')+1, -1);
-        fromName = header.value.slice(0, header.value.search('<+')-1);
+      // if (header.name === 'from') {
+        // console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
+      // }
+      let searchIndex = header.value.search('<+');
+  
+      if (searchIndex !== -1) {
+        fromAddress = header.value.slice(searchIndex+1, -1);
+        fromName = header.value.slice(0, searchIndex-1);
       } else {
-        console.log(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`));
+        // console.log(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`));
+        searchIndex = header.value.search('@');
+        if (searchIndex === -1) {
+          throw new Error('Error in From/from field');
+        }
         fromAddress = header.value;
-        fromName = header.value.slice(0, header.value.search('@'));
+        fromName = header.value.slice(0, searchIndex);
+      }
+
+      if (fromAddress === undefined) {
+        throw new Error('fromAddress undefined!')
+      }
+
+      if (fromName === undefined) {
+        throw new Error('fromName undefined!')
       }
 
       if (fromName.search('"') === 0) {
@@ -215,55 +221,65 @@ function extractNameAndAddress(headers) {
   }; // headers.ForEach()
   
   if (return_headers === undefined) {
+    // console.log(headers);
     throw new Error('From or from not found in headers!');
-  } else {
-    return return_headers;
   }
 
   } catch (err) {
     console.error(chalk.red(err));
   }
+
+  return return_headers;
 }
 
 function extractMetaData(message) {
+  let messageMetaData = undefined;
 
   let headers = extractNameAndAddress(message.payload.headers);
 
-  let threadId_internalDate = {
-    threadId: message.threadId,
-    internalDate: message.internalDate
-  }
-  let messageMetaData = {
-    id: headers.id,
-    fromAddress: headers.fromAddress,
-    fromName: headers.fromName,
+  if (headers !== undefined) {
+    let threadId_internalDate = {
+      threadId: message.threadId,
+      internalDate: message.internalDate
+    }
+    messageMetaData = {
+      id: headers.id,
+      fromAddress: headers.fromAddress,
+      fromName: headers.fromName,
 
-    threadId_internalDate: threadId_internalDate,
-    labelIds: message.labelIds,
-    sizeEstimate: message.sizeEstimate,
-    // headers: part_batch_response.body.messages[0].payload.headers
+      threadId_internalDate: threadId_internalDate,
+      labelIds: message.labelIds,
+      sizeEstimate: message.sizeEstimate,
+    }
   }
 
-  return messageMetaData;
+  return messageMetaData; 
 }
 
 function createSuggestion(message, user_info) {
+  let suggestion = undefined;
+
   let senderMetaData = extractMetaData(message);
-  let suggestion = new Suggestion({
-    userId: user_info.userId,
-    emailAddress: user_info.emailAddress,
-    emailId: user_info.emailId,
-    senderId: senderMetaData.id,
-    sender: {
-      id: senderMetaData.id,
-      fromNames: [senderMetaData.fromName],
-      fromAddress: senderMetaData.fromAddress,
-      threadIds_internalDates: [senderMetaData.threadId_internalDate],
-      totalSizeEstimate: senderMetaData.sizeEstimate,
-      count: 1
-    }
-  })
+
+  if (senderMetaData !== undefined) {
+    suggestion = new Suggestion({
+      userId: user_info.userId,
+      emailAddress: user_info.emailAddress,
+      emailId: user_info.emailId,
+      senderId: senderMetaData.id,
+      sender: {
+        id: senderMetaData.id,
+        fromNames: [senderMetaData.fromName],
+        fromAddress: senderMetaData.fromAddress,
+        threadIds_internalDates: [senderMetaData.threadId_internalDate],
+        totalSizeEstimate: senderMetaData.sizeEstimate,
+        count: 1
+      }
+    })
+  }
+
   return suggestion;
+
 }
 
 class Results {
@@ -327,7 +343,13 @@ exports.threads_batch = function (req, res) {
     if (err) return console.error(chalk.red('Error in History.findOne: ' + err));
     // console.log(doc);
     if (doc.passive.firstRun === false) {
-      res.json({ loading_status: false })
+      res.json({ 
+        status: 'success',
+        loading_status: 'OK',
+        data: {
+          loading_status: false 
+        }
+      })
     } else {
  
       let update = {
@@ -344,7 +366,13 @@ exports.threads_batch = function (req, res) {
 
         // wait until we update loading status then client can
         // start polling for loading
-        res.json({ loading_status: true }); 
+        res.json({ 
+          status: 'success',
+          loading_status: 'OK',
+          data: {
+            loading_status: true 
+          }
+        }); 
       });
 
       ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
@@ -357,19 +385,34 @@ exports.threads_batch = function (req, res) {
 
           let threadIdChunks = chunkThreadIds(threadIds, []);
 
-          await asyncForEach(threadIdChunks, async (threadIdsChunk) => {
-            let batchResult = await newBatchThreadRequest(threadIdsChunk, access_token);
-            console.log(chalk.yellow('Inter response done: ' + inter_response_count++));
+          let date;
+
+          await asyncForEach(threadIdChunks, async (threadIdChunk) => {
+            date = new Date();
+            console.log(chalk.green('Inter response started: ' + (inter_response_count++) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds()));
+            
+            let batchResult = await newBatchThreadRequest(threadIdChunk, access_token);
+
+            date = new Date();
+            console.log(chalk.yellow('Inter response done: ' + (inter_response_count) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds()));
 
             if (batchResult.parts !== undefined) {
 
               batchResult.parts.forEach((part_batch_response) => {
                 if (checkPartBatchResponse(part_batch_response)) {
+                  
                   let newSuggestion = createSuggestion(part_batch_response.body.messages[0], user_info);
-                  newResults.addToResults(newSuggestion);
-                  newSuggestion = undefined;
+                  
+                  if (newSuggestion !== undefined) {
+                    newResults.addToResults(newSuggestion);
+                    newSuggestion = undefined;
+                  }
+
                 }
               });
+
+              date = new Date();
+              console.log(chalk.red('results parsed: ' + date.getSeconds() + '.' + date.getMilliseconds()));
 
             } else {
               console.error('result.parts was undefined!');

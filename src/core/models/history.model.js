@@ -1,11 +1,8 @@
 /*******************************************************************************
  * MONGODB INIT
  ******************************************************************************/
-
-// const mongodb = require('mongodb');
 const mongoose = require('mongoose');
-// const client = mongodb.MongoClient;
-let Schema = mongoose.Schema;
+const Schema = mongoose.Schema;
 
 const historySchema = new Schema({
   userId: String,

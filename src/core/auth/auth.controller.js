@@ -2,18 +2,20 @@
  * INIT DEPS
 *******************************************************************************/
 const fs = require('fs');
+const path = require('path');
 const {google} = require('googleapis');
 const gmail = google.gmail('v1');
 
 // seems that when you use readFileSync it takes whatever dir node was started
 // in as the base dir
-const clientSecretJson = JSON.parse(fs.readFileSync('./config/client_secret.json'));
+const client_secret = path.resolve(__dirname, '../../config/client_secret.json');
+const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 
 
 /*******************************************************************************
  * OAuth2 Init
 *******************************************************************************/
-exports.oauthinit = function(req, res) {
+exports.oauth2init = function(req, res) {
 
   const oauth2Client = new google.auth.OAuth2(
     clientSecretJson.web.client_id,
@@ -23,7 +25,6 @@ exports.oauthinit = function(req, res) {
 
   const scopes = [
     'https://www.googleapis.com/auth/gmail.readonly',
-    // 'profile',
     'https://www.googleapis.com/auth/userinfo.profile'
   ];
 
@@ -37,7 +38,20 @@ exports.oauthinit = function(req, res) {
   // is empty
   req.session.destroy();
 
-  res.json({ authUrl: authUrl });
+  if (authUrl === undefined) {
+    res.json({ 
+      status: 'error', 
+      status_message: 'Error obtaining authUrl'
+    })
+  }
+
+  res.json({
+    status: 'success', 
+    status_message: 'OK',
+    data: {
+      auth_url: authUrl
+    }
+  });
 
 };
 

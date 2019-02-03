@@ -3,11 +3,14 @@
 /*******************************************************************************
 * EXPRESS INIT
 *******************************************************************************/
+const Config = require('./config/config');
+const conf = new Config();
+console.log(conf);
 
 const express = require('express');
 const googleApi = express();
 
-const PORT = 3000;
+const PORT = conf.port;
 const HOST = '0.0.0.0';
 // const HOST = '127.0.0.1';
 
@@ -158,10 +161,10 @@ googleApi.use('/', loadingRouter);
 /*******************************************************************************
  MONGOOSE INIT
 *******************************************************************************/
-const configDB = require('./config/database');
+
 const mongoose = require('mongoose');
 
-mongoose.connect(configDB.url, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     console.error(err)
   } else {
@@ -170,3 +173,5 @@ mongoose.connect(configDB.url, {useNewUrlParser: true}, (err, db) => {;
     console.log(`Running on http://${HOST}:${PORT}`);
   }
 });
+
+module.exports = googleApi

@@ -9,11 +9,12 @@ const crypto = require('crypto');
 /*******************************************************************************
  MONGOOSE INIT
 *******************************************************************************/
-const configDB = require('../../config/database');
-const mongoose = require('mongoose');
 
-var Profile = require('../models/profile.model');
+const Profile = require('../models/profile.model');
 const History = require('../models/history.model');
+
+const GOOGLE_USER_INFO_ENDPOINT =  'https://www.googleapis.com/oauth2/v2/userinfo';
+const GMAIL_PROFILE_ENDPOINT = 'https://www.googleapis.com/gmail/v1/users/me/profile';
 
 /*******************************************************************************
 Get Basic Profile
@@ -24,7 +25,7 @@ exports.basic_profile = function (req, res) {
   let access_token = req.session.token.access_token;
 
   const options = {
-    url: 'https://www.googleapis.com/oauth2/v2/userinfo',
+    url: GOOGLE_USER_INFO_ENDPOINT,
     headers: {
       'Authorization': 'Bearer ' + access_token
     }
@@ -33,6 +34,7 @@ exports.basic_profile = function (req, res) {
   let getBasicProfile = new Promise((resolve, reject) => {
     request.get(options, (error, response, body) => {
       if (!error && response.statusCode == 200) {
+        console.log(body);
         resolve(body);
       } else {
         reject(error);
@@ -75,7 +77,8 @@ exports.basic_profile = function (req, res) {
         History.updateOne(conditions, historyUpdate, options, (err, doc) => {
           console.log(chalk.yellow('HISTORY UPDATED'));
 
-          // need to make sure firstRun is in db before client proceeds
+          // need to make sure firstRun is in db and userId is in express-session
+          // before client proceeds
           res.json({ basic_profile: basic_profile });
         });
       });
@@ -113,7 +116,7 @@ exports.email_profile = function (req, res) {
   let access_token = req.session.token.access_token;
 
   const options = {
-    url: 'https://www.googleapis.com/gmail/v1/users/me/profile',
+    url: GMAIL_PROFILE_ENDPOINT,
     headers: {
       'Authorization': 'Bearer ' + access_token
     }
