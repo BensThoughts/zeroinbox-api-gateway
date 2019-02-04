@@ -20,20 +20,6 @@ get_threads_ids = function (req, res) {
   let userId = req.session.user_info.userId;
 
   let conditions = { userId: userId };
-
-  History.findOne(conditions, (err, doc) => {
-    
-    if (err) return console.error(chalk.red('Error in History.findOne: thread_ids.controller: ' + err));
-    
-    if (!doc.passive.firstRun) {
-      res.json({ 
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          loading_status: false 
-        }  
-      });
-    } else {
     
       let access_token = req.session.token.access_token;
       
@@ -53,23 +39,12 @@ get_threads_ids = function (req, res) {
           console.log(chalk.blue.bold('Thread Ids Updated!'));
 
           // make sure threadIds are inserted before proceeding to batch get
-          res.json({ 
-            status: 'success',
-            status_message: 'OK',
-            data: {
-              loading_status: true 
-            }
-          })
         });
 
       }).catch((err) => {
         console.error(chalk.red(err));
         res.status(500).send({ error: 'Request failed with error: ' + err })
       });
-
-    }
-
-  });
 
 }
 

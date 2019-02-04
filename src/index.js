@@ -1,5 +1,9 @@
 'use strict';
 
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+
 /*******************************************************************************
 * EXPRESS INIT
 *******************************************************************************/
@@ -14,20 +18,30 @@ const PORT = conf.port;
 const HOST = '0.0.0.0';
 // const HOST = '127.0.0.1';
 
+/*******************************************************************************
+* EXPRESS WITH CORS AND BODY-PARSER SETUP
+*******************************************************************************/
+const cors = require('cors');
+const addRequestId = require('express-request-id')();
+const morgan = require('morgan');
+const morganChalk = require('./config/morgan.chalk');
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const genuuid = require('uid-safe');
+const redis = require('redis');
+const redis_client = redis.createClient(process.env.REDIS_URL);
 
 /*******************************************************************************
 * LOGGING INIT (MORGAN)
 *******************************************************************************/
-const addRequestId = require('express-request-id')();
 googleApi.use(addRequestId);
 
-const morgan = require('morgan');
+
 
 morgan.token('id', function getId(req) {
   return req.id
 });
 
-const morganChalk = require('./config/morgan.chalk');
 
 googleApi.use(morgan(morganChalk.logOK, {
   skip: function (req, res) {
@@ -43,10 +57,7 @@ googleApi.use(morgan(morganChalk.logError, {
 }));
 
 
-/*******************************************************************************
-* EXPRESS WITH CORS AND BODY-PARSER SETUP
-*******************************************************************************/
-const cors = require('cors');
+
 
 
 const whiteList = [
@@ -76,11 +87,7 @@ googleApi.use(express.urlencoded({ extended: false, limit: '5mb' }));
 * EXPRESS WITH SESSIONS (uses cookies) AND REDIS SETUP
 *******************************************************************************/
 
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
-const genuuid = require('uid-safe');
-const redis = require('redis');
-const redis_client = redis.createClient(process.env.REDIS_URL);
+
 
 googleApi.use(
   session({

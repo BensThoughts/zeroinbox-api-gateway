@@ -38,3 +38,40 @@ exports.loading_status = function (req, res) {
     });
 
 };
+
+
+exports.first_run_status = function(req, res, next) {
+  // console.log('ping');
+  let userId = req.session.user_info.userId;
+  let conditions = { userId: userId }
+
+  History.findOne(conditions, (err, doc) => {
+    if (err) {
+      res.json({
+        status: 'error',
+        status_message: 'Error in firstRunStatus at History.findOne()',
+      });
+    };
+    // console.log(doc);
+    if (doc.passive.firstRun === true) {
+      let update = {
+        'active.loadingStatus': true
+      }
+      let options = {
+        multi: false,
+        upsert: true
+      }
+      History.updateOne(conditions, update, options, (err, doc) => {
+        res.json({
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            firstRun: true
+          }
+        });
+      })
+
+    }
+  });
+
+};

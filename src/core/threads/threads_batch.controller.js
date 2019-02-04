@@ -331,42 +331,6 @@ exports.threads_batch = function (req, res) {
 
   let conditions = { userId: user_info.userId };
 
-  History.findOne(conditions, (err, doc) => {
-    if (err) return console.error(chalk.red('Error in History.findOne: ' + err));
-    // console.log(doc);
-    if (doc.passive.firstRun === false) {
-      res.json({ 
-        status: 'success',
-        loading_status: 'OK',
-        data: {
-          loading_status: false 
-        }
-      })
-    } else {
- 
-      let update = {
-        "active.loadingStatus": true
-      };
-      let options = {
-        multi: false,
-        upsert: true
-      };
-
-      History.updateOne(conditions, update, options, (err, raw) => {
-        if(err) return console.error(chalk.red('Error in History.updateOne: attempt to change loading to true' + err));
-        console.log(chalk.blue.bold('History: Active: Loading set to true'));
-
-        // wait until we update loading status then client can
-        // start polling for loading
-        res.json({ 
-          status: 'success',
-          loading_status: 'OK',
-          data: {
-            loading_status: true 
-          }
-        }); 
-      });
-
       ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
         if (err) return console.error(chalk.red('Error in ThreadIds.find().distinct(): ' + err));
         const startBatchProccess = async () => {
@@ -436,14 +400,10 @@ exports.threads_batch = function (req, res) {
         }
         startBatchProccess().catch((error) => {
           console.log(error);
-          res.status(500).send('Error in startBatchProccess(): ' + error);
+          // res.status(500).send('Error in startBatchProccess(): ' + error);
         });
 
       }) // ThreadIds.find()
-
-    } // else
-
-  }); // History.findOne()
 
 }
 
