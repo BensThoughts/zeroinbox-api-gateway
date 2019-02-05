@@ -1,6 +1,9 @@
 /*******************************************************************************
  * INIT DEPS
 *******************************************************************************/
+const chalk = require('chalk');
+const logger = require('../../logger/logger');
+
 const fs = require('fs');
 const path = require('path');
 const {google} = require('googleapis');
@@ -30,7 +33,8 @@ exports.oauth2init = function(req, res) {
 
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'online',
-    scope: scopes
+    scope: scopes,
+    prompt: 'select_account',
   });
 
   // Reset the session after init because leaving the site to log in
@@ -71,6 +75,7 @@ exports.oauth2callback = function(req, res) {
   oauth2Client.getToken(code, (err, token) => {
       if (err) {
         console.error(chalk.red(err));
+        logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
 

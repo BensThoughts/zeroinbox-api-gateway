@@ -3,6 +3,8 @@
 *******************************************************************************/
 const chalk = require('chalk');
 
+const logger = require('../../logger/logger');
+
 /*******************************************************************************
  INIT MONGOOSE
 *******************************************************************************/
@@ -14,18 +16,20 @@ const History = require('../models/history.model');
 
 exports.loading_status = function (req, res) {
 
+  logger.info(chalk.green('This is an info test'));
   let userId = req.session.user_info.userId;
 
     let conditions = { userId: userId }
 
     History.findOne(conditions, (err, raw) => {
       if (err) {
+        logger.error('Error in history.findOne(): ' + err);
         res.json({
           status: 'error',
           status_message: 'Error in history.findOne()'
         })
         // return console.error()?
-        return console.error(chalk.red('Error in history.findOne(): ' + err));
+        // return console.error(chalk.red('Error in history.findOne(): ' + err));
       };
       let loading = raw.active.loadingStatus;
       res.json({ 

@@ -34,7 +34,9 @@
     "morgan": "^1.9.1",
     "nodemon": "^1.18.9",
     "request": "^2.88.0",
-    "uid-safe": "^2.1.5"
+    "uid-safe": "^2.1.5",
+    "winston": "^3.2.1",
+    "winston-logstash-transport": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",

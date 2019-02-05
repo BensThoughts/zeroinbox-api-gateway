@@ -22,9 +22,6 @@ const HOST = '0.0.0.0';
 * EXPRESS WITH CORS AND BODY-PARSER SETUP
 *******************************************************************************/
 const cors = require('cors');
-const addRequestId = require('express-request-id')();
-const morgan = require('morgan');
-const morganChalk = require('./config/morgan.chalk');
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const genuuid = require('uid-safe');
@@ -34,9 +31,10 @@ const redis_client = redis.createClient(process.env.REDIS_URL);
 /*******************************************************************************
 * LOGGING INIT (MORGAN)
 *******************************************************************************/
+const addRequestId = require('express-request-id')();
+const morgan = require('morgan');
+const morganChalk = require('./config/morgan.chalk');
 googleApi.use(addRequestId);
-
-
 
 morgan.token('id', function getId(req) {
   return req.id
@@ -56,8 +54,24 @@ googleApi.use(morgan(morganChalk.logError, {
   stream: process.stderr
 }));
 
+/*******************************************************************************
+* LOGGING INIT (LOG4JS)
+*******************************************************************************/
+const logger = require('./logger/logger');
+logger.info('Logger started');
 
-
+/* var logger = require('winston-logstash-transport').createLogger(null, {
+  application: 'zero-inbox',
+  logstash: { host: logstash, port: 5000 },
+  level: 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'api-gateway-service' },
+  transports: [
+    new winston.transports.File({ filename: '../logs/error.log', level: 'error' }),
+    new winston.transports.File({ filename: '../logs/combined.log' }),
+    // new winston.transports.Logstash({ port: 5000, host: 'logstash', node_name: 'test'})
+  ]
+}); */
 
 
 const whiteList = [
