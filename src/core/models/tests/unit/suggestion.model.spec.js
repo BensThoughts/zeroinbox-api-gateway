@@ -34,7 +34,6 @@ describe('models: suggestion', function() {
         let suggestion = new Suggestion();
  
         suggestion.validate(function(err) {
-            // console.log(err);
             expect(err.errors).to.exist;
             done();
         });
@@ -147,7 +146,6 @@ describe('models: suggestion', function() {
     it('should be valid if new Suggestion() has all required properties', function(done) {
         let suggestion = valid_suggestion();
         suggestion.validate(function(err) {
-            // console.log(err);
             expect(err).not.to.exist;
             done();
         });

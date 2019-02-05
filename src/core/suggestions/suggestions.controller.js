@@ -1,6 +1,6 @@
-const Suggestion = require('../models/suggestion.model');
+const logger = require('../../loggers/log4js');
 
-const chalk = require('chalk');
+const Suggestion = require('../models/suggestion.model');
 
 exports.suggestions = function (req, res) {
   let userId = req.session.user_info.userId;
@@ -23,7 +23,7 @@ exports.suggestions = function (req, res) {
           status: 'error',
           status_message: 'Error in suggestion.find()'
         })
-        return console.error('Error in suggestion.find(): ' + chalk.red(err))
+        return console.error('Error in suggestion.find(): ' + err);
       };
       let suggestions = raw;
       res.json({ 

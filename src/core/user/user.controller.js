@@ -2,7 +2,7 @@
 /*******************************************************************************
   INIT DEPS
 *******************************************************************************/
-const chalk = require('chalk');
+const logger = require('../../loggers/log4js');
 const request = require('request');
 const crypto = require('crypto');
 
@@ -34,7 +34,6 @@ exports.basic_profile = function (req, res) {
   let getBasicProfile = new Promise((resolve, reject) => {
     request.get(options, (error, response, body) => {
       if (!error && response.statusCode == 200) {
-        console.log(body);
         resolve(body);
       } else {
         reject(error);
@@ -45,7 +44,6 @@ exports.basic_profile = function (req, res) {
   getBasicProfile.then((basic_profile_response) => {
     let basic_profile = JSON.parse(basic_profile_response);
 
-    // console.log(basic_profile);
     let userId = basic_profile.id;
     req.session.user_info = {
       userId: basic_profile.id,
@@ -75,7 +73,7 @@ exports.basic_profile = function (req, res) {
           }
         }
         History.updateOne(conditions, historyUpdate, options, (err, doc) => {
-          console.log(chalk.yellow('HISTORY UPDATED'));
+          logger.trace('HISTORY UPDATED');
 
           // need to make sure firstRun is in db and userId is in express-session
           // before client proceeds
@@ -96,12 +94,12 @@ exports.basic_profile = function (req, res) {
       };
      
       Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
-        if (err) return console.error(chalk.red(err));
-        console.log(chalk.blue.bold('Basic profile updated!'));
+        if (err) return console.error(err);
+        logger.debug('Basic profile updated!');
       })
 
   }).catch((err) => {
-    console.error(chalk.red(err));
+    console.error(err);
     res.status(500).send('Error: ' + err);
   });
 
@@ -168,12 +166,12 @@ exports.email_profile = function (req, res) {
     };
 
     Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
-      if(err) return console.error(chalk.red(err));
-      console.log(chalk.blue.bold('Email profile updated!'));
+      if(err) return console.error(err);
+      logger.debug('Email profile updated!');
     });
 
   }).catch((err) => {
-    console.error(chalk.red(err));
+    console.error(err);
     res.status(500).send('Error: ' + err);
   });
 

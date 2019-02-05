@@ -61,7 +61,6 @@ describe('controllers: threads_ids', function() {
         })
         it('should create a new ThreadId', (done) => {
             let threadId = threads_ids.createThreadId('threadId', 'userId');
-            // console.log(threadId);
             expect(threadId).to.be.an('object');
             expect(threadId).to.have.property('validate');
             threadId.validate((err) => {

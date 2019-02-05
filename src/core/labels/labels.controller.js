@@ -25,11 +25,10 @@ exports.get_labels = function (req, res) {
   })
 
   getEmailProfile.then((labels_response) => {
-    // console.log(labels_response);
     let labels = JSON.parse(labels_response);
     res.json(labels);
   }).catch((err) => {
-    console.error(chalk.red(err));
+    console.error(err);
     res.status(500).send('Error: ' + err);
   });
 

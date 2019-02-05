@@ -1,7 +1,6 @@
 /*******************************************************************************
  * INIT DEPS
 *******************************************************************************/
-const chalk = require('chalk');
 const logger = require('../../loggers/log4js');
 
 const fs = require('fs');
@@ -74,7 +73,7 @@ exports.oauth2callback = function(req, res) {
 
   oauth2Client.getToken(code, (err, token) => {
       if (err) {
-        console.error(chalk.red(err));
+        console.error(err);
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }

@@ -1,7 +1,6 @@
 /*******************************************************************************
  INIT DEPS
 *******************************************************************************/
-const chalk = require('chalk');
 const logger = require('../../loggers/log4js');
 
 /*******************************************************************************
@@ -21,13 +20,13 @@ exports.loading_status = function (req, res) {
 
     History.findOne(conditions, (err, raw) => {
       if (err) {
-        logger.error(chalk.red('Error at loading_status in history.findOne(): ' + err));
+        logger.error('Error at loading_status in history.findOne(): ' + err);
         res.status(500).json({
           status: 'error',
           status_message: 'internal server error at path /loadingStatus'
         });
         // return console.error()?
-        // return console.error(chalk.red('Error in history.findOne(): ' + err));
+        // return console.error('Error in history.findOne(): ' + err);
       };
       let loading = raw.active.loadingStatus;
       res.json({ 
@@ -43,19 +42,17 @@ exports.loading_status = function (req, res) {
 
 
 exports.first_run_status = function(req, res, next) {
-  // console.log('ping');
   let userId = req.session.user_info.userId;
   let conditions = { userId: userId }
 
   History.findOne(conditions, (err, doc) => {
     if (err) {
-      logger.error(chalk.red('Error at first_run_status in history.findOne(): ' + err));
+      logger.error('Error at first_run_status in history.findOne(): ' + err);
       res.json({
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus',
       });
     };
-    // console.log(doc);
     if (doc.passive.firstRun === true) {
       let update = {
         'active.loadingStatus': true

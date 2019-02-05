@@ -1,14 +1,6 @@
 
-/*******************************************************************************
-  INIT CHALK
-*******************************************************************************/
-const chalk = require('chalk');
-const request = require('request');
+const logger = require('../../loggers/log4js');
 
-/*******************************************************************************
- HASHING INIT
-*******************************************************************************/
-const crypto = require('crypto');
 
 /*******************************************************************************
  MONGOOSE INIT
@@ -120,7 +112,7 @@ function newBatchThreadRequest(threadIdsChunk, access_token) {
   return new Promise((resolve, reject) => {
     batch.run((err, response) => {
       if (err) {
-        console.error(chalk.red("Error: " + err));
+        console.error("Error: " + err);
         reject(err);
       } else {
         //results = results.concat([response]);
@@ -159,10 +151,10 @@ function checkPartBatchResponse(part_batch_response) {
     if (part_batch_response.body.messages[0].payload.headers === undefined) {
       throw new Error('part_batch_response.body.messages[0].payload.headers undefined!');
     }
-    // console.log(chalk.green('part_batch_response OK!'));
+    // logger.debug(chalk.green('part_batch_response OK!');
     return true;
   } catch(err) {
-    console.error(chalk.red('Error in part_batch_response: ' + err));
+    console.error('Error in part_batch_response: ' + err);
     return false;
   }
 }
@@ -170,14 +162,14 @@ function checkPartBatchResponse(part_batch_response) {
 function extractNameAndAddress(headers) {
   let fromAddress, fromName;
   let return_headers = undefined;
-  // console.log(headers);
+  // logger.debug(headers);
   // headers.forEach((header) => {
   try {
 
   for (let header of headers) {
     if (header.name === 'From' || header.name === 'from') {
       // if (header.name === 'from') {
-        // console.log(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`));
+        // logger.debug(chalk.blue.bold(`Header is in 'from' form instead of 'From': `) + chalk.cyan(`"${header.value}"`);
       // }
       let searchIndex = header.value.search('<+');
   
@@ -185,7 +177,7 @@ function extractNameAndAddress(headers) {
         fromAddress = header.value.slice(searchIndex+1, -1);
         fromName = header.value.slice(0, searchIndex-1);
       } else {
-        // console.log(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`));
+        // logger.debug(chalk.blue(`'From' or 'from' defined as "name@address.com": `) + chalk.cyan(`"${header.value}"`);
         searchIndex = header.value.search('@');
         if (searchIndex === -1) {
           throw new Error('Error in From/from field');
@@ -216,12 +208,12 @@ function extractNameAndAddress(headers) {
   }; // headers.ForEach()
   
   if (return_headers === undefined) {
-    // console.log(headers);
+    // logger.debug(headers);
     throw new Error('From or from not found in headers!');
   }
 
   } catch (err) {
-    console.error(chalk.red(err));
+    console.error(err);
   }
 
   return return_headers;
@@ -332,7 +324,7 @@ exports.threads_batch = function (req, res) {
   let conditions = { userId: user_info.userId };
 
       ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
-        if (err) return console.error(chalk.red('Error in ThreadIds.find().distinct(): ' + err));
+        if (err) return console.error('Error in ThreadIds.find().distinct(): ' + err);
         const startBatchProccess = async () => {
   
           let inter_response_count = 0;
@@ -345,12 +337,12 @@ exports.threads_batch = function (req, res) {
 
           await asyncForEach(threadIdChunks, async (threadIdChunk) => {
             date = new Date();
-            console.log(chalk.green('Inter response started: ' + (inter_response_count++) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds()));
+            logger.debug('Inter response started: ' + (inter_response_count++) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds());
             
             let batchResult = await newBatchThreadRequest(threadIdChunk, access_token);
 
             date = new Date();
-            console.log(chalk.yellow('Inter response done: ' + (inter_response_count) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds()));
+            logger.debug('Inter response done: ' + (inter_response_count) + ' : ' + date.getSeconds() + '.' + date.getMilliseconds());
 
             if (batchResult.parts !== undefined) {
 
@@ -368,7 +360,7 @@ exports.threads_batch = function (req, res) {
               });
 
               date = new Date();
-              console.log(chalk.red('results parsed: ' + date.getSeconds() + '.' + date.getMilliseconds()));
+              logger.debug('results parsed: ' + date.getSeconds() + '.' + date.getMilliseconds());
 
             } else {
               console.error('result.parts was undefined!');
@@ -377,8 +369,8 @@ exports.threads_batch = function (req, res) {
           });
 
           Suggestion.insertMany(newResults.getResults(), (err, docs) => {
-            if (err) return console.error(chalk.red('Error in Suggestion.insertMany(): ' + err));
-            console.log(chalk.blue.bold('Suggestions inserted'));
+            if (err) return console.error('Error in Suggestion.insertMany(): ' + err);
+            logger.debug('Suggestions inserted');
             conditions = { userId: user_info.userId }
             update = {
               // userId: user_info.userId,
@@ -392,14 +384,14 @@ exports.threads_batch = function (req, res) {
     
             // change loading status only after the insert is done
             History.updateOne(conditions, update, options, (err, raw) => {
-              if(err) return console.error(chalk.red('Error in History.updateOne: attempt to change loading to false' + err));
-              console.log(chalk.blue.bold('History: Active: Loading: set to false'));
+              if(err) return console.error('Error in History.updateOne: attempt to change loading to false' + err);
+              logger.debug('History: Active: Loading: set to false');
             });
           });
-          console.log('DONE')
+          logger.debug('DONE')
         }
         startBatchProccess().catch((error) => {
-          console.log(error);
+          logger.debug(error);
           // res.status(500).send('Error in startBatchProccess(): ' + error);
         });
 

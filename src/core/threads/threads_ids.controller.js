@@ -1,9 +1,8 @@
 /*******************************************************************************
 Get All ThreadIds
 *******************************************************************************/
-
+const logger = require('../../loggers/log4js');
 const request = require('request');
-const chalk = require('chalk');
 
 const ThreadId = require('../models/thread_IDs.model');
 const History = require('../models/history.model');
@@ -15,8 +14,6 @@ const MAX_RESULTS = 500;
 
 get_threads_ids = function (req, res) {
 
-  // console.log(req);
-
   let userId = req.session.user_info.userId;
 
   let conditions = { userId: userId };
@@ -27,7 +24,7 @@ get_threads_ids = function (req, res) {
 
       getPages(access_token, []).then((results) => {
 
-        console.log(chalk.yellow('Total number of threads: ' + results.length));
+        logger.debug('Total number of threads: ' + results.length);
 
         results.forEach((thread) => {
           let threadId = createThreadId(thread.id, userId);
@@ -35,14 +32,14 @@ get_threads_ids = function (req, res) {
         });
 
         ThreadId.insertMany(threadIdsResults.getResults(), (err, docs) => {
-          if (err) return console.error(chalk.red('Error in ThreadId.insertMany(): threadids_controller: ' + err));
-          console.log(chalk.blue.bold('Thread Ids Updated!'));
+          if (err) return console.error('Error in ThreadId.insertMany(): threadids_controller: ' + err);
+          logger.trace('Thread Ids Updated!');
 
           // make sure threadIds are inserted before proceeding to batch get
         });
 
       }).catch((err) => {
-        console.error(chalk.red(err));
+        console.error(err);
         res.status(500).send({ error: 'Request failed with error: ' + err })
       });
 
@@ -51,7 +48,7 @@ get_threads_ids = function (req, res) {
 async function getPages(access_token, results, nextPageToken) {
 
   let response = await getPageOfThreads(access_token, nextPageToken).catch((error) => {
-    console.error(chalk.red('Error in getPageOfThreads!' + error));
+    console.error('Error in getPageOfThreads!' + error);
   });
 
   results = results.concat(response.threads);
@@ -74,11 +71,10 @@ function getPageOfThreads(access_token, pageToken) {
 
       if (!error && response.statusCode == 200) {
         body = JSON.parse(body);
-        // console.log('body: ' + body.threads);
-        console.log(chalk.yellow('Next page token: ' + body.nextPageToken));
+        logger.debug('Next page token: ' + body.nextPageToken);
         resolve(body)
       } else {
-        console.error(chalk.red('Error in request.get: ' + error));
+        console.error('Error in request.get: ' + error);
         reject(error);
       }
 
