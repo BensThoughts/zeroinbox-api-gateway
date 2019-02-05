@@ -1,8 +1,5 @@
 'use strict';
 
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-
 
 /*******************************************************************************
 * EXPRESS INIT
