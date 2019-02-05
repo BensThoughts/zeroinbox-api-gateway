@@ -23,7 +23,7 @@ exports.suggestions = function (req, res) {
           status: 'error',
           status_message: 'Error in suggestion.find()'
         })
-        return console.error('Error in suggestion.find(): ' + err);
+        return logger.error('Error in suggestion.find(): ' + err);
       };
       let suggestions = raw;
       res.json({ 

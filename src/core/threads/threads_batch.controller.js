@@ -112,7 +112,7 @@ function newBatchThreadRequest(threadIdsChunk, access_token) {
   return new Promise((resolve, reject) => {
     batch.run((err, response) => {
       if (err) {
-        console.error("Error: " + err);
+        logger.error("Error: " + err);
         reject(err);
       } else {
         //results = results.concat([response]);
@@ -154,7 +154,7 @@ function checkPartBatchResponse(part_batch_response) {
     // logger.debug(chalk.green('part_batch_response OK!');
     return true;
   } catch(err) {
-    console.error('Error in part_batch_response: ' + err);
+    logger.error('Error in part_batch_response: ' + err);
     return false;
   }
 }
@@ -213,7 +213,7 @@ function extractNameAndAddress(headers) {
   }
 
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 
   return return_headers;
@@ -324,7 +324,7 @@ exports.threads_batch = function (req, res) {
   let conditions = { userId: user_info.userId };
 
       ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
-        if (err) return console.error('Error in ThreadIds.find().distinct(): ' + err);
+        if (err) return logger.error('Error in ThreadIds.find().distinct(): ' + err);
         const startBatchProccess = async () => {
   
           let inter_response_count = 0;
@@ -363,13 +363,13 @@ exports.threads_batch = function (req, res) {
               logger.debug('results parsed: ' + date.getSeconds() + '.' + date.getMilliseconds());
 
             } else {
-              console.error('result.parts was undefined!');
+              logger.error('result.parts was undefined!');
             }
             batchResult = undefined;
           });
 
           Suggestion.insertMany(newResults.getResults(), (err, docs) => {
-            if (err) return console.error('Error in Suggestion.insertMany(): ' + err);
+            if (err) return logger.error('Error in Suggestion.insertMany(): ' + err);
             logger.debug('Suggestions inserted');
             conditions = { userId: user_info.userId }
             update = {
@@ -384,7 +384,7 @@ exports.threads_batch = function (req, res) {
     
             // change loading status only after the insert is done
             History.updateOne(conditions, update, options, (err, raw) => {
-              if(err) return console.error('Error in History.updateOne: attempt to change loading to false' + err);
+              if(err) return logger.error('Error in History.updateOne: attempt to change loading to false' + err);
               logger.debug('History: Active: Loading: set to false');
             });
           });

@@ -25,8 +25,6 @@ exports.loading_status = function (req, res) {
           status: 'error',
           status_message: 'internal server error at path /loadingStatus'
         });
-        // return console.error()?
-        // return console.error('Error in history.findOne(): ' + err);
       };
       let loading = raw.active.loadingStatus;
       res.json({ 

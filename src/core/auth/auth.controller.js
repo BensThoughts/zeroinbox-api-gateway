@@ -73,7 +73,6 @@ exports.oauth2callback = function(req, res) {
 
   oauth2Client.getToken(code, (err, token) => {
       if (err) {
-        console.error(err);
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }

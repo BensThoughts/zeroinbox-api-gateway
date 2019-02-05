@@ -28,7 +28,7 @@ exports.get_labels = function (req, res) {
     let labels = JSON.parse(labels_response);
     res.json(labels);
   }).catch((err) => {
-    console.error(err);
+    logger.error('Error in /labels at getEmailProfile.then(): ' + err);
     res.status(500).send('Error: ' + err);
   });
 

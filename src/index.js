@@ -20,7 +20,7 @@ const googleApi = express();
 const PORT = conf.port;
 const HOST = '0.0.0.0';
 
-logger.trace('Configuration: DB:' + conf.db);
+logger.debug('Configuration: DB:' + conf.db);
 
 /*******************************************************************************
 * EXPRESS CORS SETUP

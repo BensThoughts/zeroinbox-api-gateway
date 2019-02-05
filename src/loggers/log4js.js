@@ -38,10 +38,10 @@ if (nodeENV === 'production') {
             
             /** Debug Setting */
             // uncomment below to provide trace - info level logging to stout
-            // _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
+            _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
 
             // log info to stdout
-            _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'info', maxLevel: 'info' },
+            // _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'info', maxLevel: 'info' },
             
             // log fatal - warn to error.log
             _error: { type: 'logLevelFilter', appender: 'error', level: 'warn', maxLevel: 'fatal' },

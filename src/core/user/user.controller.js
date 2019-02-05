@@ -73,7 +73,7 @@ exports.basic_profile = function (req, res) {
           }
         }
         History.updateOne(conditions, historyUpdate, options, (err, doc) => {
-          logger.trace('HISTORY UPDATED');
+          logger.debug('HISTORY UPDATED');
 
           // need to make sure firstRun is in db and userId is in express-session
           // before client proceeds
@@ -94,12 +94,12 @@ exports.basic_profile = function (req, res) {
       };
      
       Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
-        if (err) return console.error(err);
+        if (err) return logger.error(err);
         logger.debug('Basic profile updated!');
       })
 
   }).catch((err) => {
-    console.error(err);
+    logger.error(err);
     res.status(500).send('Error: ' + err);
   });
 
@@ -166,12 +166,12 @@ exports.email_profile = function (req, res) {
     };
 
     Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
-      if(err) return console.error(err);
+      if(err) return logger.error(err);
       logger.debug('Email profile updated!');
     });
 
   }).catch((err) => {
-    console.error(err);
+    logger.error(err);
     res.status(500).send('Error: ' + err);
   });
 

@@ -32,14 +32,14 @@ get_threads_ids = function (req, res) {
         });
 
         ThreadId.insertMany(threadIdsResults.getResults(), (err, docs) => {
-          if (err) return console.error('Error in ThreadId.insertMany(): threadids_controller: ' + err);
-          logger.trace('Thread Ids Updated!');
+          if (err) return logger.error('Error in ThreadId.insertMany(): threadids_controller: ' + err);
+          logger.debug('Thread Ids Updated!');
 
           // make sure threadIds are inserted before proceeding to batch get
         });
 
       }).catch((err) => {
-        console.error(err);
+        logger.error(err);
         res.status(500).send({ error: 'Request failed with error: ' + err })
       });
 
@@ -48,7 +48,7 @@ get_threads_ids = function (req, res) {
 async function getPages(access_token, results, nextPageToken) {
 
   let response = await getPageOfThreads(access_token, nextPageToken).catch((error) => {
-    console.error('Error in getPageOfThreads!' + error);
+    logger.error('Error in getPageOfThreads!' + error);
   });
 
   results = results.concat(response.threads);
@@ -74,7 +74,7 @@ function getPageOfThreads(access_token, pageToken) {
         logger.debug('Next page token: ' + body.nextPageToken);
         resolve(body)
       } else {
-        console.error('Error in request.get: ' + error);
+        logger.error('Error in request.get: ' + error);
         reject(error);
       }
 
