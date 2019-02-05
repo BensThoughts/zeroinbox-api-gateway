@@ -2,8 +2,7 @@
  INIT DEPS
 *******************************************************************************/
 const chalk = require('chalk');
-
-const logger = require('../../logger/logger');
+const logger = require('../../loggers/log4js');
 
 /*******************************************************************************
  INIT MONGOOSE
@@ -16,18 +15,17 @@ const History = require('../models/history.model');
 
 exports.loading_status = function (req, res) {
 
-  logger.info(chalk.green('This is an info test'));
   let userId = req.session.user_info.userId;
 
     let conditions = { userId: userId }
 
     History.findOne(conditions, (err, raw) => {
       if (err) {
-        logger.error('Error in history.findOne(): ' + err);
-        res.json({
+        logger.error(chalk.red('Error at loading_status in history.findOne(): ' + err));
+        res.status(500).json({
           status: 'error',
-          status_message: 'Error in history.findOne()'
-        })
+          status_message: 'internal server error at path /loadingStatus'
+        });
         // return console.error()?
         // return console.error(chalk.red('Error in history.findOne(): ' + err));
       };
@@ -51,9 +49,10 @@ exports.first_run_status = function(req, res, next) {
 
   History.findOne(conditions, (err, doc) => {
     if (err) {
+      logger.error(chalk.red('Error at first_run_status in history.findOne(): ' + err));
       res.json({
         status: 'error',
-        status_message: 'Error in firstRunStatus at History.findOne()',
+        status_message: 'internal server error at path /firstRunStatus',
       });
     };
     // console.log(doc);
@@ -66,6 +65,9 @@ exports.first_run_status = function(req, res, next) {
         upsert: true
       }
       History.updateOne(conditions, update, options, (err, doc) => {
+
+        // update active.loadingStatus then tell client to start polling loadingStatus
+        // by indicating firstRun
         res.json({
           status: 'success',
           status_message: 'OK',

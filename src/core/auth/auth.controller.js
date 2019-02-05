@@ -2,7 +2,7 @@
  * INIT DEPS
 *******************************************************************************/
 const chalk = require('chalk');
-const logger = require('../../logger/logger');
+const logger = require('../../loggers/log4js');
 
 const fs = require('fs');
 const path = require('path');

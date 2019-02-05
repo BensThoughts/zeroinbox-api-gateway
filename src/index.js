@@ -1,104 +1,57 @@
 'use strict';
 
+const chalk = require('chalk');
+
+/*******************************************************************************
+* LOGGING INIT (LOG4JS) App (console/file) logging
+*******************************************************************************/
+const logger = require('./loggers/log4js');
+
 
 /*******************************************************************************
 * EXPRESS INIT
 *******************************************************************************/
 const Config = require('./config/config');
 const conf = new Config();
-console.log(conf);
 
 const express = require('express');
 const googleApi = express();
 
 const PORT = conf.port;
 const HOST = '0.0.0.0';
-// const HOST = '127.0.0.1';
+
+logger.trace('Configuration: DB:' + conf.db);
 
 /*******************************************************************************
-* EXPRESS WITH CORS AND BODY-PARSER SETUP
+* EXPRESS CORS SETUP
 *******************************************************************************/
 const cors = require('cors');
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
-const genuuid = require('uid-safe');
-const redis = require('redis');
-const redis_client = redis.createClient(process.env.REDIS_URL);
-
-/*******************************************************************************
-* LOGGING INIT (MORGAN)
-*******************************************************************************/
-const addRequestId = require('express-request-id')();
-const morgan = require('morgan');
-const morganChalk = require('./config/morgan.chalk');
-googleApi.use(addRequestId);
-
-morgan.token('id', function getId(req) {
-  return req.id
-});
-
-
-googleApi.use(morgan(morganChalk.logOK, {
-  skip: function (req, res) {
-          return res.statusCode >= 400
-        },
-  stream: process.stdout
-}));
-googleApi.use(morgan(morganChalk.logError, {
-  skip: function (req, res) {
-          return res.statusCode < 400
-        },
-  stream: process.stderr
-}));
-
-/*******************************************************************************
-* LOGGING INIT (LOG4JS)
-*******************************************************************************/
-const logger = require('./logger/logger');
-logger.info('Logger started');
-
-/* var logger = require('winston-logstash-transport').createLogger(null, {
-  application: 'zero-inbox',
-  logstash: { host: logstash, port: 5000 },
-  level: 'info',
-  format: winston.format.json(),
-  defaultMeta: { service: 'api-gateway-service' },
-  transports: [
-    new winston.transports.File({ filename: '../logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: '../logs/combined.log' }),
-    // new winston.transports.Logstash({ port: 5000, host: 'logstash', node_name: 'test'})
-  ]
-}); */
-
-
 const whiteList = [
   'http://127.0.0.1:80',
   'http://127.0.0.1:4200'
-  // 'http://192.168.1.115:80',
-  // 'http://192.168.1.115'
-  // 'https://us-central1-labelorganizer.cloudfunctions.net',
 ];
-
-
 
 googleApi.use(
   cors({
     origin: true,
     credentials: true
   }),
-  // cookieParser(),
-  // bodyParser({ limit: '5mb' })
-
 );
 
+/*******************************************************************************
+* JSON and BODY PARSER (urlencoded) SETUP
+*******************************************************************************/
 googleApi.use(express.json({ limit: '5mb' }));
 googleApi.use(express.urlencoded({ extended: false, limit: '5mb' }));
 
 /*******************************************************************************
 * EXPRESS WITH SESSIONS (uses cookies) AND REDIS SETUP
 *******************************************************************************/
-
-
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const genuuid = require('uid-safe');
+const redis = require('redis');
+const redis_client = redis.createClient(process.env.REDIS_URL);
 
 googleApi.use(
   session({
@@ -120,11 +73,34 @@ googleApi.use(
 );
 
 /*******************************************************************************
+* LOGGING INIT (MORGAN) Http request logging
+*******************************************************************************/
+const addRequestId = require('express-request-id')();
+const morgan = require('morgan');
+const morganChalk = require('./loggers/morgan.chalk');
+
+googleApi.use(addRequestId);
+
+morgan.token('id', function getId(req) {
+  return req.id
+});
+
+googleApi.use(morgan(morganChalk.logOK, {
+  skip: function (req, res) {
+          return res.statusCode >= 400
+        },
+  stream: process.stdout
+}));
+googleApi.use(morgan(morganChalk.logError, {
+  skip: function (req, res) {
+          return res.statusCode < 400
+        },
+  stream: process.stderr
+}));
+
+/*******************************************************************************
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *******************************************************************************/
-
-
-
 googleApi.use((req, res, next) => {
   let path = req.path;
   if (path !== '/oauth2init') {
@@ -136,7 +112,6 @@ googleApi.use((req, res, next) => {
   }
   next();
 });
-
 
 
 /**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
@@ -176,19 +151,19 @@ googleApi.use('/', suggestionsRouter);
 
 googleApi.use('/', loadingRouter);
 
+
 /*******************************************************************************
  MONGOOSE INIT
 *******************************************************************************/
-
 const mongoose = require('mongoose');
 
 mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
-    console.error(err)
+    logger.error('Error in index.js at mongoose.connect():' + err);
   } else {
     googleApi.locals.db = db;
     googleApi.listen(PORT, HOST);
-    console.log(`Running on http://${HOST}:${PORT}`);
+    logger.info(`Running on http://${HOST}:${PORT}`);
   }
 });
 
