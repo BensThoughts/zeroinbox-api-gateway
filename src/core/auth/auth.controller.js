@@ -19,6 +19,9 @@ const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 *******************************************************************************/
 exports.oauth2init = function(req, res) {
 
+
+
+
   const oauth2Client = new google.auth.OAuth2(
     clientSecretJson.web.client_id,
     clientSecretJson.web.client_secret,

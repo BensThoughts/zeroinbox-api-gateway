@@ -156,6 +156,8 @@ googleApi.use('/', loadingRouter);
  MONGOOSE INIT
 *******************************************************************************/
 const mongoose = require('mongoose');
+const amqp = require('amqplib/callback_api');
+
 
 mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
@@ -166,5 +168,22 @@ mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
     logger.info(`Running on http://${HOST}:${PORT}`);
   }
 });
+
+
+amqp.connect('amqp://some-rabbit', function(err, conn) {
+  conn.createChannel(function(err, ch) {
+    let q = 'task_queue';
+    let msg = 'Hellow World!..........';
+
+    ch.assertQueue(q, { durable: true });
+    for (let i = 0; i < 4; i++) {
+      ch.sendToQueue(q, new Buffer(msg), { persistent: true });
+      console.log(' [x] Sent %s', msg);
+    };
+  });
+
+  setTimeout(function() { conn.close() }, 500);
+});
+
 
 module.exports = googleApi
