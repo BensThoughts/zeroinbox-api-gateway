@@ -33,37 +33,36 @@ if (nodeENV === 'production') {
                 compress: true  
             },
 
-            // log info to info.log
             _info: { type: 'logLevelFilter', appender: 'info', level: 'info', maxLevel: 'info' },
-            
-            /** Debug Setting */
-            // uncomment below to provide trace - info level logging to stout
-            _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
-
-            // log info to stdout
-            // _stdout: { type: 'logLevelFilter', appender: 'stdout', level: 'info', maxLevel: 'info' },
-            
-            // log fatal - warn to error.log
+ 
             _error: { type: 'logLevelFilter', appender: 'error', level: 'warn', maxLevel: 'fatal' },
 
-            /** Production Setting */
-            // uncomment below to provide error - fatal level logging to stderr
-            // _stderr: { type: 'logLevelFilter', appender: 'stderr', level: 'error', maxLevel: 'fatal' },
-            
-            /** Dev Setting */
-            // log fatal - error to stderr
-            _stderr: { type: 'logLevelFilter', appender: 'stderr', level: 'warn', maxLevel: 'fatal' },
+            _trace: { type: 'logLevelFilter', appender: 'debug', level: 'trace' },
 
-            // log trace - fatal to debug.log
-            _trace: { type: 'logLevelFilter', appender: 'debug', level: 'trace' }
+
+            /** Dev Setting */
+            _stdout_debug: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
+
+            /** Prod Setting */
+            _stdout_prod: { type: 'logLevelFilter', appender: 'stdout', level: 'info', maxLevel: 'info' },
+
+
+            /** Dev Setting */
+            _stderr_debug: { type: 'logLevelFilter', appender: 'stderr', level: 'warn', maxLevel: 'fatal' },
+
+            /** Prod Setting */
+            _stderr_prod: { type: 'logLevelFilter', appender: 'stderr', level: 'error', maxLevel: 'fatal' },
+
         },
         categories: { 
-            default: { appenders: ['_stdout'], level: 'info' },
-            filter: { appenders: ['_info', '_stdout', '_error', '_stderr', '_trace'], level: 'trace' }
+            default: { appenders: ['_stdout_prod'], level: 'info' },
+            dev: { appenders: ['_info', '_stdout_debug', '_error', '_stderr_debug', '_trace'], level: 'trace' },
+            prod: { appenders: ['_info', '_stdout_prod', '_error', '_stderr_prod', '_trace'], level: 'trace' }
         }
     });
 }
 
-const logger = log4js.getLogger('filter');
+// switch getLogger('prod') for prod
+const logger = log4js.getLogger('dev');
 
 module.exports = logger;
