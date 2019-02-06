@@ -1,0 +1,6 @@
+[2019-02-05T23:42:49.709] [ERROR] dev - Error in createClient(): TypeError: Cannot read property 'sendToQueue' of undefined
+[2019-02-05T23:45:44.405] [ERROR] dev - Error in createClient(): TypeError: Cannot read property 'createChannel' of undefined
+[2019-02-05T23:46:13.768] [ERROR] dev - Error in createClient(): TypeError: Cannot read property 'createChannel' of undefined
+[2019-02-06T00:50:38.299] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
+[2019-02-06T00:51:28.598] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
+[2019-02-06T01:26:49.664] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached

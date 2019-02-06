@@ -158,32 +158,21 @@ googleApi.use('/', loadingRouter);
 const mongoose = require('mongoose');
 const amqp = require('amqplib/callback_api');
 
+const rabbitConfig = require('./config/rabbit.config');
+const rabbit_cfg = new rabbitConfig.topology();
+
+const rabbit = require('rabbot');
 
 mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect():' + err);
   } else {
-    googleApi.locals.db = db;
-    googleApi.listen(PORT, HOST);
-    logger.info(`Running on http://${HOST}:${PORT}`);
+    rabbit.configure(rabbit_cfg).then(function() {
+      googleApi.locals.db = db;
+      googleApi.listen(PORT, HOST);
+      logger.info(`Running on http://${HOST}:${PORT}`);
+    });
   }
 });
-
-
-amqp.connect('amqp://some-rabbit', function(err, conn) {
-  conn.createChannel(function(err, ch) {
-    let q = 'task_queue';
-    let msg = 'Hellow World!..........';
-
-    ch.assertQueue(q, { durable: true });
-    for (let i = 0; i < 4; i++) {
-      ch.sendToQueue(q, new Buffer(msg), { persistent: true });
-      console.log(' [x] Sent %s', msg);
-    };
-  });
-
-  setTimeout(function() { conn.close() }, 500);
-});
-
 
 module.exports = googleApi
