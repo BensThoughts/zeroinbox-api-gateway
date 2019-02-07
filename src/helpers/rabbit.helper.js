@@ -4,10 +4,6 @@ const logger = require('../loggers/log4js');
 var EventEmitter = require('events').EventEmitter;
 var utils = require('util');
 
-function parseOpts(options, ) {
-
-}
-
 class RabbitMQ {
 
     constructor() {
