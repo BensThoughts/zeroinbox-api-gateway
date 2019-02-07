@@ -18,7 +18,7 @@ const express = require('express');
 const googleApi = express();
 
 const PORT = conf.port;
-const HOST = '0.0.0.0';
+const HOST = conf.host;
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
