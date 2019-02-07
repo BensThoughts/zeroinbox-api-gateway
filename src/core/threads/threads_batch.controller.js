@@ -7,7 +7,6 @@ const logger = require('../../loggers/log4js');
 *******************************************************************************/
 const Suggestion = require('../models/suggestion.model');
 const History = require('../models/history.model');
-const ThreadIds = require('../models/thread_IDs.model');
 
 /*******************************************************************************
  BATCHELOR INIT
@@ -323,8 +322,6 @@ exports.threads_batch = function (req, res) {
 
   let conditions = { userId: user_info.userId };
 
-      ThreadIds.find().distinct('threadId', conditions, (err, threadIds) => {
-        if (err) return logger.error('Error in ThreadIds.find().distinct(): ' + err);
         const startBatchProccess = async () => {
   
           let inter_response_count = 0;
@@ -394,8 +391,6 @@ exports.threads_batch = function (req, res) {
           logger.debug(error);
           // res.status(500).send('Error in startBatchProccess(): ' + error);
         });
-
-      }) // ThreadIds.find()
 
 }
 
