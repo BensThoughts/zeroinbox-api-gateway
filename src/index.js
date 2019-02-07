@@ -156,18 +156,21 @@ googleApi.use('/', loadingRouter);
  MONGOOSE INIT
 *******************************************************************************/
 const mongoose = require('mongoose');
-const amqp = require('amqplib/callback_api');
+const rabbit = require('./helpers/rabbit.helper');
 
-const rabbitConfig = require('./config/rabbit.config');
-const rabbit_cfg = new rabbitConfig.topology();
-
-const rabbit = require('rabbot');
+let options = {
+  url: 'amqp://rabbitmq',
+  exchanges: [
+    { name: 'firstRun.ex.1', type: 'direct' },
+  ],
+};
 
 mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
-    logger.error('Error in index.js at mongoose.connect():' + err);
+    logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    rabbit.configure(rabbit_cfg).then(function() {
+    rabbit.connect(options, (err, ch) => {
+      logger.debug('Publisher Connected');
       googleApi.locals.db = db;
       googleApi.listen(PORT, HOST);
       logger.info(`Running on http://${HOST}:${PORT}`);
@@ -175,4 +178,4 @@ mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
   }
 });
 
-module.exports = googleApi
+module.exports = googleApi;

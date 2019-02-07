@@ -2,6 +2,7 @@
  INIT DEPS
 *******************************************************************************/
 const logger = require('../../loggers/log4js');
+const rabbit = require('../../helpers/rabbit.helper');
 
 /*******************************************************************************
  INIT MONGOOSE
@@ -41,6 +42,8 @@ exports.loading_status = function (req, res) {
 
 exports.first_run_status = function(req, res, next) {
   let userId = req.session.user_info.userId;
+  let access_token = req.session.token.access_token;
+
   let conditions = { userId: userId }
 
   History.findOne(conditions, (err, doc) => {
@@ -52,9 +55,17 @@ exports.first_run_status = function(req, res, next) {
       });
     };
     if (doc.passive.firstRun === true) {
+
+      rabbit.publish('firstRun.ex.1', {
+        userId: userId,
+        access_token: access_token,
+        firstRun: true
+      });
+      
       let update = {
         'active.loadingStatus': true
       }
+      
       let options = {
         multi: false,
         upsert: true

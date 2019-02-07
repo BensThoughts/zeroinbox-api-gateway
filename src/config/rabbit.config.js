@@ -13,16 +13,9 @@ exports.topology = function() {
     },
     exchanges:[
         // { name: "config-ex.1", type: "fanout", publishTimeout: 1000 },
-        { name: "threads.ex.1", type: "direct", alternate: "alternate-ex.2", persistent: true },
+        { name: "threads.ex.1", type: "direct", autoDelete: true , durable: false },
         // { name: "dead-letter-ex.2", type: "fanout" }
         ],
-    queues:[
-        { name:"threads.q.1", limit: 100, queueLimit: 1000 },
-        // { name:"config-q.2", subscribe: true, deadLetter: "dead-letter-ex.2" }
-        ],
-    bindings:[
-        { exchange: "threads.ex.1", target: "threads.q.1", keys: [ "threads" ] },
-        // { exchange: "config-ex.2", target: "config-q.2", keys: "test1" }
-      ]
-    }   
+    }
+
 }

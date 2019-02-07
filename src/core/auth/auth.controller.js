@@ -16,18 +16,11 @@ const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 const googleApi = require('../../index');
 
 const rabbit = require('rabbot');
-
+const publish = require('../../helpers/rabbit.helper');
 /*******************************************************************************
  * OAuth2 Init
 *******************************************************************************/
 exports.oauth2init = function(req, res) {
-
-  rabbit.publish('threads.ex.1', {
-    routingKey: 'threads',
-    contentType: 'application/json',
-    body: { text: 'test' }
-  },
-  'dev');
 
   const oauth2Client = new google.auth.OAuth2(
     clientSecretJson.web.client_id,

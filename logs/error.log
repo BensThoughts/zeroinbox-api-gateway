@@ -4,3 +4,4 @@
 [2019-02-06T00:50:38.299] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
 [2019-02-06T00:51:28.598] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
 [2019-02-06T01:26:49.664] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
+[2019-02-06T21:17:02.054] [ERROR] dev - [AMQP] connect ECONNREFUSED 172.18.0.2:5672
