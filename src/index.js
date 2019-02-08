@@ -17,8 +17,8 @@ const conf = new Config();
 const express = require('express');
 const googleApi = express();
 
-const PORT = conf.port;
-const HOST = conf.host;
+const PORT = conf.express.port;
+const HOST = conf.express.host;
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
@@ -155,17 +155,13 @@ googleApi.use('/', loadingRouter);
 *******************************************************************************/
 const mongoose = require('mongoose');
 const rabbit = require('./helpers/rabbit.helper');
-const MQConfig = require('./config/rabbit.topology');
-const mqConf = new MQConfig();
 
-mongoose.connect(conf.db, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(conf.db.url, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    logger.info('Mongo Connected: ' + conf.db);
-    rabbit.connect(mqConf, (err, ch) => {
-      logger.info('RabbitMQ Connected: ' + mqConf.url);
-      logger.debug('Publisher Connected');
+    logger.info('Mongo Connected: ' + conf.db.url);
+    rabbit.connect(conf.rabbit, (err, ch) => {
       googleApi.locals.db = db;
       googleApi.listen(PORT, HOST);
       logger.info(`Running on http://${HOST}:${PORT}`);

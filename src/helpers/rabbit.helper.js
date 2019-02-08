@@ -4,6 +4,10 @@ const logger = require('../loggers/log4js');
 var EventEmitter = require('events').EventEmitter;
 var utils = require('util');
 
+function parseOpts(options, ) {
+
+}
+
 class RabbitMQ {
 
     constructor() {
@@ -14,9 +18,11 @@ class RabbitMQ {
   
     connect(opts, cb) {
       amqp.connect(opts.url, (err, conn) => {
+        logger.info('Connected to RabbitMQ: ' + opts.url);
         this.rabbitConn = conn;
         conn.createConfirmChannel((err, ch) => {
           if (err) logger.error('Error creating channel: ' + err);
+          logger.info('Create Confirm Channel!');
           this.rabbitConfirmChannel = ch;
           this.parseOpts(opts, cb);
           cb(err, ch);
@@ -43,6 +49,7 @@ class RabbitMQ {
     }
 
     createConfirmChannel(cb) {
+      logger.info('Created Confirm Channel');
       this.rabbitConn.createConfirmChannel((err, ch) => {
         this.rabbitConfirmChanel = ch;
         cb(err, ch);
@@ -65,27 +72,32 @@ class RabbitMQ {
     }
 
     addExchange(exName, type) {
+      logger.trace('assertExchange: ' + exName);
       this.rabbitConfirmChannel.assertExchange(exName, type);
     }
 
     addQueue(qName) {
+      logger.trace('assertQueue: ' + qName);
       this.rabbitConfirmChannel.assertQueue(qName);
     }
 
     bindQueue(qName, exName) {
+      logger.trace('bindQueue: ' + qName + ' to ' + exName);
       this.rabbitConfirmChannel.bindQueue(qName, exName);
     }
   
     publish(exName, msg) {
       msg = JSON.stringify(msg);
-      this.rabbitConfirmChannel.publish(exName, '', new Buffer(msg));
+      this.rabbitConfirmChannel.publish(exName,'', new Buffer(msg));
     }
 
     consume(qName) {
+      logger.info('Listenting to queue: ' + qName)
       this.rabbitConfirmChannel.consume(qName, (msg) => {
-        msg = msg.content.toString();
-        msg = JSON.parse(msg);
-        this.emit('received', msg);
+        let content = msg.content.toString();
+        logger.debug(content);
+        content = JSON.parse(content);
+        this.emit('received', content);
         this.rabbitConfirmChannel.ack(msg);
       });
     }
@@ -100,28 +112,7 @@ exports.connect = function connect(opts, cb) {
   thisRabbit.connect(opts, cb);
 }
 
-exports.createConfirmChannel = function createConfirmChannel(cb) {
-  thisRabbit.createConfirmChannel(cb);
-}
-
-exports.createChannel = function createChannel(cb) {
-  thisRabbit.createChannel(cb);
-}
-
-exports.addExchange = function addExchange(exName, type) {
-  thisRabbit.addExchange(exName, type);
-}
-
-exports.addQueue = function addQueue(qName) {
-  thisRabbit.addQueue(qName);
-}
-
-exports.bindQueue = function bindQueue(qName, exName) {
-  thisRabbit.bindQueue(qName, exName);
-}
-
 exports.consume = function consume(qName, cb) {
-  logger.debug('Listenting to queue: ' + qName)
   thisRabbit.on('received', cb);
   thisRabbit.consume(qName);
 }

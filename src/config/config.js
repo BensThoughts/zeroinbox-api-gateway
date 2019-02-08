@@ -1,25 +1,27 @@
+const fs = require('fs');
+const path = require('path');
+const workdir = path.resolve(__dirname) + '/'
+const logger = require(workdir + '../loggers/log4js');
 
 module.exports = function() {
-    switch(process.env.NODE_ENV) {
+    let env = process.env.NODE_ENV;
+    switch(env) {
         case 'development':
-            return {
-                db: 'mongodb://mongo:27017/zero-inbox',
-                host: '0.0.0.0',
-                port: process.env.PORT || 3000
-            }
+            const devConfig = fs.readFileSync(workdir + './dev/dev.config.json');
+            logger.info('Dev Config: ' + devConfig.toString());
+            return JSON.parse(devConfig.toString());
+        
         case 'production':
-            return {
-                db: 'mongodb://mongo:27017/zero-inbox',
-                host: '0.0.0.0',
-                port: process.env.PORT || 3000
-            }
+            const prodConfig = fs.readFileSync(workdir + './prod/prod.config.json');
+            logger.info('Prod Config: ' + prodConfig.toString());
+            return JSON.parse(prodConfig.toString());
+            
         case 'test':
-            return {
-                db: 'mongodb://localhost/zero-inbox',
-                host: '0.0.0.0',
-                port: process.env.PORT || 3333
-            }
+            const testConfig = fs.readFileSync(workdir + './test/test.config.json');
+            logger.info('Test Config: ' + testConfig.toString());
+            return JSON.parse(testConfig.toString());
+
         default:
-            return { error: 'error' }
+            return Error('Error loading config files, ' + env + ' environment not found!');
     }
 }
