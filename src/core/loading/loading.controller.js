@@ -54,7 +54,7 @@ exports.first_run_status = function(req, res, next) {
         status_message: 'internal server error at path /firstRunStatus',
       });
     };
-    if (doc.passive.firstRun === true) {
+    // if (doc.passive.firstRun === true) {
 
       rabbit.publish('firstRun.ex.1', {
         userId: userId,
@@ -81,9 +81,17 @@ exports.first_run_status = function(req, res, next) {
             firstRun: true
           }
         });
-      })
+      });
 
-    }
+    // } else {
+    //  res.json({
+    //    status: 'success',
+    //    status_message: 'OK',
+    //    data: {
+    //      firstRun: false
+    //    }
+    //  })
+    // }
   });
 
 };
