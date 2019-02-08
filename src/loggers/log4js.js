@@ -41,7 +41,8 @@ if (nodeENV === 'production') {
 
 
             /** Dev Setting */
-            _stdout_debug: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
+            _stdout_debug: { type: 'logLevelFilter', appender: 'stdout', level: 'debug', maxLevel: 'info' },
+            _stdout_trace: { type: 'logLevelFilter', appender: 'stdout', level: 'trace', maxLevel: 'info' },
 
             /** Prod Setting */
             _stdout_prod: { type: 'logLevelFilter', appender: 'stdout', level: 'info', maxLevel: 'info' },
@@ -57,12 +58,13 @@ if (nodeENV === 'production') {
         categories: { 
             default: { appenders: ['_stdout_prod'], level: 'info' },
             dev: { appenders: ['_info', '_stdout_debug', '_error', '_stderr_debug', '_trace'], level: 'trace' },
+            dev_trace: { appenders: ['_info', '_stdout_trace', '_error', '_stderr_debug', '_trace'], level: 'trace' },
             prod: { appenders: ['_info', '_stdout_prod', '_error', '_stderr_prod', '_trace'], level: 'trace' }
         }
     });
 }
 
 // switch getLogger('prod') for prod
-const logger = log4js.getLogger('dev');
+const logger = log4js.getLogger('dev_trace');
 
 module.exports = logger;
