@@ -15,7 +15,6 @@
             "heartbeat": 60,
             "vhost": "/"
         },
-        "url": "amqp://rabbitmq",
         "exchanges" : [
             { 
                 "channel": "api.send.1", 

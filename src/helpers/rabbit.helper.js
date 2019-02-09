@@ -27,7 +27,7 @@ class RabbitMQ {
 
         this.rabbitConn = conn;
         this.parseOpts(opts, cb).then(() => {
-          logger.trace(this.channels.keys());
+          logger.trace('Chanels opened: ' + this.channels.size);
           if (cb) {
             cb(err, conn);
           }
@@ -135,11 +135,10 @@ class RabbitMQ {
     };
 
     consume(channel, qName, options) {
-      logger.trace(channel);
-      logger.trace(qName);
-      logger.trace(options);
+
      this.getChannel(channel, (err, ch) => {
-       logger.info('Listenting on channel ' + channel + ' to: ' + qName);
+       let optionsMsg = utils.inspect(options);
+      logger.info('Listenting on channel ' + channel + ' to: ' + qName + ' with options: ' + optionsMsg);
        ch.consume(qName, (msg) => {
          let message = new RabbitMsg(msg);
          message.deserialize();
