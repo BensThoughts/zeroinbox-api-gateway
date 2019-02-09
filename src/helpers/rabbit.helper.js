@@ -85,13 +85,6 @@ class RabbitMQ {
           });
         })
     };
-  
-    publish(channel, exName, msg, routingKey, options) {
-      msg = JSON.stringify(msg);
-      this.getChannel(channel, (err, ch) => {
-        ch.publish(exName, routingKey || '', new Buffer(msg));
-      })
-    };
 
     createConfirmChannelPromise(channelName) {
       return new Promise((resolve, reject) => {
@@ -124,6 +117,19 @@ class RabbitMQ {
       this.channels.set(channelName, ch);
     }
 
+    setChannelPrefetch(channel, prefetch) {
+      this.getChannel(channel, (err, ch) => {
+        ch.prefetch(prefetch);
+      });
+    }
+
+    publish(channel, exName, msg, routingKey, options) {
+      msg = JSON.stringify(msg);
+      this.getChannel(channel, (err, ch) => {
+        ch.publish(exName, routingKey || '', new Buffer(msg));
+      })
+    };
+
     consume(channel, qName, options) {
       logger.trace(channel);
       logger.trace(qName);
@@ -139,6 +145,7 @@ class RabbitMQ {
    };
 
     ack(channel, msg) {
+      msg = msg.getMsg();
       this.getChannel(channel, (err, ch) => {
         ch.ack(msg);
       })
@@ -182,8 +189,12 @@ exports.publish = function publish(channel, exName, msg, routingKey, options) {
   thisRabbit.publish(channel, exName, msg, routingKey, options);
 }
 
-exports.ack = function ack(msg) {
-  thisRabbit.ack(msg);
+exports.ack = function ack(channel, msg) {
+  thisRabbit.ack(channel, msg);
+}
+
+exports.setChannelPrefetch = function setChannelPrefetch(channel, prefetch) {
+  thisRabbit.setChannelPrefetch(channel, prefetch);
 }
 
 /* exports.addQueue = function addQueue(qName, options, cb) {
