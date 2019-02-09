@@ -19,8 +19,12 @@ class RabbitMQ {
     }
   
     connect(opts, cb) {
-      amqp.connect(opts.url, (err, conn) => {
-        logger.info('Connected to RabbitMQ: ' + opts.url);
+      amqp.connect(opts.connection, (err, conn) => {
+        let protocol = opts.connection.protocol;
+        let hostname = opts.connection.hostname;
+        let port = opts.connection.port;
+        logger.info('Connected to RabbitMQ: ' + protocol + '://' + hostname + ':' + port);
+
         this.rabbitConn = conn;
         this.parseOpts(opts, cb).then(() => {
           logger.trace(this.channels.keys());
