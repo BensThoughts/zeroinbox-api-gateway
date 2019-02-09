@@ -156,11 +156,11 @@ googleApi.use('/', loadingRouter);
 const mongoose = require('mongoose');
 const rabbit = require('./helpers/rabbit.helper');
 
-mongoose.connect(conf.db.url, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(conf.mongo.url, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    logger.info('Mongo Connected: ' + conf.db.url);
+    logger.info('Mongo Connected: ' + conf.mongo.url);
     rabbit.connect(conf.rabbit, (err, ch) => {
       googleApi.locals.db = db;
       googleApi.listen(PORT, HOST);

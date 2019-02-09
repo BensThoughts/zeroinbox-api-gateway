@@ -1,18 +1,33 @@
 {
-    "db": {
+    "mongo": {
         "url": "mongodb://mongo:27017/zero-inbox"
     },
 
     "rabbit": {
         "url": "amqp://rabbitmq",
         "exchanges" : [
-            { "name": "firstRun.ex.1", "type": "direct" }
+            { 
+                "channel": "api.send.1", 
+                "name": "firstRun.ex.1", 
+                "type": "direct", 
+                "options": {} 
+            }
         ],
         "queues": [
-            { "name": "firstRun.q.1" }
+            { 
+                "channel": "api.send.1", 
+                "name": "firstRun.q.1", 
+                "options": { "autoDelete": "true" } 
+            }
         ],
         "bindings": [
-            { "exchange": "firstRun.ex.1", "queue": "firstRun.q.1" }
+            { 
+                "channel": "api.send.1", 
+                "queue": "firstRun.q.1", 
+                "exchange": "firstRun.ex.1", 
+                "key": "", 
+                "options": {} 
+            }
         ]
     },
 

@@ -56,7 +56,7 @@ exports.first_run_status = function(req, res, next) {
     };
     // if (doc.passive.firstRun === true) {
 
-      rabbit.publish('firstRun.ex.1', {
+      rabbit.publish('api.send.1', 'firstRun.ex.1', {
         userId: userId,
         access_token: access_token,
         firstRun: true
