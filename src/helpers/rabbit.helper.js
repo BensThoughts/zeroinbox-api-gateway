@@ -39,13 +39,13 @@ class RabbitMQ {
 
     if (opts.exchanges) {
       await asyncForEach(opts.exchanges, async (exchange) => {
-        await this.addExchange(exchange.channel, exchange.name, exchange.type, exchange.options);
+        await this.assertExchange(exchange.channel, exchange.name, exchange.type, exchange.options);
       });
     } 
 
     if (opts.queues) {
       await asyncForEach(opts.queues, async (queue) => {
-        await this.addQueue(queue.channel, queue.name, queue.options);
+        await this.assertQueue(queue.channel, queue.name, queue.options);
       });
     } 
     
@@ -57,7 +57,7 @@ class RabbitMQ {
   
   }
 
-  async addExchange(channel, exName, type, options, cb) {
+  async assertExchange(channel, exName, type, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       ch.assertExchange(exName, type, options, (err, ex) => {
         let exInfo = utils.inspect(ex);
@@ -69,7 +69,7 @@ class RabbitMQ {
     });
   }
 
-  async addQueue(channel, qName, options, cb) {
+  async assertQueue(channel, qName, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       ch.assertQueue(qName, options, (err, q) => {
         let qInfo = utils.inspect(q);

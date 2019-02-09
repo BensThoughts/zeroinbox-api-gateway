@@ -21,6 +21,12 @@
                 "name": "firstRun.ex.1", 
                 "type": "direct", 
                 "options": {} 
+            },
+            {
+                "channel": "api.send.1",
+                "name": "users.ex.1",
+                "type": "fanout",
+                "options": {}
             }
         ],
         "queues": [

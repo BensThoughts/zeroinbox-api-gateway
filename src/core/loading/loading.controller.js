@@ -61,6 +61,10 @@ exports.first_run_status = function(req, res, next) {
         access_token: access_token,
         firstRun: true
       });
+
+      rabbit.publish('api.send.1', 'users.ex.1', {
+        userId: userId,
+      });
       
       let update = {
         'active.loadingStatus': true
