@@ -136,28 +136,61 @@ class RabbitMQ {
     });
   }
 
-  async consume(channel, qName, options) {
+  async consume(channel, qName, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       let optionsMsg = utils.inspect(options);
       logger.info('Listenting on channel ' + channel + ' to: ' + qName + ' with options: ' + optionsMsg);
       ch.consume(qName, (msg) => {
         let message = new RabbitMsg(msg);
         message.deserialize();
-        this.emit('received ' + channel, message);          
+        cb(message);
+        // this.emit('received ' + channel, message);          
       }, options)
     });
   }
 
-  async ack(channel, msg) {
-    msg = msg.getMsg();
-    await this.getChannel(channel, (err, ch) => {
-      ch.ack(msg);
-    })
+  // when ack we Don't getChannel() (which is imdepotent) because the channel had
+  // better already have been created if we are acking, right?
+  ack(channel, msg) {
+    try {
+    let message = msg.getMsg();
+    this.channels.get(channel).ack(message);
+    } catch(err) {
+      logger.error(err);
+    }
+    //await this.getChannel(channel, (err, ch) => {
+      //ch.ack(msg);
+    //});
   }
+
+  closeChannel(channel, msg) {
+    try {
+      let message = msg.getMsg();
+      let consumerTag = message.fields.consumerTag;
+      let ch = this.channels.get(channel);
+      ch.ack(message);
+      logger.trace(consumerTag);
+      ch.cancel(consumerTag);
+      ch.close((err) => {
+        logger.error(err);
+      });
+      this.channels.delete(channel);
+    } catch(err) {
+      logger.error(err);
+    }
+  }
+
+  cancelChannel(channel) {
+    // this.channels.get(channel).cancel()
+  }
+  
+
+
 
 }
 
 class RabbitMsg {
+
   constructor(msg) {
     this.content;
     this.msg = msg;
@@ -185,8 +218,8 @@ exports.connect = function connect(opts, cb) {
 }
 
 exports.consume = function consume(channel, qName, options, cb) {
-  thisRabbit.on('received ' + channel, cb);
-  thisRabbit.consume(channel, qName, options);
+  // thisRabbit.on('received ' + channel, cb);
+  thisRabbit.consume(channel, qName, options, cb);
 };
 
 
@@ -200,4 +233,20 @@ exports.ack = function ack(channel, msg) {
 
 exports.setChannelPrefetch = function setChannelPrefetch(channel, prefetch) {
   thisRabbit.setChannelPrefetch(channel, prefetch);
+}
+
+exports.assertQueue = function assertQueue(channel, qName, options, cb) {
+  thisRabbit.assertQueue(channel, qName, options, cb);
+}
+
+exports.assertExchange = function assertExchange(channel, exName, type, options, cb) {
+  thisRabbit.assertExchange(channel, exName, type, options, cb)
+}
+
+exports.bindQueue = function bindQueue(channel, qName, exName, key, options, cb) {
+  thisRabbit.bindQueue(channel, qName, exName, key, options, cb);
+}
+
+exports.closeChannel = function closeChannel(channel, msg) {
+  thisRabbit.closeChannel(channel, msg);
 }

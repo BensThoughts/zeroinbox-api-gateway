@@ -16,12 +16,6 @@
             "vhost": "/"
         },
         "exchanges" : [
-            { 
-                "channel": "api.send.1", 
-                "name": "firstRun.ex.1", 
-                "type": "direct", 
-                "options": {} 
-            },
             {
                 "channel": "api.send.1",
                 "name": "users.ex.1",
@@ -30,20 +24,8 @@
             }
         ],
         "queues": [
-            { 
-                "channel": "api.send.1", 
-                "name": "firstRun.q.1", 
-                "options": { "autoDelete": "true" } 
-            }
         ],
         "bindings": [
-            { 
-                "channel": "api.send.1", 
-                "queue": "firstRun.q.1", 
-                "exchange": "firstRun.ex.1", 
-                "key": "", 
-                "options": {} 
-            }
         ]
     },
 
