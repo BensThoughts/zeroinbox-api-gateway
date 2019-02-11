@@ -124,26 +124,15 @@ oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO**/
 const authRouter = require('./core/auth/auth.routes');
 const userRouter = require('./core/user/user.routes');
 const labelsRouter = require('./core/labels/labels.routes');
-const threadsRouter = require('./core/threads/threads.routes');
 const suggestionsRouter = require('./core/suggestions/suggestions.routes');
 const loadingRouter = require('./core/loading/loading.routes');
 
 
 googleApi.use('/', authRouter);
 
-/**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
-START...ALL REQUEST BASED API CALLS
-oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO**/
-
 googleApi.use('/', userRouter);
 
 googleApi.use('/', labelsRouter);
-
-googleApi.use('/', threadsRouter);
-
-/**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
-END...ALL REQUEST BASED API CALLS
-oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO**/
 
 googleApi.use('/', suggestionsRouter);
 

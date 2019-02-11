@@ -34,7 +34,7 @@ exports.oauth2init = function(req, res) {
   ];
 
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'online',
+    access_type: 'offline',
     scope: scopes,
     prompt: 'select_account',
   });
@@ -79,6 +79,8 @@ exports.oauth2callback = function(req, res) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
+
+      logger.debug(token);
 
       req.session.token = {
         access_token: token.access_token,

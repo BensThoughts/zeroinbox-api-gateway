@@ -5,3 +5,21 @@
 [2019-02-06T00:51:28.598] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
 [2019-02-06T01:26:49.664] [ERROR] dev - Error in rabbit.addConnection(): No endpoints could be reached
 [2019-02-06T21:17:02.054] [ERROR] dev - [AMQP] connect ECONNREFUSED 172.18.0.2:5672
+[2019-02-10T11:31:58.416] [ERROR] dev_trace - { Error: getaddrinfo EAI_AGAIN www.googleapis.com:443
+    at Object._errnoException (util.js:992:11)
+    at errnoException (dns.js:55:15)
+    at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:92:26)
+  code: 'EAI_AGAIN',
+  errno: 'EAI_AGAIN',
+  syscall: 'getaddrinfo',
+  hostname: 'www.googleapis.com',
+  host: 'www.googleapis.com',
+  port: 443 }
+[2019-02-11T03:29:12.928] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-11T03:29:12.929] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)

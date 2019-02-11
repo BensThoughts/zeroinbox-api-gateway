@@ -1,8 +1,8 @@
 const amqp = require('amqplib/callback_api');
 const logger = require('../loggers/log4js');
 
-var EventEmitter = require('events').EventEmitter;
 var utils = require('util');
+
 
 async function asyncForEach(array, callback) {
   for (let index = 0; index < array.length; index++) {
@@ -11,11 +11,16 @@ async function asyncForEach(array, callback) {
 }
 
 
+/**
+ * A RabbitMQ client interface to provide abstraction over the amqplib.
+ * 
+ */
 class RabbitMQ {
 
   constructor() {
     this.rabbitConn;
     this.channels = new Map();
+    this.consumerTags = new Map();
   }
   
   connect(opts, cb) {
@@ -26,16 +31,26 @@ class RabbitMQ {
       logger.info('Connected to RabbitMQ: ' + protocol + '://' + hostname + ':' + port);
 
       this.rabbitConn = conn;
-      this.parseOpts(opts, cb).then(() => {
-      logger.trace('Chanels opened: ' + this.channels.size);
+
+      this.setupTopology(opts).then(() => {
+        logger.trace('Chanels opened: ' + this.channels.size);
+      
         if (cb) {
           cb(err, conn);
         }
+
       }).catch((err) => logger.error(err));
+ 
     });
   };
 
-  async parseOpts(opts, cb) {
+  /**
+   * Sets up the RabbitMQ topology
+   * 
+   * @param {Options} opts - An Options Object to be parsed for topology info
+   *  
+   */
+  async setupTopology(opts) {
 
     if (opts.exchanges) {
       await asyncForEach(opts.exchanges, async (exchange) => {
@@ -60,10 +75,12 @@ class RabbitMQ {
   async assertExchange(channel, exName, type, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       ch.assertExchange(exName, type, options, (err, ex) => {
-        let exInfo = utils.inspect(ex);
-        logger.info('assertExchange on channel ' + channel + ': ' + exInfo);
         if (cb) {
-          cb(err, ex);
+          cb(err,ch)
+        } else {
+          if (err) return logger.error('Error in RabbitMQ.assertExchange(): ' + err);
+          let exInfo = utils.inspect(ex);
+          logger.info('assertExchange on channel ' + channel + ': ' + exInfo);
         }
       });
     });
@@ -72,10 +89,12 @@ class RabbitMQ {
   async assertQueue(channel, qName, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       ch.assertQueue(qName, options, (err, q) => {
-        let qInfo = utils.inspect(q);
-        logger.info('assertQueue on channel ' + channel + ': ' + qInfo);
         if (cb) {
           cb(err, q);
+        } else {
+          if (err) return logger.error('Error in RabbitMQ.assertQueue(): ' + err);
+          let qInfo = utils.inspect(q);
+          logger.info('assertQueue on channel ' + channel + ': ' + qInfo);
         }
       });
     });
@@ -84,14 +103,22 @@ class RabbitMQ {
   async bindQueue(channel, qName, exName, key, options, cb) {
     await this.getChannel(channel, (err, ch) => {
       ch.bindQueue(qName, exName, key, options, (err, ok) => {
-        logger.info('bind Queue ' + qName + ' to ' + exName + ' on channel ' + channel);
         if (cb) {
           cb(err, ok);
+        } else {
+          if (err) return logger.error('Error in RabbitMQ.bindQueue(): ' + err);
+          logger.info('bind Queue ' + qName + ' to ' + exName + ' on channel ' + channel);
         }
       });
     });
   }
 
+  /**
+   * returns a promise that creates a new confirmChannel on the current 
+   * connection and stores it in this.channels (a Map) for later retrieval
+   * 
+   * @param {string} channelName 
+   */
   createConfirmChannelPromise(channelName) {
     return new Promise((resolve, reject) => {
       this.rabbitConn.createConfirmChannel((err, ch) => {
@@ -99,7 +126,6 @@ class RabbitMQ {
           reject(err);
         }
         this.setChannel(channelName, ch);
-        logger.info('Created Confirm Channel: ' + channelName);
         resolve(ch);
       });
     });
@@ -109,10 +135,21 @@ class RabbitMQ {
     this.channels.set(channelName, ch);
   }
 
+  /**
+   * Attempts to retrieve a channel from this.channels and creates
+   * a new channel if one is not already stored. This is an async
+   * operation that will wait for the new channel to be created
+   * so that all other operations after that use the same channel
+   * name will find the chanel in the Map object.
+   * 
+   * @param {string} channelName - the name of the channel
+   * @param {function} cb - a callback function 
+   */
   async getChannel(channelName, cb) {
     let channel = this.channels.get(channelName);
     if (channel === undefined) {
       await this.createConfirmChannelPromise(channelName).then((ch) => {
+        logger.info('Created Confirm Channel: ' + channelName);
         cb(undefined, ch); 
       }).catch(err => {
         logger.error('Error creating channel: ' + err);
@@ -132,7 +169,7 @@ class RabbitMQ {
   async publish(channel, exName, msg, routingKey, options) {
     msg = JSON.stringify(msg);
     await this.getChannel(channel, (err, ch) => {
-      ch.publish(exName, routingKey || '', new Buffer(msg));
+      ch.publish(exName, routingKey || '', new Buffer(msg), options || {});
     });
   }
 
@@ -142,10 +179,15 @@ class RabbitMQ {
       logger.info('Listenting on channel ' + channel + ' to: ' + qName + ' with options: ' + optionsMsg);
       ch.consume(qName, (msg) => {
         let message = new RabbitMsg(msg);
-        message.deserialize();
         cb(message);
-        // this.emit('received ' + channel, message);          
-      }, options)
+      }, options, (err, ok) => {
+        if (err) {
+          logger.error(err)
+        } else {
+          let consumerTag = ok.consumerTag;
+          this.consumerTags.set(channel, consumerTag);
+        };
+      })
     });
   }
 
@@ -156,48 +198,43 @@ class RabbitMQ {
     let message = msg.getMsg();
     this.channels.get(channel).ack(message);
     } catch(err) {
-      logger.error(err);
+      logger.error('Error in RabbitMQ.ack()' + err);
     }
-    //await this.getChannel(channel, (err, ch) => {
-      //ch.ack(msg);
-    //});
   }
 
-  closeChannel(channel, msg) {
+  closeChannel(channel) {
     try {
-      let message = msg.getMsg();
-      let consumerTag = message.fields.consumerTag;
       let ch = this.channels.get(channel);
-      ch.ack(message);
-      logger.trace(consumerTag);
-      ch.cancel(consumerTag);
-      ch.close((err) => {
-        logger.error(err);
-      });
+      ch.close();
       this.channels.delete(channel);
     } catch(err) {
-      logger.error(err);
+      logger.error('Error in RabbitMQ.closeChannel()' + err);
     }
   }
 
   cancelChannel(channel) {
-    // this.channels.get(channel).cancel()
+    try {
+      let consumerTag = this.consumerTags.get(channel);
+      let ch = this.channels.get(channel);
+      ch.cancel(consumerTag);
+    } catch(err) {
+      logger.error('Error in RabbitMQ.cancelChannel()' + err);
+    }
   }
   
-
-
-
 }
 
+/**
+ * A RabbitMsg holds the original full message (metadata and all) and a 
+ * JSON deserialized version of it.  This way within the program someone 
+ * can get the contents in a JSON format with msg.content and can also 
+ * ack the message with rabbit.ack(channel, msg)
+ */
 class RabbitMsg {
 
   constructor(msg) {
-    this.content;
+    this.content = JSON.parse(msg.content.toString());
     this.msg = msg;
-  }
-
-  deserialize() {
-    this.content = JSON.parse(this.msg.content.toString());
   }
 
   getJsonMsg() {
@@ -209,8 +246,6 @@ class RabbitMsg {
   }
 }
 
-utils.inherits(RabbitMQ, EventEmitter);
-
 const thisRabbit = new RabbitMQ();
 
 exports.connect = function connect(opts, cb) {
@@ -218,7 +253,6 @@ exports.connect = function connect(opts, cb) {
 }
 
 exports.consume = function consume(channel, qName, options, cb) {
-  // thisRabbit.on('received ' + channel, cb);
   thisRabbit.consume(channel, qName, options, cb);
 };
 
@@ -247,6 +281,10 @@ exports.bindQueue = function bindQueue(channel, qName, exName, key, options, cb)
   thisRabbit.bindQueue(channel, qName, exName, key, options, cb);
 }
 
-exports.closeChannel = function closeChannel(channel, msg) {
-  thisRabbit.closeChannel(channel, msg);
+exports.closeChannel = function closeChannel(channel) {
+  thisRabbit.closeChannel(channel);
+}
+
+exports.cancelChannel = function cancelChannel(channel) {
+  thisRabbit.cancelChannel(channel);
 }

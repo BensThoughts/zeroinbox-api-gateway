@@ -13,6 +13,11 @@ const History = require('../models/history.model');
  Check Loading Status
 *******************************************************************************/
 
+/**
+ * The client can poll /loadingStatus to find out if the inbox is still loading.
+ * After this comes back false the client can safely hit /suggestions endpoint
+ * to gather all of the suggestions
+ */
 exports.loading_status = function (req, res) {
 
   let userId = req.session.user_info.userId;
@@ -40,7 +45,7 @@ exports.loading_status = function (req, res) {
 };
 
 
-exports.first_run_status = function(req, res, next) {
+exports.load_suggestions = function(req, res, next) {
   let userId = req.session.user_info.userId;
   let access_token = req.session.token.access_token;
 
@@ -54,52 +59,68 @@ exports.first_run_status = function(req, res, next) {
         status_message: 'internal server error at path /firstRunStatus',
       });
     };
-    // if (doc.passive.firstRun === true) {
-
-      rabbit.publish('api.send.1', 'users.ex.1', {
-        userId: userId,
-        access_token: access_token,
+    
+    // check to make sure active exists it won't exist on the users first run ever
+    // if loadingStatus is false we can safely send off the command message to start loading
+    // the inbox.  Else the inbox is already/still loading from a previous (recent) sign in.
+    logger.trace(doc);
+    logger.trace(doc.active);
+    if (doc.active === undefined) {
+      publishUser(userId, access_token);
+      updateLoadingStatus(userId, () => {
+      });
+    } else if (!doc.active.loadingStatus) {
+      publishUser(userId, access_token);
+      updateLoadingStatus(userId, () => {
+      });
+    }
+    logger.trace('PING');
+    res.json({
+      status: 'success',
+      status_message: 'OK',
+      data: {
         firstRun: true
-      });
-
-      //rabbit.publish('api.send.1', 'firstRun.ex.1', {
-      //  userId: userId,
-      //  access_token: access_token,
-      //  firstRun: true
-      //});
-
-
-      
-      let update = {
-        'active.loadingStatus': true
       }
-      
-      let options = {
-        multi: false,
-        upsert: true
-      }
-      History.updateOne(conditions, update, options, (err, doc) => {
-
-        // update active.loadingStatus then tell client to start polling loadingStatus
-        // by indicating firstRun
-        res.json({
-          status: 'success',
-          status_message: 'OK',
-          data: {
-            firstRun: true
-          }
-        });
-      });
-
-    // } else {
-    //  res.json({
-    //    status: 'success',
-    //    status_message: 'OK',
-    //    data: {
-    //      firstRun: false
-    //    }
-    //  })
-    // }
+    });   
   });
 
-};
+}
+
+function publishUser(userId, access_token) {
+  let sentAt = new Date().getTime();
+  logger.debug(sentAt);
+  rabbit.publish('api.send.1', 'users.ex.1', {
+    userId: userId,
+    access_token: access_token,
+    firstRun: true
+  }, '', { 
+    contentType: 'application/json', 
+    type: 'user',
+    appId: 'zi-api-gateway',
+    timestamp: sentAt,
+    encoding: 'string Buffer',
+
+    persistent: true,
+  });
+}
+
+function updateLoadingStatus(userId, cb) {
+  let conditions = { userId: userId };
+
+  let update = {
+    'active.loadingStatus': true
+  }
+
+  let options = {
+    multi: false,
+    upsert: true
+  }
+  History.updateOne(conditions, update, options, (err, doc) => {
+
+    // update active.loadingStatus then tell client to start polling loadingStatus
+    // by indicating firstRun
+    cb();
+
+  });
+
+}
