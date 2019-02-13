@@ -12,6 +12,7 @@ const crypto = require('crypto');
 
 const Profile = require('../models/profile.model');
 const History = require('../models/history.model');
+const Token = require('../models/token.model');
 
 const GOOGLE_USER_INFO_ENDPOINT =  'https://www.googleapis.com/oauth2/v2/userinfo';
 const GMAIL_PROFILE_ENDPOINT = 'https://www.googleapis.com/gmail/v1/users/me/profile';
@@ -51,52 +52,78 @@ exports.basic_profile = function (req, res) {
       emailAddress: '',
     }
 
-      const conditions = { userId: userId };
-      let options = {
-        multi: false,
-        upsert: true
-      };
-      History.findOne(conditions, (err, doc) => {
-        let historyUpdate = {
-        }
-        if (doc === null) { // doc === null indicates first run
-          historyUpdate = {
-            passive: {
-              firstRun: true,
-              firstRunDate: new Date(),
-              lastRunDate: new Date()
-            }
-          }
-        } else {
-          historyUpdate = {
-            "passive.lastRunDate": new Date()
-          }
-        }
-        History.updateOne(conditions, historyUpdate, options, (err, doc) => {
-          logger.debug('HISTORY UPDATED');
+    const conditions = { userId: userId };
+    let options = {
+      multi: false,
+      upsert: true
+    };
 
-          // need to make sure firstRun is in db and userId is in express-session
-          // before client proceeds
-          res.json({ basic_profile: basic_profile });
-        });
-      });
-      let profileUpdate = {
-        userId: userId,
-        basic: {
-          id: basic_profile.id,
-          name: basic_profile.name,
-          given_name: basic_profile.given_name,
-          family_name: basic_profile.family_name,
-          link: basic_profile.link,
-          picture: basic_profile.picture,
-          locale: basic_profile.locale
+    History.findOne(conditions, (err, doc) => {
+      let activeUpdate;
+      let passiveUpdate;
+      if (doc === null) { // doc === null indicates first run
+        passiveUpdate = {
+          "userId": userId,
+          "passive.firstRun": true,
+          "passive.firstRunDate": new Date(),
+          "passive.lastRunDate": new Date()
         }
-      };
+      } else {
+        passiveUpdate = {
+          "passive.lastRunDate": new Date(),
+        }
+      }
+      let refresh_token = req.session.token.refresh_token;
+      if (refresh_token) {
+        activeUpdate = {
+          "active.session.cookie": req.headers.cookie,
+          "active.session.access_token": req.session.token.access_token,
+          "active.session.expiry_date": req.session.token.expiry_date,
+          "active.session.scope": req.session.token.scope,
+          "active.session.token_type": req.session.token.token_type,
+          "active.session.refresh_token": req.session.token.refresh_token
+        }
+      } else {
+        activeUpdate = {
+          "active.session.cookie": req.headers.cookie,
+          "active.session.access_token": req.session.token.access_token,
+          "active.session.expiry_date": req.session.token.expiry_date,
+          "active.session.scope": req.session.token.scope,
+          "active.session.token_type": req.session.token.token_type,
+        }
+      }
+      let historyUpdate = {
+        ...activeUpdate,
+        ...passiveUpdate
+      }
+      logger.debug(historyUpdate);
+      History.updateOne(conditions, historyUpdate, options, (err, doc) => {
+        logger.debug('HISTORY UPDATED');
+
+        // need to make sure firstRun is in db and userId is in express-session
+        // before client proceeds
+        res.json({ basic_profile: basic_profile });
+      });
+    });
+
+
+    let profileUpdate = {
+      userId: userId,
+      basic: {
+        id: basic_profile.id,
+        name: basic_profile.name,
+        given_name: basic_profile.given_name,
+        family_name: basic_profile.family_name,
+        link: basic_profile.link,
+        picture: basic_profile.picture,
+        locale: basic_profile.locale
+      }
+    };
      
-      Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
-        if (err) return logger.error(err);
-        logger.debug('Basic profile updated!');
-      })
+    Profile.updateOne(conditions, profileUpdate, options, (err, doc) => {
+      if (err) return logger.error(err);
+      logger.debug('Basic profile updated!');
+    });
 
   }).catch((err) => {
     logger.error(err);

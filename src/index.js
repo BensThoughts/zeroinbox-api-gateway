@@ -143,7 +143,8 @@ googleApi.use('/', loadingRouter);
  MONGOOSE INIT
 *******************************************************************************/
 const mongoose = require('mongoose');
-const rabbit = require('./helpers/rabbit.helper');
+// const rabbit = require('./helpers/rabbit.helper');
+const rabbit = require('zero-rabbit');
 
 mongoose.connect(conf.mongo.url, {useNewUrlParser: true}, (err, db) => {;
   if (err) {

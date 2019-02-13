@@ -4,8 +4,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const sessionSchema = new Schema({
-  cookie: { type: String, required: false },
+const tokenSchema = new Schema({
+  userId: { type: String, required: false },
   access_token: { type: String, required: true },
   expiry_date: { type: String, required: true },
   token_type: { type: String, required: true },
@@ -13,19 +13,6 @@ const sessionSchema = new Schema({
   refresh_token: { type: String, required: false },
 });
 
-const historySchema = new Schema({
-  userId: String,
-  active: {
-    loadingStatus: Boolean,
-    session: sessionSchema
-  },
-  passive: {
-    firstRun: Boolean,
-    firstRunDate: Date,
-    lastRunDate: Date
-  },
-});
+const Token = mongoose.model('Tokens', tokenSchema);
 
-const History = mongoose.model('History', historySchema);
-
-module.exports = History;
+module.exports = Token;

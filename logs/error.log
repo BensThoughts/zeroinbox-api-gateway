@@ -23,3 +23,64 @@
     at runMicrotasksCallback (internal/process/next_tick.js:121:5)
     at _combinedTickCallback (internal/process/next_tick.js:131:7)
     at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-11T05:09:52.928] [ERROR] dev_trace - ReferenceError: Token is not defined
+    at getBasicProfile.then (/usr/src/app/src/core/user/user.controller.js:65:7)
+    at <anonymous>
+    at process._tickCallback (internal/process/next_tick.js:188:7)
+[2019-02-11T06:28:14.750] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-11T06:28:14.751] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-11T06:37:09.302] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-11T06:37:09.303] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T03:48:31.604] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-12T03:48:31.605] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T03:50:24.938] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-12T03:50:24.941] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T03:55:05.288] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-12T03:55:05.290] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T04:06:51.817] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-12T04:06:51.818] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T04:11:57.030] [ERROR] dev_trace - Error creating channel: TypeError: Cannot read property 'createConfirmChannel' of undefined
+[2019-02-12T04:11:57.032] [ERROR] dev_trace - TypeError: Cannot read property 'assertExchange' of undefined
+    at getChannel (/usr/src/app/src/helpers/rabbit.helper.js:77:10)
+    at createConfirmChannelPromise.then.catch.err (/usr/src/app/src/helpers/rabbit.helper.js:156:9)
+    at <anonymous>
+    at runMicrotasksCallback (internal/process/next_tick.js:121:5)
+    at _combinedTickCallback (internal/process/next_tick.js:131:7)
+    at process._tickCallback (internal/process/next_tick.js:180:9)
+[2019-02-12T20:20:46.966] [ERROR] dev_trace - Error in index.js at mongoose.connect(): MongoNetworkError: failed to connect to server [mongo:27017] on first connect [MongoNetworkError: connection 0 to mongo:27017 timed out]

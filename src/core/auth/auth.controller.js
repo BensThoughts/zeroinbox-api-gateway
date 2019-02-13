@@ -13,10 +13,6 @@ const gmail = google.gmail('v1');
 const client_secret = path.resolve(__dirname, '../../config/client_secret.json');
 const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 
-const googleApi = require('../../index');
-
-const rabbit = require('rabbot');
-const publish = require('../../helpers/rabbit.helper');
 /*******************************************************************************
  * OAuth2 Init
 *******************************************************************************/
@@ -80,13 +76,18 @@ exports.oauth2callback = function(req, res) {
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
 
-      logger.debug(token);
+      logger.debug('This Token: ' + token);
+
+      let refresh_token = token.refresh_token;
+
+      logger.debug('Refresh token: ' + refresh_token);
 
       req.session.token = {
         access_token: token.access_token,
         scope: token.scope,
         token_type: token.token_type,
-        expiry_date: token.expiry_date
+        expiry_date: token.expiry_date,
+        refresh_token: refresh_token
       };
 
       // res.cookie('c_tok', my_token);
