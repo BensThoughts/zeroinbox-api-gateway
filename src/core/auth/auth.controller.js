@@ -14,7 +14,8 @@ const {
   oauth_redirect_url,
   access_type,
   prompt,
-  app_redirect_url,
+  auth_success_redirect_url,
+  auth_failure_redirect_url,
   scope,
 } = require('../../config/auth.config');
 
@@ -70,13 +71,17 @@ exports.oauth2callback = function(req, res) {
 
   const code = req.query.code;
 
-  const oauth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    oauth_redirect_url
-  );
+  if (code === undefined || !code) {
+    res.redirect(auth_failure_redirect_url)
+  } else {
 
-  oauth2Client.getToken(code, (err, token) => {
+    const oauth2Client = new google.auth.OAuth2(
+      client_id,
+      client_secret,
+      oauth_redirect_url
+    );
+
+    oauth2Client.getToken(code, (err, token) => {
       if (err) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
@@ -97,7 +102,9 @@ exports.oauth2callback = function(req, res) {
       };
 
       // res.cookie('c_tok', my_token);
-      res.redirect(app_redirect_url);
-  });
+      res.redirect(auth_success_redirect_url);
+    });
+
+  }
 
 };

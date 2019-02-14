@@ -35,7 +35,7 @@ const whiteList = cors_whitelist;
 
 googleApi.use(
   cors({
-    origin: whiteList,
+    origin: 'http://127.0.0.1:4200',
     credentials: true
   }),
 );
