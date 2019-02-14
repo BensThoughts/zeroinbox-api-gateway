@@ -1,0 +1,14 @@
+{
+    "exchanges" : [
+        {
+            "channel": "api.send.1",
+            "name": "user.ids.ex.1",
+            "type": "fanout",
+            "options": {}
+        }
+    ],
+    "queues": [
+    ],
+    "bindings": [
+    ]
+}

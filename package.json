@@ -11,7 +11,7 @@
     "test-unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --exit",
     "test-integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
     "start": "cd ./src && node index.js",
-    "start:dev": "nodemon -r dotenv/config --inspect-brk=0.0.0.0 /usr/src/app/src/index.js dot_env_config_path=/usr/src/app",
+    "start:dev": "nodemon --inspect-brk=0.0.0.0 /usr/src/app/src/index.js",
     "dev": "cd ./src && node index.js"
   },
   "author": "",

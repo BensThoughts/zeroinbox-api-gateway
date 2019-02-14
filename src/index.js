@@ -10,14 +10,16 @@ const logger = require('./loggers/log4js');
 * EXPRESS INIT
 *******************************************************************************/
 const {
-  RABBIT_TOPOLOGY,
-  EXPRESS_PORT,
-  EXPRESS_HOST,
-  CORS_WHITELIST,
-  REDIS_HOST,
-  REDIS_PORT,
-  MONGO_URL
+  express_port,
+  express_host,
+  cors_whitelist,
+  session_redis_host,
+  session_redis_port,
+  session_secret,
+  mongo_uri
  } = require('./config/init.config');
+
+ const { rabbit_config } = require('./config/rabbit.config');
 
 const express = require('express');
 const googleApi = express();
@@ -29,7 +31,7 @@ const googleApi = express();
 *******************************************************************************/
 const cors = require('cors');
 
-const whiteList = CORS_WHITELIST.split(',');
+const whiteList = cors_whitelist;
 logger.trace(whiteList);
 
 googleApi.use(
@@ -58,14 +60,14 @@ const genuuid = require('uid-safe');
 googleApi.use(
   session({
     store: new RedisStore({
-     host: REDIS_HOST,
-     port: REDIS_PORT,
+     host: session_redis_host,
+     port: session_redis_port,
     }),
     resave: false,
     genid: function(req) {
       return genuuid.sync(18); // use UUIDs for session IDs
     },
-    secret: '81de324d-c5bc-42f5-9681-b1a4bd603b53',
+    secret: session_secret,
     cookie: {
       maxAge: 60 * 60 * 1000
     },
@@ -150,15 +152,15 @@ const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
 
-mongoose.connect(MONGO_URL, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    logger.info('Mongo Connected: ' + MONGO_URL);
-    rabbit.connect(RABBIT_TOPOLOGY.rabbit, (err, ch) => {
+    logger.info('Mongo Connected!');
+    rabbit.connect(rabbit_config, (err, ch) => {
       googleApi.locals.db = db;
-      googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
-      logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
+      googleApi.listen(express_port, express_host);
+      logger.info(`Running on http://${express_host}:${express_port}`);
     });
   }
 });

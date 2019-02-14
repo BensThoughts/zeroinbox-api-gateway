@@ -9,16 +9,14 @@ const {google} = require('googleapis');
 // const gmail = google.gmail('v1');
 
 const {
-G_OAUTH_CLIENT_ID,
-G_OAUTH_CLIENT_SECRET,
-G_OAUTH_REDIRECT_URL,
-G_OAUTH_ACCESS_TYPE,
-G_OAUTH_PROMPT,
-ZERO_INBOX_REDIRECT_URL,
-G_OAUTH_SCOPES
+  client_id,
+  client_secret,
+  oauth_redirect_url,
+  access_type,
+  prompt,
+  app_redirect_url,
+  scope,
 } = require('../../config/auth.config');
-
-const SCOPES = G_OAUTH_SCOPES.split(',');
 
 
 // seems that when you use readFileSync it takes whatever dir node was started
@@ -32,15 +30,15 @@ const SCOPES = G_OAUTH_SCOPES.split(',');
 exports.oauth2init = function(req, res) {
 
   const oauth2Client = new google.auth.OAuth2(
-    G_OAUTH_CLIENT_ID,
-    G_OAUTH_CLIENT_SECRET,
-    G_OAUTH_REDIRECT_URL
+    client_id,
+    client_secret,
+    oauth_redirect_url
   );
 
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: G_OAUTH_ACCESS_TYPE,
-    scope: SCOPES,
-    prompt: G_OAUTH_PROMPT,
+    access_type: access_type,
+    scope: scope,
+    prompt: prompt,
   });
 
   // Reset the session after init because leaving the site to log in
@@ -73,9 +71,9 @@ exports.oauth2callback = function(req, res) {
   const code = req.query.code;
 
   const oauth2Client = new google.auth.OAuth2(
-    G_OAUTH_CLIENT_ID,
-    G_OAUTH_CLIENT_SECRET,
-    G_OAUTH_REDIRECT_URL
+    client_id,
+    client_secret,
+    oauth_redirect_url
   );
 
   oauth2Client.getToken(code, (err, token) => {
@@ -99,7 +97,7 @@ exports.oauth2callback = function(req, res) {
       };
 
       // res.cookie('c_tok', my_token);
-      res.redirect(ZERO_INBOX_REDIRECT_URL);
+      res.redirect(app_redirect_url);
   });
 
 };
