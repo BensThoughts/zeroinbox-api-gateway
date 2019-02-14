@@ -32,11 +32,10 @@ const googleApi = express();
 const cors = require('cors');
 
 const whiteList = cors_whitelist;
-logger.trace(whiteList);
 
 googleApi.use(
   cors({
-    origin: true,
+    origin: whiteList,
     credentials: true
   }),
 );

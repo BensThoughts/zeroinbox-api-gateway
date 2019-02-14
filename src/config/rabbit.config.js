@@ -1,10 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const workdir = path.resolve(__dirname) + '/'
-const rabbitTop = fs.readFileSync(workdir + './rabbit.config.json');
+const rabbitTop = fs.readFileSync(workdir + './rabbit.topology.json');
 const rabbitTopology = JSON.parse(rabbitTop.toString());
 const logger = require('../loggers/log4js');
-logger.info(rabbitTopology);
+logger.info('Rabbit Topology: ' + rabbitTop.toString());
 
 
 const RABBIT_HOSTNAME = process.env.RABBIT_HOSTNAME;
