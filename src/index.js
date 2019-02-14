@@ -1,7 +1,5 @@
 'use strict';
 
-const chalk = require('chalk');
-
 /*******************************************************************************
 * LOGGING INIT (LOG4JS) App (console/file) logging
 *******************************************************************************/
@@ -11,23 +9,28 @@ const logger = require('./loggers/log4js');
 /*******************************************************************************
 * EXPRESS INIT
 *******************************************************************************/
-const Config = require('./config/config');
-const conf = new Config();
+const {
+  RABBIT_TOPOLOGY,
+  EXPRESS_PORT,
+  EXPRESS_HOST,
+  CORS_WHITELIST,
+  REDIS_HOST,
+  REDIS_PORT,
+  MONGO_URL
+ } = require('./config/init.config');
 
 const express = require('express');
 const googleApi = express();
 
-const PORT = conf.express.port;
-const HOST = conf.express.host;
+
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
 *******************************************************************************/
 const cors = require('cors');
-const whiteList = [
-  'http://127.0.0.1:80',
-  'http://127.0.0.1:4200'
-];
+
+const whiteList = CORS_WHITELIST.split(',');
+logger.trace(whiteList);
 
 googleApi.use(
   cors({
@@ -48,15 +51,15 @@ googleApi.use(express.urlencoded({ extended: false, limit: '5mb' }));
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const genuuid = require('uid-safe');
-const redis = require('redis');
-const redis_client = redis.createClient(process.env.REDIS_URL);
+// const redis = require('redis');
+//const redis_client = redis.createClient(process.env.REDIS_URL);
+
 
 googleApi.use(
   session({
     store: new RedisStore({
-     host: '127.0.0.1',
-     port: 6379,
-     client: redis_client
+     host: REDIS_HOST,
+     port: REDIS_PORT,
     }),
     resave: false,
     genid: function(req) {
@@ -146,15 +149,16 @@ const mongoose = require('mongoose');
 // const rabbit = require('./helpers/rabbit.helper');
 const rabbit = require('zero-rabbit');
 
-mongoose.connect(conf.mongo.url, {useNewUrlParser: true}, (err, db) => {;
+
+mongoose.connect(MONGO_URL, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    logger.info('Mongo Connected: ' + conf.mongo.url);
-    rabbit.connect(conf.rabbit, (err, ch) => {
+    logger.info('Mongo Connected: ' + MONGO_URL);
+    rabbit.connect(RABBIT_TOPOLOGY.rabbit, (err, ch) => {
       googleApi.locals.db = db;
-      googleApi.listen(PORT, HOST);
-      logger.info(`Running on http://${HOST}:${PORT}`);
+      googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+      logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
     });
   }
 });

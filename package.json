@@ -11,7 +11,7 @@
     "test-unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --exit",
     "test-integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
     "start": "cd ./src && node index.js",
-    "start:dev": "cd ./src && nodemon --inspect-brk=0.0.0.0 index.js",
+    "start:dev": "nodemon -r dotenv/config --inspect-brk=0.0.0.0 /usr/src/app/src/index.js dot_env_config_path=/usr/src/app",
     "dev": "cd ./src && node index.js"
   },
   "author": "",
@@ -24,6 +24,7 @@
     "connect-redis": "^3.4.0",
     "cookie-parser": "^1.4.3",
     "cors": "^2.8.5",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "express-request-id": "^1.4.1",
     "express-session": "^1.15.6",

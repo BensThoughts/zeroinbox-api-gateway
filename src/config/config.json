@@ -1,8 +1,4 @@
 {
-    "mongo": {
-        "url": "mongodb://mongo:27017/zero-inbox"
-    },
-
     "rabbit": {
         "connection": {
             "protocol": "amqp",
@@ -27,10 +23,5 @@
         ],
         "bindings": [
         ]
-    },
-
-    "express": {
-        "host": "0.0.0.0",
-        "port": "3000" 
     }
 }

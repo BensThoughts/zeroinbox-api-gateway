@@ -6,12 +6,25 @@ const logger = require('../../loggers/log4js');
 const fs = require('fs');
 const path = require('path');
 const {google} = require('googleapis');
-const gmail = google.gmail('v1');
+// const gmail = google.gmail('v1');
+
+const {
+G_OAUTH_CLIENT_ID,
+G_OAUTH_CLIENT_SECRET,
+G_OAUTH_REDIRECT_URL,
+G_OAUTH_ACCESS_TYPE,
+G_OAUTH_PROMPT,
+ZERO_INBOX_REDIRECT_URL,
+G_OAUTH_SCOPES
+} = require('../../config/auth.config');
+
+const SCOPES = G_OAUTH_SCOPES.split(',');
+
 
 // seems that when you use readFileSync it takes whatever dir node was started
 // in as the base dir
-const client_secret = path.resolve(__dirname, '../../config/client_secret.json');
-const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
+// const client_secret = path.resolve(__dirname, '../../config/client_secret.json');
+// const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 
 /*******************************************************************************
  * OAuth2 Init
@@ -19,20 +32,15 @@ const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 exports.oauth2init = function(req, res) {
 
   const oauth2Client = new google.auth.OAuth2(
-    clientSecretJson.web.client_id,
-    clientSecretJson.web.client_secret,
-    'http://127.0.0.1:3000/oauth2callback'
+    G_OAUTH_CLIENT_ID,
+    G_OAUTH_CLIENT_SECRET,
+    G_OAUTH_REDIRECT_URL
   );
 
-  const scopes = [
-    'https://www.googleapis.com/auth/gmail.readonly',
-    'https://www.googleapis.com/auth/userinfo.profile'
-  ];
-
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: scopes,
-    prompt: 'select_account',
+    access_type: G_OAUTH_ACCESS_TYPE,
+    scope: SCOPES,
+    prompt: G_OAUTH_PROMPT,
   });
 
   // Reset the session after init because leaving the site to log in
@@ -65,9 +73,9 @@ exports.oauth2callback = function(req, res) {
   const code = req.query.code;
 
   const oauth2Client = new google.auth.OAuth2(
-    clientSecretJson.web.client_id,
-    clientSecretJson.web.client_secret,
-    'http://127.0.0.1:3000/oauth2callback'
+    G_OAUTH_CLIENT_ID,
+    G_OAUTH_CLIENT_SECRET,
+    G_OAUTH_REDIRECT_URL
   );
 
   oauth2Client.getToken(code, (err, token) => {
@@ -91,7 +99,7 @@ exports.oauth2callback = function(req, res) {
       };
 
       // res.cookie('c_tok', my_token);
-      res.redirect('http://127.0.0.1:4200/loading');
+      res.redirect(ZERO_INBOX_REDIRECT_URL);
   });
 
 };
