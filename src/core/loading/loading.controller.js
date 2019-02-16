@@ -89,11 +89,11 @@ exports.load_suggestions = function(req, res, next) {
 function publishUser(userId, access_token) {
   let sentAt = new Date().getTime();
   logger.debug(sentAt);
-  rabbit.publish('api.send.1', 'user.ids.ex.1', {
+  rabbit.publish('api.send.1', 'user.ids.ex.1', '', {
     userId: userId,
     access_token: access_token,
     firstRun: true
-  }, '', { 
+  }, { 
     contentType: 'application/json', 
     type: 'user',
     appId: 'zi-api-gateway',
