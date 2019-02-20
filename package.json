@@ -1,6 +1,6 @@
 {
   "name": "zero-inbox-api-gateway",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "description": "Backend for zero inbox. The Api Gateway",
   "main": "/src/index.js",
   "directories": {
@@ -30,19 +30,19 @@
     "express-session": "^1.15.6",
     "googleapis": "^36.0.0",
     "log4js": "^4.0.2",
-    "mongoose": "^5.4.13",
+    "mongoose": "^5.4.14",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.10",
     "request": "^2.88.0",
     "uid-safe": "^2.1.5",
-    "zero-rabbit": "^1.0.8"
+    "zero-rabbit": "^1.0.9"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^4.12.0",
     "eslint-plugin-promise": "^3.6.0",
     "mocha": "^5.2.0",
-    "sinon": "^7.2.3",
+    "sinon": "^7.2.4",
     "supertest": "^3.4.2"
   },
   "private": true

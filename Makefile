@@ -1,9 +1,11 @@
-APP_NAME=zeroinbox_api
-TAG=${shell ./git-version.sh}
-IMG=${NAME}:${TAG}
-LATEST=${NAME}:latest
-VERSION=${shell ./sem-version.sh}
-DOCKER_REPO=gcr.io/zero-inbox-organizer
+deploy_env ?= deploy.env
+include $(deploy_env)
+export $(shell sed 's/=.*//' $(deploy_env))
+
+SEM_VERSION=${shell ./sem-version.sh}
+GIT_VERSION=${shell ./git-version.sh}
+
+IMG_NAME=${DOCKER_REPO}/${APP_NAME}
 
 
 # HELP
@@ -19,11 +21,11 @@ help: ## This help.
 # DOCKER TASKS
 # Build the container
 build: ## Build the container
-	@docker build -t ${DOCKER_REPO}/$(APP_NAME):${TAG} .
-	@docker tag ${DOCKER_REPO}/$(APP_NAME):${TAG} ${DOCKER_REPO}/${APP_NAME}:latest
-	@docker tag ${DOCKER_REPO}/$(APP_NAME):${TAG} ${DOCKER_REPO}/${APP_NAME}:${VERSION}
+	@docker build -t ${IMG_NAME}:${GIT_VERSION} .
+	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:latest
+	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
 
 push: ## Push to gcr.io/zero-inbox-organizer
-	@docker push ${DOCKER_REPO}/${APP_NAME}:${TAG}
-	@docker push ${DOCKER_REPO}/${APP_NAME}:${VERSION}
-	@docker push ${DOCKER_REPO}/${APP_NAME}:latest
+	@docker push ${IMG_NAME}:${GIT_VERSION}
+	@docker push ${IMG_NAME}:latest
+	@docker push ${IMG_NAME}:${SEM_VERSION}
