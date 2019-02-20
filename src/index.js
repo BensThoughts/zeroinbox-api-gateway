@@ -31,11 +31,12 @@ const googleApi = express();
 *******************************************************************************/
 const cors = require('cors');
 
-const whiteList = cors_whitelist;
+const whitelist = cors_whitelist;
+logger.debug('Cors Whitelist: ' + whitelist);
 
 googleApi.use(
   cors({
-    origin: 'http://127.0.0.1:4200',
+    origin: whitelist,
     credentials: true
   }),
 );
