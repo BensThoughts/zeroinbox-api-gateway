@@ -26,10 +26,16 @@ build: COMPARE_ID=$(shell docker images -f reference=${IMG_NAME}:${PREV_GIT_VERS
 build:
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
+
+	ifdef (${COMPARE_ID})
+	ifdef (${DEL_VER})
 	ifeq (${COMPARE_ID}, ${DEL_VER})
 	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
-	else
-	ifdef (${DEL_VER})
+	endif
+	endif
+	endif
+
+	ifndef (${COMPARE_ID})
 	docker image rm ${IMG_NAME}:${DEL_VER}
 	endif
 
