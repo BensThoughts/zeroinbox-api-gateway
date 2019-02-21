@@ -53,9 +53,6 @@ googleApi.use(express.urlencoded({ extended: false, limit: '5mb' }));
 const session = require('express-session');
 const RedisStore = require('connect-redis')(session);
 const genuuid = require('uid-safe');
-// const redis = require('redis');
-//const redis_client = redis.createClient(process.env.REDIS_URL);
-
 
 googleApi.use(
   session({
