@@ -25,7 +25,7 @@ build: ## Build the container
 	@docker build -t ${IMG_NAME}:latest .
 	@docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
-	@docker rm ${IMG_NAME}:${PREV_GIT_VERSION}
+	@docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
 
 push: ## Push to gcr.io/zero-inbox-organizer
 	@docker push ${IMG_NAME}:${GIT_VERSION}
