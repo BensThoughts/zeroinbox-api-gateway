@@ -21,8 +21,8 @@ help: ## This help.
 # DOCKER TASKS
 # Build the container
 build: ## Build the container
-	@docker build -t ${IMG_NAME}:${GIT_VERSION} .
-	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:latest
+	@docker build -t ${IMG_NAME}:latest .
+	@docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 	# @docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
 
 push: ## Push to gcr.io/zero-inbox-organizer
