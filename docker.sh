@@ -105,13 +105,13 @@ if [ "$pushMode" != "-" ]; then
 			 printf "New sem version: $NEW_SEM_VER\n"
 			 NEW_GIT_VER=$(git rev-parse @)
 			 PREV_GIT_VER=$(git rev-parse @~)
-			 docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VERSION
-			 docker image rm $IMG_NAME:$PREV_GIT_VERSION
-			 docker push $IMG_NAME:$NEW_GIT_VERSION
+			 docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VER
+			 docker image rm $IMG_NAME:$PREV_GIT_VER
+			 docker push $IMG_NAME:$NEW_GIT_VER
 			 docker push $IMG_NAME:latest
-			 docker tag $IMG_NAME:$NEW_GIT_VERSION $IMG_NAME:$NEW_SEM_VERSION
-			 docker push $IMG_NAME:$NEW_SEM_VERSION
-			 docker image rm $IMG_NAME:$NEW_SEM_VERSION
+			 docker tag $IMG_NAME:$NEW_GIT_VER $IMG_NAME:$NEW_SEM_VER
+			 docker push $IMG_NAME:$NEW_SEM_VER
+			 docker image rm $IMG_NAME:$NEW_SEM_VER
             ;;
         minor)
             echo minor
