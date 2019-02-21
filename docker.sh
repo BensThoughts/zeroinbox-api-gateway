@@ -114,9 +114,34 @@ if [ "$pushMode" != "-" ]; then
 			 docker image rm $IMG_NAME:$NEW_SEM_VER
             ;;
         minor)
-            echo minor
+             PREV_SEM_VER="v$(jq -rM '.version' package.json)"
+			 NEW_SEM_VER=$(npm version minor)
+			 printf "Previous sem version: $PREV_SEM_VER\n"
+			 printf "New sem version: $NEW_SEM_VER\n"
+			 NEW_GIT_VER=$(git rev-parse @)
+			 PREV_GIT_VER=$(git rev-parse @~)
+			 docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VER
+			 docker image rm $IMG_NAME:$PREV_GIT_VER
+			 docker push $IMG_NAME:$NEW_GIT_VER
+			 docker push $IMG_NAME:latest
+			 docker tag $IMG_NAME:$NEW_GIT_VER $IMG_NAME:$NEW_SEM_VER
+			 docker push $IMG_NAME:$NEW_SEM_VER
+			 docker image rm $IMG_NAME:$NEW_SEM_VER
             ;;
         major)
+             PREV_SEM_VER="v$(jq -rM '.version' package.json)"
+			 NEW_SEM_VER=$(npm version major)
+			 printf "Previous sem version: $PREV_SEM_VER\n"
+			 printf "New sem version: $NEW_SEM_VER\n"
+			 NEW_GIT_VER=$(git rev-parse @)
+			 PREV_GIT_VER=$(git rev-parse @~)
+			 docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VER
+			 docker image rm $IMG_NAME:$PREV_GIT_VER
+			 docker push $IMG_NAME:$NEW_GIT_VER
+			 docker push $IMG_NAME:latest
+			 docker tag $IMG_NAME:$NEW_GIT_VER $IMG_NAME:$NEW_SEM_VER
+			 docker push $IMG_NAME:$NEW_SEM_VER
+			 docker image rm $IMG_NAME:$NEW_SEM_VER
             echo major
             ;;
         *)
