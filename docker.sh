@@ -8,14 +8,14 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     exit 1
 fi
 
-usage="$(basename "$0") [-h] [-b] [-p] [-m] -- program to build and push docker container images"
+usage="$(basename "$0") [ -h | --help ] [ -b | --build ] [ -p | --push ] -- program to build and push docker container images"
 echo "$usage"
 
 help="
 where:
 	-h, --help:  help
 	-b, --build: build container
-	-p, --push:  push a new patch version"
+	-p, --push:  push a new version (patch, minor, or major)"
 
 
 OPTIONS=hbp:v
