@@ -82,15 +82,19 @@ if [ "$b" = "y" ]; then
 	GIT_VER=$(git rev-parse @)
 	PREV_GIT_VER=$(git rev-parse @~)
 	PREV_ID=$(docker images -f reference=$IMG_NAME:latest --format "{{.ID}}")
-	PREV_GIT_TAG=$(docker images -f reference=$IMG_NAME:$PREV_GIT_VER --format "{{.Tag}}")
 	printf "Image: $IMG_NAME:$GIT_VER\n"
 	docker build -t $IMG_NAME:latest .
 	docker tag $IMG_NAME:latest $IMG_NAME:$GIT_VER
+	PREV_GIT_TAGS=$(docker images -f reference=$IMG_NAME -f before=$IMG_NAME:$GIT_VER --format "{{.Tag}}")
 	CUR_ID=$(docker images -f reference=$IMG_NAME:latest --format "{{.ID}}")
+	# If the ID changes the image has changed so we remove the old image
 	if [ "$PREV_ID" != "$CUR_ID" ]; then
 		docker image rm $PREV_ID
-	elif [ ! -z "$PREV_GIT_TAG" ]; then
-		docker image rm "$IMG_NAME:$PREV_GIT_TAG"
+	# If the image hasn't changed but new commits have been made we remove
+	# the older commit tags and keep the image
+	elif [ ! -z "$PREV_GIT_TAGS" ]; then
+		printf "$PREV_GIT_TAGS"
+		# docker image rm "$IMG_NAME:$PREV_GIT_TAGS"
 	fi
 fi
 
