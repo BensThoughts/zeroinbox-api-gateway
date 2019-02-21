@@ -3,7 +3,8 @@ include $(deploy_env)
 export $(shell sed 's/=.*//' $(deploy_env))
 
 SEM_VERSION=${shell ./sem-version.sh}
-GIT_VERSION=${shell ./git-version.sh}
+GIT_VERSION=${shell git rev-parse @}
+PREV_GIT_VERSION=${shell git rev-parse @~}
 
 IMG_NAME=${DOCKER_REPO}/${APP_NAME}
 
@@ -23,11 +24,10 @@ help: ## This help.
 build: ## Build the container
 	@docker build -t ${IMG_NAME}:latest .
 	@docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
-	# @docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
+	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
+	@docker rm ${IMG_NAME}:${PREV_GIT_VERSION}
 
 push: ## Push to gcr.io/zero-inbox-organizer
-	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
 	@docker push ${IMG_NAME}:${GIT_VERSION}
 	@docker push ${IMG_NAME}:latest
 	@docker push ${IMG_NAME}:${SEM_VERSION}
-	@docker rm ${IMG_NAME}:${SEM_VERSION}
