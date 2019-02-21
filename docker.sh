@@ -30,15 +30,14 @@ while getopts ':hbp:' option; do
 			 CUR_ID=$(docker images -f reference=$IMG_NAME:latest --format "{{.ID}}")
 			 printf "Previoud ID: $PREV_ID\n"
 			 printf "Current ID: $CUR_ID\n"
-			 printf "Previous Git Tag: $PREV_GIT_TAG"
+			 printf "Previous Git Tag: $PREV_GIT_TAG\n"
 			 if [ "$PREV_ID" != "$CUR_ID" ]; then
 					echo New Image found
 					docker image rm $PREV_ID
-			 else if [ ! -z "$PREV_GIT_TAG"]; then
+			 elif [ ! -z "$PREV_GIT_TAG" ]; then
 			 		echo Previous git version found
 					echo "$PREV_GIT_TAG"
-					docker image rm $IMG_NAME:$PREV_GIT_VERSION
-			 fi
+					docker image rm "$IMG_NAME:$PREV_GIT_TAG"
 			 fi
 			 exit
        ;;
