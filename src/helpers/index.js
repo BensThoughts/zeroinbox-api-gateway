@@ -8,7 +8,7 @@ async function asyncForEach(array, callback) {
     await callback(array[index], index, array);
   }
 }
-// te
+
 /**
  * A RabbitMQ client interface to provide abstraction over the amqplib.
  * 
