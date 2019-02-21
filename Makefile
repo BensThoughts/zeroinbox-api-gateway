@@ -27,12 +27,15 @@ build:
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 
-ifdef $(COMPARE_ID)
+	@echo $(COMPARE_ID)
+ifdef COMPARE_ID
 	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
 endif
 
-ifndef $(COMPARE_ID)
-ifdef $(DEL_VER)
+	@echo $(COMPARE_ID)
+	@echo $(DEL_VER)
+ifndef COMPARE_ID
+ifdef DEL_VER
 	docker image rm ${IMG_NAME}:${DEL_VER}
 endif
 endif
