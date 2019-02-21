@@ -12,7 +12,6 @@ const crypto = require('crypto');
 
 const Profile = require('../models/profile.model');
 const History = require('../models/history.model');
-const Token = require('../models/token.model');
 
 const GOOGLE_USER_INFO_ENDPOINT =  'https://www.googleapis.com/oauth2/v2/userinfo';
 const GMAIL_PROFILE_ENDPOINT = 'https://www.googleapis.com/gmail/v1/users/me/profile';
