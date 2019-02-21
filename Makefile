@@ -20,9 +20,9 @@ build: ## Build the container
 build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:latest --format "{{.ID}}")
 build: GIT_VERSION=${shell git rev-parse @}
 build:
-	@docker build -t ${IMG_NAME}:latest .
-	@docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
-	@docker image rm ${DEL_VER}
+	docker build -t ${IMG_NAME}:latest .
+	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
+	docker image rm ${DEL_VER}
 
 
 push-patch: ## Push new patch version to gcr.io/zero-inbox-organizer
@@ -31,17 +31,17 @@ push-patch: PREV_GIT_VERSION=${shell git rev-parse @~}
 push-patch: GIT_VERSION=${shell git rev-parse @}
 push-patch: SEM_VERSION=${shell jq -rM '.version' package.json}
 push-patch:
-	@echo ${GIT_VERSION}
-	@echo ${PREV_GIT_VERSION}
+	@echo 'Previous git version: ${PREV_GIT_VERSION}'
+	@echo 'Current git version: ${GIT_VERSION}'
 	@echo ${PATCH_SEM_VER}
 	@echo ${SEM_VERSION}
-	@docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
-	@docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
-	@docker push ${IMG_NAME}:${GIT_VERSION}
-	@docker push ${IMG_NAME}:latest
-	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:v${SEM_VERSION}
-	@docker push ${IMG_NAME}:v${SEM_VERSION}
-	@docker image rm ${IMG_NAME}:v${SEM_VERSION}
+	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
+	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
+	docker push ${IMG_NAME}:${GIT_VERSION}
+	docker push ${IMG_NAME}:latest
+	docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:v${SEM_VERSION}
+	docker push ${IMG_NAME}:v${SEM_VERSION}
+	docker image rm ${IMG_NAME}:v${SEM_VERSION}
 
 push-minor: ## Push new minor version to gcr.io/zero-inbox-organizer
 push-minor: PATCH_SEM_VER=$(shell npm version minor)
