@@ -20,11 +20,13 @@ help: ## This help.
 # Build the container
 build: ## Build the container
 build: GIT_VERSION=${shell git rev-parse @}
-build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:${GIT_VERSION} --format "{{.Tag}}")
+build: PREV_GIT_VERSION=${shell git rev-parse @~}
+build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:latest --format "{{.ID}}")
 build:
-	docker image rm ${IMG_NAME}:${DEL_VER}
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
+	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
+	docker image rm ${IMG_NAME}:${DEL_VER}
 
 
 push-patch: ## Push new patch version to gcr.io/zero-inbox-organizer
@@ -43,6 +45,7 @@ push-patch:
 	docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:v${SEM_VERSION}
 	docker push ${IMG_NAME}:v${SEM_VERSION}
 	docker image rm ${IMG_NAME}:v${SEM_VERSION}
+
 
 push-minor: ## Push new minor version to gcr.io/zero-inbox-organizer
 push-minor: PATCH_SEM_VER=$(shell npm version minor)
