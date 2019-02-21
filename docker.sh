@@ -19,8 +19,8 @@ where:
 	-p, --push:  push a new version (patch, minor, or major)"
 
 
-OPTIONS=hbp:v
-LONGOPTS=help,build,push:,verbose
+OPTIONS=hibp
+LONGOPTS=help,info,build,push
 
 # -use ! and PIPESTATUS to get exit code with errexit set
 # -temporarily store output to be able to check for errors
@@ -35,7 +35,7 @@ fi
 # read getopt’s output this way to handle the quoting right:
 eval set -- "$PARSED"
 
-h=n b=n p=n v=n i=n pushMode=-
+h=n b=n p=n i=n pushMode=-
 # now enjoy the options in order and nicely split until we see --
 while true; do
     case "$1" in
@@ -54,10 +54,6 @@ while true; do
         -p|--push)
             pushMode="$2"
             shift 2
-            ;;
-        -v|--verbose)
-            v=y
-            shift
             ;;
         --)
             shift
@@ -78,7 +74,7 @@ if [ "$h" = "y" ]; then
 fi
 
 if [ "$i" = "y" ]; then
-	printf "$IMG_NAME\n"
+	printf "Repo/App: $IMG_NAME\n"
 fi
 
 if [ "$b" = "y" ]; then
