@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage="$(basename "$0") [-h] [-b] [-p push patch] [-m push minor] -- program to build and push docker container images"
+usage="$(basename "$0") [-h] [-b] [-p] [-m] -- program to build and push docker container images"
 help="
 where:
 	-h  help
@@ -34,25 +34,21 @@ while getopts ':hbp:' option; do
 			 fi
 			 exit
        ;;
-    p) printf "Pushing new patch version:\n"
-			 PREV_SEM_VER="v$(jq -rM '.version' package.json)"
-			 NEW_SEM_VER=$(npm version patch)
+    p) printf "Building docker image: \n"
+			 #PREV_SEM_VER="v$(jq -rM '.version' package.json)"
+			 #NEW_SEM_VER=$(npm version patch)
 			 printf "Previous sem version: $PREV_SEM_VER\n"
 			 printf "New sem version: $NEW_SEM_VER\n"
-			 NEW_GIT_VER=$(git rev-parse @)
-			 PREV_GIT_VER=$(git rev-parse @~)
-			 docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VERSION
-			 docker image rm $IMG_NAME:$PREV_GIT_VERSION
-			 docker push $IMG_NAME:$NEW_GIT_VERSION
-			 docker push $IMG_NAME:latest
-			 docker tag $IMG_NAME:$NEW_GIT_VERSION $IMG_NAME:$NEW_SEM_VERSION
-			 docker push $IMG_NAME:$NEW_SEM_VERSION
-			 docker image rm $IMG_NAME:$NEW_SEM_VERSION
+			 #NEW_GIT_VER=$(git rev-parse @)
+			 #PREV_GIT_VER=$(git rev-parse @~)
+			 #docker tag $IMG_NAME:latest $IMG_NAME:$NEW_GIT_VERSION
+			 #docker image rm $IMG_NAME:$PREV_GIT_VERSION
+			 #docker push $IMG_NAME:$NEW_GIT_VERSION
+			 #docker push $IMG_NAME:latest
+			 #docker tag $IMG_NAME:$NEW_GIT_VERSION $IMG_NAME:$NEW_SEM_VERSION
+			 #docker push $IMG_NAME:$NEW_SEM_VERSION
+			 #docker image rm $IMG_NAME:$NEW_SEM_VERSION
 			 exit
-       ;;
-    :) printf "missing argument for -%s\n" "$OPTARG" >&2
-       echo "$usage" >&2
-       exit 1
        ;;
    \?) printf "illegal option: -%s\n" "$OPTARG" >&2
        echo "$usage" >&2
