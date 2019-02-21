@@ -23,9 +23,11 @@ help: ## This help.
 build: ## Build the container
 	@docker build -t ${IMG_NAME}:${GIT_VERSION} .
 	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:latest
-	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
+	# @docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
 
 push: ## Push to gcr.io/zero-inbox-organizer
+	@docker tag ${IMG_NAME}:${GIT_VERSION} ${IMG_NAME}:${SEM_VERSION}
 	@docker push ${IMG_NAME}:${GIT_VERSION}
 	@docker push ${IMG_NAME}:latest
 	@docker push ${IMG_NAME}:${SEM_VERSION}
+	@docker rm ${IMG_NAME}:${SEM_VERSION}
