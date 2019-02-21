@@ -3,6 +3,8 @@ include $(deploy_env)
 export $(shell sed 's/=.*//' $(deploy_env))
 
 IMG_NAME=${DOCKER_REPO}/${APP_NAME}
+# GIT_VERSION=${shell git rev-parse @}
+
 
 # HELP
 # This will output the help for each task
@@ -17,8 +19,8 @@ help: ## This help.
 # DOCKER TASKS
 # Build the container
 build: ## Build the container
-build: DEL_VER=$(shell docker images -f reference=${GIT_VERSION}:latest --format "{{.Tag}}")
 build: GIT_VERSION=${shell git rev-parse @}
+build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:${GIT_VERSION} --format "{{.Tag}}")
 build:
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
@@ -33,8 +35,7 @@ push-patch: SEM_VERSION=${shell jq -rM '.version' package.json}
 push-patch:
 	@echo 'Previous git version: ${PREV_GIT_VERSION}'
 	@echo 'Current git version: ${GIT_VERSION}'
-	@echo ${PATCH_SEM_VER}
-	@echo ${SEM_VERSION}
+	@echo 'Semantic version: ${PATCH_SEM_VER}'
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
 	docker push ${IMG_NAME}:${GIT_VERSION}
