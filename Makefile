@@ -28,20 +28,13 @@ build:
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 
 	@echo $(COMPARE_ID)
-ifdef COMPARE_ID
-rm-prev-git:
-	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
-endif
-
-	@echo $(COMPARE_ID)
 	@echo $(DEL_VER)
-ifndef COMPARE_ID
-ifdef DEL_VER
-rm-prev-ver:
-	docker image rm ${IMG_NAME}:${DEL_VER}
-endif
-endif
-
+	if [ -z ${COMPARE_ID} ]; 
+	then docker image rm ${IMG_NAME}:${PREV_GIT_VERSION};
+	else if [ -z ${DEL_VER} ];
+	then docker image rm ${IMG_NAME}:${DEL_VER};
+	fi;
+	fi;
 
 push-patch: ## Push new patch version to gcr.io/zero-inbox-organizer
 push-patch: PATCH_SEM_VER=$(shell npm version patch)
