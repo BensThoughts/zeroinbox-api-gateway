@@ -17,12 +17,12 @@ help: ## This help.
 # DOCKER TASKS
 # Build the container
 build: ## Build the container
-build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:latest --format "{{.ID}}")
+build: DEL_VER=$(shell docker images -f reference=${GIT_VERSION}:latest --format "{{.Tag}}")
 build: GIT_VERSION=${shell git rev-parse @}
 build:
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
-	docker image rm ${DEL_VER}
+	docker image rm ${IMG_NAME}:${DEL_VER}
 
 
 push-patch: ## Push new patch version to gcr.io/zero-inbox-organizer
