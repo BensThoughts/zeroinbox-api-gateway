@@ -22,22 +22,20 @@ build: ## Build the container
 build: GIT_VERSION=${shell git rev-parse @}
 build: PREV_GIT_VERSION=${shell git rev-parse @~}
 build: DEL_VER=$(shell docker images -f reference=${IMG_NAME}:latest --format "{{.ID}}")
-build: COMPARE_ID=$(shell docker images -f reference=${IMG_NAME}:${PREV_GIT_VERSION} --format "{{.ID}}")
+build: COMPARE_ID=$(shell docker images -f reference=${IMG_NAME}:${PREV_GIT_VERSION} --format "{{.Tag}}")
 build:
 	docker build -t ${IMG_NAME}:latest .
 	docker tag ${IMG_NAME}:latest ${IMG_NAME}:${GIT_VERSION}
 
-	ifdef (${COMPARE_ID})
-	ifdef (${DEL_VER})
-	ifeq (${COMPARE_ID}, ${DEL_VER})
+ifdef $(COMPARE_ID)
 	docker image rm ${IMG_NAME}:${PREV_GIT_VERSION}
-	endif
-	endif
-	endif
+endif
 
-	ifndef (${COMPARE_ID})
+ifndef $(COMPARE_ID)
+ifdef $(DEL_VER)
 	docker image rm ${IMG_NAME}:${DEL_VER}
-	endif
+endif
+endif
 
 
 push-patch: ## Push new patch version to gcr.io/zero-inbox-organizer
