@@ -151,56 +151,6 @@ describe('models: suggestion', function() {
         });
     });
 
-
-    describe('methods:', () => {
-        it('should have addOneToCount', () => {
-            let suggestion = valid_suggestion();
-            suggestion.should.have.property('addOneToCount');
-        });
-        it('addOneToCount should add one to count', () => {
-            let suggestion = valid_suggestion();        
-            suggestion.addOneToCount();
-            expect(suggestion.count).to.equal(2);
-            expect(suggestion.totalSizeEstimate).to.eql(123456);
-        });
-        it('should have concatNames', () => {
-            let suggestion = valid_suggestion();
-            suggestion.should.have.property('concatNames');
-        });
-        it('concatNames should concat a new names', () => {
-            let suggestion = valid_suggestion();
-            expect(suggestion.senderNames).to.eql(['fromName']);
-            suggestion.concatNames('newName');
-            expect(suggestion.senderNames).to.eql(['fromName', 'newName']);
-        });
-        it('should have concatThreadIds_internalDates', () => {
-            let suggestion = valid_suggestion();
-            suggestion.should.have.property('concatThreadIds_internalDates');
-        });
-        it('concatThreadIds_internalDates should concat new threadIds_internalDates', () => {
-            let suggestion = valid_suggestion();
-            suggestion.concatThreadIds_internalDates([
-                { threadId: 'newThreadId', internalDate: 654321 },
-                { threadId: 'newThreadId2', internalDate: 55555 }    
-            ]);
-            suggestion.validate((err) => {
-                expect(err).not.to.exist;
-            })
-            let newArray = suggestion.get('threadIds_internalDates');
-            expect(newArray.length).to.eql(3);
-        });
-        it('should have addToTotalSizeEstimate', () => {
-            let suggestion = valid_suggestion();
-            suggestion.should.have.property('addToTotalSizeEstimate');
-        });
-        it('addToTotalSizeEstimate should add to totalSizeEstimate', () => {
-            let suggestion = valid_suggestion();
-            suggestion.addToTotalSizeEstimate(1234);
-            expect(suggestion.totalSizeEstimate).to.eql(124690);
-            expect(suggestion.count).to.eql(1);
-        });
-    });
-
     describe('static methods:', () => {
         it('should have createSenderId', () => {
             let suggestion = valid_suggestion();

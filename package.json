@@ -1,6 +1,6 @@
 {
   "name": "zero-inbox-api-gateway",
-  "version": "1.1.15",
+  "version": "1.1.14",
   "description": "Backend for zero inbox. The Api Gateway",
   "main": "/src/index.js",
   "directories": {
@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./src/**/*.spec.js --exit",
-    "test-unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --exit",
-    "test-integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
+    "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --exit",
+    "integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
     "start": "node /usr/src/app/src/index.js",
     "start:dev": "nodemon --inspect-brk=0.0.0.0 /usr/src/app/src/index.js",
     "dev": "cd ./src && node index.js"

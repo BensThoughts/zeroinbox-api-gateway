@@ -26,27 +26,6 @@ const suggestionSchema = new Schema({
   count: { type: Number, required: true },
 });
 
-
-suggestionSchema.methods.addOneToCount = function() {
-  this.count++
-};
-
-suggestionSchema.methods.getId = function() {
-  return this.senderId;
-}
-
-suggestionSchema.methods.concatNames = function(name) {
-  this.senderNames = this.senderNames.concat(name);
-}
-
-suggestionSchema.methods.concatThreadIds_internalDates = function(threadIds_internalDates) {
-  this.threadIds_internalDates = this.threadIds_internalDates.concat(threadIds_internalDates);
-}
-
-suggestionSchema.methods.addToTotalSizeEstimate = function(totalSizeEstimate) {
-  this.totalSizeEstimate = this.totalSizeEstimate + totalSizeEstimate;
-}
-
 suggestionSchema.statics.createSenderId = function(senderAddress) {
   let md5sum = crypto.createHash('md5');
   md5sum.update(senderAddress);
@@ -55,9 +34,6 @@ suggestionSchema.statics.createSenderId = function(senderAddress) {
   // this.senderId = id;
   return id;
 }
-
-
-
 
 const Suggestion = mongoose.model('suggestions', suggestionSchema);
 
