@@ -13,10 +13,10 @@ echo "$usage"
 
 help="
 where:
-	-h, --help:  help
-	-i, --info: get the current projects repo/name
-	-b, --build: build container
-	-p, --push:  push a new version (patch, minor, or major)"
+	-h, --help  : help
+	-i, --info  : get the current projects repo/name
+	-b, --build : build container
+	-p, --push  : push a new version (patch, minor, or major)"
 
 
 OPTIONS=hibp:
@@ -81,7 +81,7 @@ if [ "$b" = "y" ]; then
 	GIT_VER=$(git rev-parse @)
 	PREV_ID=$(docker images -f reference=$IMG_NAME:latest --format "{{.ID}}")
 	# Start by removing all previous versions of the image
-	if [ ! -z PREV_ID ]; then
+	if [ ! -z "$PREV_ID" ]; then
 		docker image rm -f "$PREV_ID"
 	fi
 	# Build and tag the image with the git commit hash
