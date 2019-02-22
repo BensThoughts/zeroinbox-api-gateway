@@ -154,10 +154,38 @@ mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   } else {
     logger.info('Mongo Connected!');
     rabbit.connect(rabbit_config, (err, ch) => {
-      googleApi.listen(express_port, express_host);
+      let server = googleApi.listen(express_port, express_host);
+      processHandler(server);
       logger.info(`Running on http://${express_host}:${express_port}`);
     });
   }
 });
+
+// SIG Handling
+const signals = {
+  'SIGTERM': 15
+};
+
+function processHandler(server) {
+  Object.keys(signals).forEach((signal) => {
+    process.on(signal, () => {
+      logger.info(`Process received a ${signal} signal`);
+      shutdown(server, signal, signals[signal]);
+    });
+  });
+}
+
+// App shutdown logic
+const shutdown = (server, signal, value) => {
+  logger.info('shutdown!');
+  server.close(() => {
+    logger.info(`Server stopped by ${signal} with value ${value}`);
+    rabbit.disconnect(() => {
+      logger.info('rabbit disconnected');
+      mongoose.disconnect();
+    });
+  });
+}
+
 
 module.exports = googleApi;
