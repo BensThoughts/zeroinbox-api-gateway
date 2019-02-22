@@ -90,8 +90,10 @@ if [ "$b" = "y" ]; then
         docker image rm -f "$PREV_ID"
     fi
     # Build and tag the image with the git commit hash
-    printf "\nBuilding new docker image: $IMG_NAME:$GIT_VER\n"
+    printf "\nBuilding new docker image: latest\n"
     docker build -t $IMG_NAME:latest .
+
+    printf "\nTagging image with git hash: $GIT_VER\n"
     docker tag $IMG_NAME:latest $IMG_NAME:$GIT_VER
 fi
 
