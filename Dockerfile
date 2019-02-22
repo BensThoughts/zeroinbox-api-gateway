@@ -4,3 +4,4 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install && mkdir logs
 COPY ./src ./src
+CMD ["npm", "start", "/usr/src/app/src/index.js"]
