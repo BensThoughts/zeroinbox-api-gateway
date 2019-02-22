@@ -154,7 +154,6 @@ mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   } else {
     logger.info('Mongo Connected!');
     rabbit.connect(rabbit_config, (err, ch) => {
-      googleApi.locals.db = db;
       googleApi.listen(express_port, express_host);
       logger.info(`Running on http://${express_host}:${express_port}`);
     });
