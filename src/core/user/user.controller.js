@@ -101,7 +101,13 @@ exports.basic_profile = function (req, res) {
 
         // need to make sure firstRun is in db and userId is in express-session
         // before client proceeds
-        res.json({ basic_profile: basic_profile });
+        res.json({ 
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            basic_profile: basic_profile 
+          }
+        });
       });
     });
 
@@ -126,7 +132,10 @@ exports.basic_profile = function (req, res) {
 
   }).catch((err) => {
     logger.error(err);
-    res.status(500).send('Error: ' + err);
+    res.status(500).json({
+      status: 'error',
+      status_message: 'Error: ' + err
+    });
   });
 
 };
@@ -173,7 +182,13 @@ exports.email_profile = function (req, res) {
 
     // respode after writing emailId to the session so it is avail for every
     // other route called after
-    res.json({ email_profile: email_profile });
+    res.json({ 
+      status: 'success',
+      status_message: 'OK',
+      data: {
+        email_profile: email_profile
+      } 
+    });
 
     let conditions = { userId: userId };
     let profileUpdate = {
@@ -198,7 +213,10 @@ exports.email_profile = function (req, res) {
 
   }).catch((err) => {
     logger.error(err);
-    res.status(500).send('Error: ' + err);
+    res.status(500).json({
+      status: 'error',
+      status_message: 'Error: ' + err
+    });
   });
 
 }

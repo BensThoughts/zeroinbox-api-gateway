@@ -2,11 +2,7 @@
  * INIT DEPS
 *******************************************************************************/
 const logger = require('../../loggers/log4js');
-
-const fs = require('fs');
-const path = require('path');
 const {google} = require('googleapis');
-// const gmail = google.gmail('v1');
 
 const {
   client_id,
@@ -19,11 +15,6 @@ const {
   scope,
 } = require('../../config/auth.config');
 
-
-// seems that when you use readFileSync it takes whatever dir node was started
-// in as the base dir
-// const client_secret = path.resolve(__dirname, '../../config/client_secret.json');
-// const clientSecretJson = JSON.parse(fs.readFileSync(client_secret));
 
 /*******************************************************************************
  * OAuth2 Init
@@ -111,5 +102,11 @@ exports.oauth2callback = function(req, res) {
 
 exports.logout = function(req, res) {
   req.session.destroy();
-  res.json('Session Reset');
+  res.json({
+    status: 'success',
+    status_message: 'OK',
+    data: {
+      message: 'Session Reset!'
+    }
+  });
 }
