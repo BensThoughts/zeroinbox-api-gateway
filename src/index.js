@@ -24,9 +24,6 @@ const {
 const express = require('express');
 const googleApi = express();
 
-const healthRouter = require('./core/health/health.routes')
-googleApi.use('/', healthRouter);
-
 /*******************************************************************************
 * EXPRESS CORS SETUP
 *******************************************************************************/
@@ -103,19 +100,23 @@ googleApi.use(morgan(morganChalk.logError, {
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *******************************************************************************/
 googleApi.use((req, res, next) => {
-  let path = req.path;
-  if (path !== '/oauth2init') {
-    if (path !== '/oauth2callback') {
-      if (!req.session) {
-        return res.status(403).json({ 
-          status: 'error',
-          status_message: 'No Session!'
-        });
-      } else if (!req.session.token) {
-        return res.status(403).json({ 
-          status: 'error',
-          status_message: 'No credentials set!' 
-        });
+  logger.debug(req.headers);
+  if (!req.session) {
+    logger.debug('No Session Set!');
+    res.status(403).json({
+      status: 'error',
+      status_message: 'No session token found!'
+    });
+  } else {
+    let path = req.path;
+    if (path !== '/oauth2init') {
+      if (path !== '/oauth2callback') {
+        if (!req.session.token) {
+          return res.status(401).json({ 
+            status: 'error',
+            status_message: 'No credentials set!' 
+          });
+        }
       }
     }
   }
@@ -148,6 +149,9 @@ googleApi.use('/', labelsRouter);
 googleApi.use('/', suggestionsRouter);
 
 googleApi.use('/', loadingRouter);
+
+const healthRouter = require('./core/health/health.routes')
+googleApi.use('/', healthRouter);
 
 
 /*******************************************************************************
