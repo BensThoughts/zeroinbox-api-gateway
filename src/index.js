@@ -104,8 +104,16 @@ googleApi.use((req, res, next) => {
   let path = req.path;
   if (path !== '/oauth2init') {
     if (path !== '/oauth2callback') {
-      if (!req.session.token) {
-        return res.status(403).json({ error: 'No credentials sent!' });
+      if (!req.session) {
+        return res.status(403).json({ 
+          status: 'error',
+          status_message: 'No Session!'
+        })
+      } else if (!req.session.token) {
+        return res.status(403).json({ 
+          status: 'error',
+          status_message: 'No credentials set!' 
+        });
       }
     }
   }
