@@ -152,8 +152,9 @@ mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
-    logger.info('Mongo Connected!');
-    rabbit.connect(rabbit_config, (err, ch) => {
+    logger.info('Connected to MongoDB!');
+    rabbit.connect(rabbit_config, (err, conn) => {
+      logger.info('Connected to RabbitMQ!')
       let server = googleApi.listen(express_port, express_host);
       processHandler(server);
       logger.info(`Running on http://${express_host}:${express_port}`);
