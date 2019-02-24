@@ -24,6 +24,10 @@ const {
 const express = require('express');
 const googleApi = express();
 
+// Naive health check
+const healthRouter = require('./core/health/health.routes')
+googleApi.use('/', healthRouter);
+
 /*******************************************************************************
 * EXPRESS CORS SETUP
 *******************************************************************************/
@@ -100,9 +104,8 @@ googleApi.use(morgan(morganChalk.logError, {
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *******************************************************************************/
 googleApi.use((req, res, next) => {
-  logger.debug(req.headers);
   if (!req.session) {
-    logger.debug('No Session Set!');
+    logger.debug('No session set, is redis up? or attacker?!');
     res.status(403).json({
       status: 'error',
       status_message: 'No session token found!'
@@ -119,8 +122,8 @@ googleApi.use((req, res, next) => {
         }
       }
     }
+    next();
   }
-  next();
 });
 
 
@@ -149,9 +152,6 @@ googleApi.use('/', labelsRouter);
 googleApi.use('/', suggestionsRouter);
 
 googleApi.use('/', loadingRouter);
-
-const healthRouter = require('./core/health/health.routes')
-googleApi.use('/', healthRouter);
 
 
 /*******************************************************************************

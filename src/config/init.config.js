@@ -6,4 +6,5 @@ module.exports = {
     session_redis_port: process.env.SESSION_REDIS_PORT,
     session_secret: process.env.SESSION_SECRET,
     mongo_uri: process.env.MONGO_URI,
+    log_level: process.env.LOG_LEVEL
 }
