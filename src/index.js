@@ -108,7 +108,7 @@ googleApi.use((req, res, next) => {
         return res.status(403).json({ 
           status: 'error',
           status_message: 'No Session!'
-        })
+        });
       } else if (!req.session.token) {
         return res.status(403).json({ 
           status: 'error',
