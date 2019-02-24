@@ -16,7 +16,7 @@ const {
   session_redis_host,
   session_redis_port,
   session_secret,
-  mongo_uri
+  mongo_uri,
  } = require('./config/init.config');
 
  const { rabbit_config } = require('./config/rabbit.config');
@@ -24,6 +24,8 @@ const {
 const express = require('express');
 const googleApi = express();
 
+const healthRouter = require('./core/health/health.routes')
+googleApi.use('/', healthRouter);
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
