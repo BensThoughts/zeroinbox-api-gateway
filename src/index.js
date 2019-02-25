@@ -24,9 +24,15 @@ const {
 const express = require('express');
 const googleApi = express();
 
+googleApi.get('/', (req, res) => {
+  logger.debug('GKE Ingress health checked!');
+  res.status(200).send();
+});
+
 // Naive health check
 const healthRouter = require('./core/health/health.routes')
 googleApi.use('/', healthRouter);
+
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
