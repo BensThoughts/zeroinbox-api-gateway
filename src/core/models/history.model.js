@@ -17,6 +17,7 @@ const historySchema = new Schema({
   userId: String,
   active: {
     loadingStatus: Boolean,
+    percentLoaded: Number,
     session: sessionSchema
   },
   passive: {
