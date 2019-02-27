@@ -32,12 +32,14 @@ exports.loading_status = function (req, res) {
           status_message: 'internal server error at path /loadingStatus'
         });
       };
-      let loading = raw.active.loadingStatus;
+      let loadingStatus = raw.active.loadingStatus;
+      let percentLoaded = raw.active.percentLoaded;
       res.json({ 
         status: 'success',
         status_message: 'OK',
         data: {
-          loading_status: loading 
+          loadingStatus: loadingStatus,
+          percentLoaded: percentLoaded,
         }
       });
     });
