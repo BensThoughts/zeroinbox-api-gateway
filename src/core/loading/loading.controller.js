@@ -60,6 +60,8 @@ exports.first_run_status = function(req, res) {
       });
     }
 
+    logger.trace('doc.passive' + doc.passive);
+
     if (doc.passive === undefined) {
       res.json({
         status: 'success',
@@ -73,7 +75,7 @@ exports.first_run_status = function(req, res) {
         status: 'success',
         status_message: 'OK',
         data: {
-          firstRun: doc.passive.findRun
+          firstRun: doc.passive.firstRun
         }
       });
     }
