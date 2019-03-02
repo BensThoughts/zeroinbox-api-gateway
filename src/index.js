@@ -118,8 +118,8 @@ googleApi.use((req, res, next) => {
     });
   } else {
     let path = req.path;
-    if (path !== '/oauth2init') {
-      if (path !== '/oauth2callback') {
+    if (path !== '/v1/oauth2init') {
+      if (path !== '/v1/oauth2callback') {
         if (!req.session.token) {
           return res.status(401).json({ 
             status: 'error',
@@ -149,15 +149,15 @@ const suggestionsRouter = require('./core/suggestions/suggestions.routes');
 const loadingRouter = require('./core/loading/loading.routes');
 
 
-googleApi.use('/', authRouter);
+googleApi.use('/v1', authRouter);
 
-googleApi.use('/', userRouter);
+googleApi.use('/v1', userRouter);
 
-googleApi.use('/', labelsRouter);
+googleApi.use('/v1', labelsRouter);
 
-googleApi.use('/', suggestionsRouter);
+googleApi.use('/v1', suggestionsRouter);
 
-googleApi.use('/', loadingRouter);
+googleApi.use('/v1', loadingRouter);
 
 
 /*******************************************************************************
