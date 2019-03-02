@@ -8,7 +8,7 @@ const expect = chai.expect();
 
 const request = require('request');
 
-const base = 'http://127.0.0.1:3000'
+const base = 'http://127.0.0.1:8080'
 
 const authUrlResponse = require('../fixtures/authUrl.json');
 

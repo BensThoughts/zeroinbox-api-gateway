@@ -6,5 +6,7 @@ module.exports = {
     session_redis_port: process.env.SESSION_REDIS_PORT,
     session_secret: process.env.SESSION_SECRET,
     mongo_uri: process.env.MONGO_URI,
-    log_level: process.env.LOG_LEVEL
+    log_level: process.env.LOG_LEVEL,
+    BASIC_PROFILE_ENDPOINT: process.env.BASIC_PROFILE_ENDPOINT,
+    GMAIL_PROFILE_ENDPOINT: process.env.GMAIL_PROFILE_ENDPOINT
 }

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./src/**/*.spec.js --exit",
-    "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --exit",
+    "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --timeout 60000 --exit",
     "integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
     "start": "node /usr/src/app/src/index.js",
     "start:dev": "nodemon --inspect-brk=0.0.0.0 /usr/src/app/src/index.js",
@@ -24,7 +24,6 @@
     "connect-redis": "^3.4.0",
     "cookie-parser": "^1.4.4",
     "cors": "^2.8.5",
-    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "express-request-id": "^1.4.1",
     "express-session": "^1.15.6",
@@ -39,10 +38,15 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "dotenv": "^6.2.0",
     "eslint": "^4.12.0",
     "eslint-plugin-promise": "^3.6.0",
     "mocha": "^5.2.0",
-    "sinon": "^7.2.4",
+    "mongodb-memory-server": "^3.1.2",
+    "nock": "^10.0.6",
+    "node-mocks-http": "^1.7.3",
+    "sinon": "^7.2.6",
+    "sinon-express-mock": "^2.1.0",
     "supertest": "^3.4.2"
   },
   "private": true
