@@ -99,7 +99,6 @@ describe('userController:', () => {
                 userController.basic_profile(basicRequest, basicResponse);
                 basicResponse.on('end', () => {
                     // console.log(basicRequest);
-                    expect(basicRequest.session.user_info.userId).to.eql('115399687284834648545');
                     let response = JSON.parse(basicResponse._getData());
                     // console.log(response);
                     expect(response.status).to.eql('success');
@@ -116,6 +115,16 @@ describe('userController:', () => {
                             }
                     }
                     expect(response.data).to.eql(data);
+                    done();
+                });
+            });
+            it('should set the request session object with the userId', (done) => {
+                let basicRequest = getBasicRequest();
+                let basicResponse = getBasicResponse();
+                userController.basic_profile(basicRequest, basicResponse);
+                basicResponse.on('end', () => {
+                    // console.log(basicRequest);
+                    expect(basicRequest.session.user_info.userId).to.eql('115399687284834648545');
                     done();
                 });
             });
@@ -146,33 +155,41 @@ describe('userController:', () => {
 
     describe('email_profile: ', () => {
         describe('googleapi calls succeed', () => {
-            beforeEach(() => {
+            let emailRequest;
+            let emailResponse;
+            beforeEach((done) => {
                 let emailFixture = require('../fixtures/email_profile');
                 nock('https://www.googleapis.com')
                 .get('/gmail/v1/users/me/profile')
                 .reply(200, emailFixture);
-            });
-            it('should give a correct response', (done) => {
-                let emailRequest = getEmailRequest();
-                let emailResponse = getEmailResponse();
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
                 userController.email_profile(emailRequest, emailResponse);
                 emailResponse.on('end', () => {
-                    let response = JSON.parse(emailResponse._getData());
-                    // console.log(response);
-                    expect(response.status).to.eql('success');
-                    expect(response.status_message).to.eql('OK');
-                    let data = {
-                        email_profile:
-                            { 
-                                emailAddress: 'test@gmail.com',
-                                messagesTotal: 1000,
-                                threadsTotal: 700,
-                                historyId: '12345abc' 
-                            }
-                    }
-                    expect(response.data).to.eql(data);
                     done();
                 });
+            });
+            it('should give a correct response', () => {
+                let response = JSON.parse(emailResponse._getData());
+                // console.log(response);
+                expect(response.status).to.eql('success');
+                expect(response.status_message).to.eql('OK');
+                let data = {
+                    email_profile:
+                        { 
+                            emailAddress: 'test@gmail.com',
+                            messagesTotal: 1000,
+                            threadsTotal: 700,
+                            historyId: '12345abc' 
+                        }
+                }
+                expect(response.data).to.eql(data);
+            });
+            it ('should set the session emailAddress', () => {
+                expect(emailRequest.session.user_info.emailAddress).to.eql('test@gmail.com')
+            });
+            it('should set the session emailId to the md5 hex of the emailAddress', () => {
+                expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
             });
         });
         describe('googleapi calls fails', () => {
