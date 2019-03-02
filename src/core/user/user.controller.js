@@ -53,6 +53,15 @@ exports.basic_profile = function (req, res) {
       emailAddress: '',
     }
 
+    // need to make sure userId is in express-session before client proceeds
+    res.json({ 
+      status: 'success',
+      status_message: 'OK',
+      data: {
+        basic_profile: basic_profile 
+      }
+    });
+
     const conditions = { userId: userId };
     let options = {
       multi: false,
@@ -85,16 +94,11 @@ exports.basic_profile = function (req, res) {
     }
     logger.debug(historyUpdate);
     History.updateOne(conditions, historyUpdate, options, (err, doc) => {
-      logger.debug('HISTORY UPDATED');
-      // need to make sure firstRun is in db and userId is in express-session
-      // before client proceeds
-      res.json({ 
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          basic_profile: basic_profile 
-        }
-      });
+      if (err) {
+        logger.error(err)
+      } else {
+        logger.debug('History updated!');
+      };
     });
 
     let profileUpdate = {
@@ -166,7 +170,6 @@ exports.email_profile = function (req, res) {
 
     // respond after writing emailId to the session so it is avail for every
     // other route called after
-    logger.trace('TEST');
     res.status(200).json({
       status: 'success',
       status_message: 'OK',
