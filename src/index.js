@@ -114,24 +114,41 @@ googleApi.use((req, res, next) => {
     logger.debug('No session set, is redis up? or attacker?!');
     res.status(403).json({
       status: 'error',
-      status_message: 'No session token found!'
+      status_message: 'No session found, was cookie set correctly?!'
     });
   } else {
     let path = req.path;
-    if (path !== '/v1/oauth2init') {
-      if (path !== '/v1/oauth2callback') {
-        if (!req.session.token) {
-          return res.status(401).json({ 
+    switch(path) {
+      case '/v1/oauth2init':
+        return next();
+      case '/v1/oauth2callback':
+        return next();
+      case '/v1/basicProfile':
+        return checkAuth(req, res, next);
+      case '/v1/emailProfile':
+        if (!req.session.user_info.userId) {
+          return res.status(500).json({
             status: 'error',
-            status_message: 'No credentials set!' 
+            status_message: 'Must call /v1/basicProfile before calling /v1/emailProfile'
           });
+        } else {
+          return checkAuth(req, res, next);
         }
-      }
+      default:
+        return next();
     }
-    next();
   }
 });
 
+function checkAuth(req, res, next) {
+  if (!req.session.token) {
+    return res.status(401).json({
+      status: 'error',
+      status_message: 'No credentials set!'
+    });
+  }
+  return next();
+}
 
 /**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
   ____                       _             _            _
