@@ -52,7 +52,6 @@ exports.first_run_status = function(req, res) {
   let conditions = { userId: userId }
 
   History.findOne(conditions, (err, doc) => {
-    let passiveUpdate;
     if (err) {
       logger.error('Error at first_run_status in history.findOne(): ' + err)
       res.status(500).json({
@@ -60,7 +59,7 @@ exports.first_run_status = function(req, res) {
         status_message: 'internal server error at path /firstRunStatus'
       });
     } else if (doc.passive.firstRun === undefined) {
-        passiveUpdate = {
+        let passiveUpdate = {
           "userId": userId,
           "passive.firstRun": true,
           "passive.firstRunDate": new Date(),
@@ -75,7 +74,7 @@ exports.first_run_status = function(req, res) {
           }
         });
     } else {
-      passiveUpdate = {
+      let passiveUpdate = {
         "userId": userId,
         "passive.lastRunDate": new Date(),
       }
