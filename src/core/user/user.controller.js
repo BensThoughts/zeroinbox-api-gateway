@@ -59,19 +59,7 @@ exports.basic_profile = function (req, res) {
 
     History.findOne(conditions, (err, doc) => {
       let activeUpdate;
-      let passiveUpdate;
-      if (doc === null) { // doc === null indicates first run
-        passiveUpdate = {
-          "userId": userId,
-          "passive.firstRun": true,
-          "passive.firstRunDate": new Date(),
-          "passive.lastRunDate": new Date()
-        }
-      } else {
-        passiveUpdate = {
-          "passive.lastRunDate": new Date(),
-        }
-      }
+
       let refresh_token = req.session.token.refresh_token;
       if (refresh_token) {
         activeUpdate = {
@@ -93,7 +81,6 @@ exports.basic_profile = function (req, res) {
       }
       let historyUpdate = {
         ...activeUpdate,
-        ...passiveUpdate
       }
       logger.debug(historyUpdate);
       History.updateOne(conditions, historyUpdate, options, (err, doc) => {
