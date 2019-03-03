@@ -6,10 +6,10 @@ const Schema = mongoose.Schema;
 
 const sessionSchema = new Schema({
   cookie: { type: String, required: false },
-  access_token: { type: String, required: true },
-  expiry_date: { type: String, required: true },
-  token_type: { type: String, required: true },
-  scope: { type: String, required: true },
+  access_token: { type: String, required: false },
+  expiry_date: { type: String, required: false },
+  token_type: { type: String, required: false },
+  scope: { type: String, required: false },
   refresh_token: { type: String, required: false },
 });
 

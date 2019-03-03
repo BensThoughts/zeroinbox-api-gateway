@@ -156,7 +156,7 @@ describe('models: suggestion', function() {
             let suggestion = valid_suggestion();
             Suggestion.should.have.property('createSenderId');
         });
-        it('createSenderId should create id as hex with md5 hash', () => {
+        it('createSenderId should create id as md5 hash in hex decimal', () => {
             let suggestion = valid_suggestion();
             let id = create_senderId('senderAddress');
             expect(suggestion.senderId).to.eql(id);

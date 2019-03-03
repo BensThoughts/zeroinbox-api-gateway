@@ -8,7 +8,6 @@ exports.suggestions = function (req, res) {
     let conditions = { userId: userId };
 
     let projection = {
-      // sender: 1,
       "senderAddress": 1,
       "senderNames": 1,
       "totalSizeEstimate": 1,
@@ -19,20 +18,21 @@ exports.suggestions = function (req, res) {
 
     Suggestion.find(conditions, projection, (err, raw) => {
       if (err) {
+        logger.error('Error in suggestion.find(): ' + err);
         res.json({
           status: 'error',
-          status_message: 'Error in suggestion.find()'
-        })
-        return logger.error('Error in suggestion.find(): ' + err);
-      };
-      let suggestions = raw;
-      res.json({ 
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          suggestions: suggestions 
-        }
-      });
-    })
+          status_message: 'Error at /suggestions: Error in MongoDb find'
+        });
+      } else {
+        let suggestions = raw;
+        res.json({ 
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            suggestions: suggestions 
+          }
+        });
+      }
+    });
 
 }

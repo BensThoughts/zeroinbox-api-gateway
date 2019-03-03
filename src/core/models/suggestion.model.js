@@ -14,10 +14,8 @@ var notEmpty = function(features){
 const suggestionSchema = new Schema({
   userId: { type: String, required: true },
   senderId: { type: String, required: true },
-  // senderNames: [{ type: String, required: true }],
   senderNames: { type: [String], required: true, validate: [notEmpty, 'Please add at least one threadId'] },
   senderAddress: { type: String, required: true },
-  // threadIds_internalDates: { type: [{threadId: String, internalDate: Number}], required: true },
   threadIds_internalDates: { type: [{ 
     threadId: {type: String, required: true}, 
     internalDate: {type: Number, required: true } }

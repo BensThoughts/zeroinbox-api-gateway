@@ -53,7 +53,7 @@ exports.first_run_status = function(req, res) {
 
   History.findOne(conditions, (err, doc) => {
     if (err) {
-      logger.error('Error at first_run_status in history.findOne(): ' + err)
+      logger.error('Error at first_run_status in history.findOne(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus'

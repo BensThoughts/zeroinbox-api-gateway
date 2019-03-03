@@ -8,8 +8,3 @@ exports.healthz = function(req, res, next) {
     next();
   }
 }
-
-exports.healthGKE = function (req, res, next) {
-  logger.debug('Google Health Checked')
-  res.status(200).send();
-}

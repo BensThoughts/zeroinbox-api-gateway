@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 let mongoServer;
 
+const Profile = require('../../../models/profile.model');
+
 
 
 const userController = require('../../user.controller');
@@ -70,28 +72,30 @@ function getBasicResponse(){
 
 
 describe('userController:', () => {
-    before(function(done) {
-        let opts = { useNewUrlParser: true };
-        mongoServer = new MongoMemoryServer();
-        mongoServer.getConnectionString().then((mongoUri) => {
-            return mongoose.connect(mongoUri, opts, (err) => {
-                if (err) done(err);
-            });
-        }).then(() => done());
-    });
+
     
-    after(() => {
-        mongoose.disconnect();
-        mongoServer.stop();
-    });
+
 
     describe('basic_profile: ', () => {
         describe('googleapi calls succeed', () => {
+            beforeEach(function(done) {
+                let opts = { useNewUrlParser: true };
+                mongoServer = new MongoMemoryServer();
+                mongoServer.getConnectionString().then((mongoUri) => {
+                    return mongoose.connect(mongoUri, opts, (err) => {
+                        if (err) done(err);
+                    });
+                }).then(() => done());
+            });
             beforeEach(() => {
                 let basicFixture = require('../fixtures/basic_profile');
                 nock('https://www.googleapis.com')
                 .get('/oauth2/v2/userinfo')
                 .reply(200, basicFixture);
+            });
+            afterEach(() => {
+                mongoose.disconnect();
+                mongoServer.stop();
             });
             it('should give a correct response', (done) => {
                 let basicRequest = getBasicRequest();
@@ -138,6 +142,19 @@ describe('userController:', () => {
                     code: '500'
                 });
             });
+            beforeEach((done) => {
+                let opts = { useNewUrlParser: true };
+                mongoServer = new MongoMemoryServer();
+                mongoServer.getConnectionString().then((mongoUri) => {
+                    return mongoose.connect(mongoUri, opts, (err) => {
+                        if (err) done(err);
+                    });
+                }).then(() => done());
+            });
+            afterEach(() => {
+                mongoose.disconnect();
+                mongoServer.stop();
+            });
             it('should give an error response', (done) => {
                 let basicRequest = getBasicRequest();
                 let basicResponse = getBasicResponse();
@@ -169,6 +186,19 @@ describe('userController:', () => {
                     done();
                 });
             });
+            beforeEach(function(done) {
+                let opts = { useNewUrlParser: true };
+                mongoServer = new MongoMemoryServer();
+                mongoServer.getConnectionString().then((mongoUri) => {
+                    return mongoose.connect(mongoUri, opts, (err) => {
+                        if (err) done(err);
+                    });
+                }).then(() => done());
+            });
+            afterEach(() => {
+                mongoose.disconnect();
+                mongoServer.stop();
+            });
             it('should give a correct response', () => {
                 let response = JSON.parse(emailResponse._getData());
                 // console.log(response);
@@ -191,6 +221,22 @@ describe('userController:', () => {
             it('should set the session emailId to the md5 hex of the emailAddress', () => {
                 expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
             });
+            it('should upload the email profile to MongoDB', (done) => {
+                let conditions = { userId: emailRequest.session.user_info.userId }
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
+                userController.email_profile(emailRequest, emailResponse);
+                emailResponse.on('end', () => {
+                    Profile.findOne(conditions, (err, doc) => {
+                        expect(doc.email.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058');
+                        expect(doc.email.emailAddress).to.eql('test@gmail.com');
+                        expect(doc.email.messagesTotal).to.eql(1000);
+                        expect(doc.email.threadsTotal).to.eql(700);
+                        expect(doc.email.historyId).to.eql('12345abc');
+                        done();
+                    });
+                });
+            });
         });
         describe('googleapi calls fails', () => {
             beforeEach(() => {
@@ -200,6 +246,19 @@ describe('userController:', () => {
                     message : 'error', 
                     code: '500'
                 });
+            });
+            beforeEach(function(done) {
+                let opts = { useNewUrlParser: true };
+                mongoServer = new MongoMemoryServer();
+                mongoServer.getConnectionString().then((mongoUri) => {
+                    return mongoose.connect(mongoUri, opts, (err) => {
+                        if (err) done(err);
+                    });
+                }).then(() => done());
+            });
+            afterEach(() => {
+                mongoose.disconnect();
+                mongoServer.stop();
             });
             it('should give an error response', (done) => {
                 let emailRequest = getEmailRequest();

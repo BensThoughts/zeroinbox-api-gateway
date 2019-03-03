@@ -47,7 +47,7 @@ log4js.configure({
         /** Prod Setting */
         _stderr_prod: { type: 'logLevelFilter', appender: 'stderr', level: 'warn', maxLevel: 'fatal' },
 
-        _test: { type: 'noLogFilter', exclude: '*', appender: 'stdout' },
+        _test: { type: 'noLogFilter', exclude: '', appender: 'stdout' },
     },
     categories: { 
         default: { appenders: ['_stdout_prod'], level: 'info' },
@@ -58,7 +58,7 @@ log4js.configure({
         production_trace: { appenders: ['_stdout_trace', '_stderr_debug'], level: 'trace' },
         production_debug: { appenders: ['_stdout_trace', '_stderr_debug'], level: 'trace' },
         production: { appenders: ['_stdout_prod', '_stderr_prod'], level: 'info' },
-        test: { appenders: ['_test'], level: 'info' }
+        test: { appenders: ['_test'], level: 'fatal' }
     }
 });
 
