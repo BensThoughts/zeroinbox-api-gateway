@@ -58,7 +58,22 @@ exports.first_run_status = function(req, res) {
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus'
       });
-    } else if (doc.passive.firstRun === undefined) {
+    } else if (doc === null || !doc) {
+      let passiveUpdate = {
+        "userId": userId,
+        "passive.firstRun": true,
+        "passive.firstRunDate": new Date(),
+        "passive.lastRunDate": new Date()
+      }
+      updatePassiveHistory(userId, passiveUpdate);
+      res.status(200).json({
+        status: 'success',
+        status_message: 'OK',
+        data: {
+          firstRun: true
+        }
+      });
+    } else if (doc.passive.firstRun === undefined || !doc.passive) {
         let passiveUpdate = {
           "userId": userId,
           "passive.firstRun": true,
