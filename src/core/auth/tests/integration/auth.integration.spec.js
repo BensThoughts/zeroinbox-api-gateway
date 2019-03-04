@@ -1,3 +1,5 @@
+const dotenv = require('dotenv').config();
+
 const supertest = require('supertest');
 const googleApi = require('../../../../index');
 const chai = require('chai');
