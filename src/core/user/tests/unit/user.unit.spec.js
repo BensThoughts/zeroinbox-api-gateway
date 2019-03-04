@@ -6,8 +6,6 @@ let mongoServer;
 
 const Profile = require('../../../models/profile.model');
 
-
-
 const userController = require('../../user.controller');
 
 const chai = require('chai');
@@ -221,11 +219,8 @@ describe('userController:', () => {
                 expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
             });
             it('should upload the email profile to MongoDB', (done) => {
-                let conditions = { userId: emailRequest.session.user_info.userId }
-                emailRequest = getEmailRequest();
-                emailResponse = getEmailResponse();
-                userController.email_profile(emailRequest, emailResponse);
-                emailResponse.on('end', () => {
+                let conditions = { userId: emailRequest.session.user_info.userId };
+                let findFunc = function() {
                     Profile.findOne(conditions, (err, doc) => {
                         expect(doc.email.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058');
                         expect(doc.email.emailAddress).to.eql('test@gmail.com');
@@ -234,7 +229,8 @@ describe('userController:', () => {
                         expect(doc.email.historyId).to.eql('12345abc');
                         done();
                     });
-                });
+                }
+                setTimeout(findFunc, 50);
             });
         });
         describe('googleapi calls fails', () => {

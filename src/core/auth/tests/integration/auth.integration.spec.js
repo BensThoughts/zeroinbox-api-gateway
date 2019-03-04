@@ -9,7 +9,7 @@ describe('routes: auth - supertest', function() {
 
     it('responds with auth_url', (done) => {
         supertest(googleApi)
-            .get('/oauth2init')
+            .get('/v1/oauth2init')
             .set('Accept', 'application/json')
             .expect(200)
             .end((err, res) => {
