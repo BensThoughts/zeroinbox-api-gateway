@@ -1,4 +1,4 @@
-process.env.NODE_ENV = 'test';
+const dotenv = require('dotenv').config();
 
 const chai = require('chai');
 const sinon = require('sinon');

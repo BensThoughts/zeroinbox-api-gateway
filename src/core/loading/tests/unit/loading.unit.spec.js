@@ -55,8 +55,6 @@ const loadingController = rewire('../../loading.controller');
 
 describe('loadingController:', () => {
 
-    
-
     describe('first_run_status: ', () => {
         before((done) => {
             let opts = { useNewUrlParser: true };
