@@ -1,3 +1,5 @@
+const logger = require('../loggers/log4js');
+
 function routeErrors(req, res, next) {
   if (!req.session) {
     logger.debug('No session set, is redis up? or attacker?!');
