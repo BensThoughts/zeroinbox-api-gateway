@@ -1,5 +1,9 @@
 const dotenv = require('dotenv').config();
 
+if (dotenv.error) {
+    throw dotenv.error;
+}
+
 const chai = require('chai');
 const sinon = require('sinon');
 const should = chai.should();

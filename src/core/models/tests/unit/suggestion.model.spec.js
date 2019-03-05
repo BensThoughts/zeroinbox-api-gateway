@@ -1,5 +1,9 @@
 const dotenv = require('dotenv').config();
 
+if (dotenv.error) {
+    throw dotenv.error;
+}
+
 var expect = require('chai').expect;
 const crypto = require('crypto'); 
 

@@ -1,5 +1,9 @@
 const dotenv = require('dotenv').config();
 
+if (dotenv.error) {
+    throw dotenv.error;
+}
+
 const mongoose = require('mongoose');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 let mongoServer;
@@ -75,7 +79,7 @@ describe('userController:', () => {
 
     describe('basic_profile: ', () => {
         describe('googleapi calls succeed', () => {
-            beforeEach(function(done) {
+            before(function(done) {
                 let opts = { useNewUrlParser: true };
                 mongoServer = new MongoMemoryServer();
                 mongoServer.getConnectionString().then((mongoUri) => {
@@ -84,13 +88,15 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            beforeEach(() => {
+            before(() => {
                 let basicFixture = require('../fixtures/basic_profile');
                 nock('https://www.googleapis.com')
                 .get('/oauth2/v2/userinfo')
+                .times(2)
                 .reply(200, basicFixture);
             });
-            afterEach(() => {
+            after(() => {
+                nock.cleanAll();
                 mongoose.disconnect();
                 mongoServer.stop();
             });
@@ -131,15 +137,16 @@ describe('userController:', () => {
             });
         });
         describe('googleapi calls fails', () => {
-            beforeEach(() => {
+            before(() => {
                 nock('https://www.googleapis.com')
                 .get('/oauth2/v2/userinfo')
+                .times(3)
                 .replyWithError({
                     message: 'error',
                     code: '500'
                 });
             });
-            beforeEach((done) => {
+            before((done) => {
                 let opts = { useNewUrlParser: true };
                 mongoServer = new MongoMemoryServer();
                 mongoServer.getConnectionString().then((mongoUri) => {
@@ -148,7 +155,8 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            afterEach(() => {
+            after(() => {
+                nock.cleanAll();
                 mongoose.disconnect();
                 mongoServer.stop();
             });
@@ -171,19 +179,14 @@ describe('userController:', () => {
         describe('googleapi calls succeed', () => {
             let emailRequest;
             let emailResponse;
-            beforeEach((done) => {
+            before(() => {
                 let emailFixture = require('../fixtures/email_profile');
                 nock('https://www.googleapis.com')
                 .get('/gmail/v1/users/me/profile')
+                .times(4)
                 .reply(200, emailFixture);
-                emailRequest = getEmailRequest();
-                emailResponse = getEmailResponse();
-                userController.email_profile(emailRequest, emailResponse);
-                emailResponse.on('end', () => {
-                    done();
-                });
             });
-            beforeEach(function(done) {
+            before(function(done) {
                 let opts = { useNewUrlParser: true };
                 mongoServer = new MongoMemoryServer();
                 mongoServer.getConnectionString().then((mongoUri) => {
@@ -192,57 +195,86 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            afterEach(() => {
+            after(() => {
+                nock.cleanAll();
                 mongoose.disconnect();
                 mongoServer.stop();
             });
-            it('should give a correct response', () => {
-                let response = JSON.parse(emailResponse._getData());
-                // console.log(response);
-                expect(response.status).to.eql('success');
-                expect(response.status_message).to.eql('OK');
-                let data = {
-                    email_profile:
-                        { 
-                            emailAddress: 'test@gmail.com',
-                            messagesTotal: 1000,
-                            threadsTotal: 700,
-                            historyId: '12345abc' 
-                        }
-                }
-                expect(response.data).to.eql(data);
+            it('should give a correct response', (done) => {
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
+                userController.email_profile(emailRequest, emailResponse);
+                emailResponse.on('end', () => {
+                    let response = JSON.parse(emailResponse._getData());
+                    // console.log(response);
+                    expect(response.status).to.eql('success');
+                    expect(response.status_message).to.eql('OK');
+                    let data = {
+                        email_profile:
+                            { 
+                                emailAddress: 'test@gmail.com',
+                                messagesTotal: 1000,
+                                threadsTotal: 700,
+                                historyId: '12345abc' 
+                            }
+                    }
+                    expect(response.data).to.eql(data);
+                    done();
+                });
+             
             });
-            it ('should set the session emailAddress', () => {
-                expect(emailRequest.session.user_info.emailAddress).to.eql('test@gmail.com')
+            it ('should set the session emailAddress', (done) => {
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
+                userController.email_profile(emailRequest, emailResponse);
+                emailResponse.on('end', () => {
+                    // let response = JSON.parse(emailResponse._getData());
+                    expect(emailRequest.session.user_info.emailAddress).to.eql('test@gmail.com')
+                    done();
+                });
             });
-            it('should set the session emailId to the md5 hex of the emailAddress', () => {
-                expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
+            it('should set the session emailId to the md5 hex of the emailAddress', (done) => {
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
+                userController.email_profile(emailRequest, emailResponse);
+                emailResponse.on('end', () => {
+                    let response = JSON.parse(emailResponse._getData());
+                    expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
+                    done();
+                });
             });
             it('should upload the email profile to MongoDB', (done) => {
-                let conditions = { userId: emailRequest.session.user_info.userId };
-                let findFunc = function() {
-                    Profile.findOne(conditions, (err, doc) => {
-                        expect(doc.email.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058');
-                        expect(doc.email.emailAddress).to.eql('test@gmail.com');
-                        expect(doc.email.messagesTotal).to.eql(1000);
-                        expect(doc.email.threadsTotal).to.eql(700);
-                        expect(doc.email.historyId).to.eql('12345abc');
-                        done();
-                    });
-                }
-                setTimeout(findFunc, 50);
+                emailRequest = getEmailRequest();
+                emailResponse = getEmailResponse();
+                userController.email_profile(emailRequest, emailResponse);
+                emailResponse.on('end', () => {
+                    let response = JSON.parse(emailResponse._getData());
+                    let conditions = { userId: emailRequest.session.user_info.userId };
+                    let findFunc = function() {
+                        Profile.findOne(conditions, (err, doc) => {
+                            expect(doc.email.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058');
+                            expect(doc.email.emailAddress).to.eql('test@gmail.com');
+                            expect(doc.email.messagesTotal).to.eql(1000);
+                            expect(doc.email.threadsTotal).to.eql(700);
+                            expect(doc.email.historyId).to.eql('12345abc');
+                            done();
+                        });
+                    }
+                    setTimeout(findFunc, 50);
+                });
             });
         });
         describe('googleapi calls fails', () => {
-            beforeEach(() => {
+            before(() => {
                 nock('https://www.googleapis.com')
                 .get('/gmail/v1/users/me/profile')
+                .times(1)
                 .replyWithError({
                     message : 'error', 
                     code: '500'
                 });
             });
-            beforeEach(function(done) {
+            before(function(done) {
                 let opts = { useNewUrlParser: true };
                 mongoServer = new MongoMemoryServer();
                 mongoServer.getConnectionString().then((mongoUri) => {
@@ -251,7 +283,8 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            afterEach(() => {
+            after(() => {
+                nock.cleanAll();
                 mongoose.disconnect();
                 mongoServer.stop();
             });

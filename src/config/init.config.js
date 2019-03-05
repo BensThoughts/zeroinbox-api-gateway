@@ -8,5 +8,8 @@ module.exports = {
     mongo_uri: process.env.MONGO_URI,
     log_level: process.env.LOG_LEVEL,
     BASIC_PROFILE_ENDPOINT: process.env.BASIC_PROFILE_ENDPOINT,
-    GMAIL_PROFILE_ENDPOINT: process.env.GMAIL_PROFILE_ENDPOINT
+    GMAIL_PROFILE_ENDPOINT: process.env.GMAIL_PROFILE_ENDPOINT,
+    GAPI_INIT_RETRY_DELAY: process.env.GAPI_INIT_RETRY_DELAY,
+    GAPI_DELAY_MULTIPLIER: process.env.GAPI_DELAY_MULTIPLIER,
+    GAPI_MAX_RETRIES: process.env.GAPI_MAX_RETRIES
 }
