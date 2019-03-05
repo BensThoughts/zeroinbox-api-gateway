@@ -62,7 +62,7 @@ log4js.configure({
     }
 });
 
-const { log_level } = require('../config/init.config');
+const { log_level } = require('../../config/init.config');
 
 const logger = log4js.getLogger(log_level);
 

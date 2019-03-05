@@ -1,7 +1,7 @@
 /*******************************************************************************
  * INIT DEPS
 *******************************************************************************/
-const logger = require('../../loggers/log4js');
+const logger = require('../../libs/loggers/log4js');
 const {google} = require('googleapis');
 
 const {

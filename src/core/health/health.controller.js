@@ -1,4 +1,4 @@
-const logger = require('../../loggers/log4js');
+const logger = require('../../libs/loggers/log4js');
 
 exports.healthz = function(req, res, next) {
   logger.debug('Health Check Headers: ' + JSON.stringify(req.headers));

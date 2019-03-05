@@ -3,7 +3,7 @@ const path = require('path');
 const workdir = path.resolve(__dirname) + '/'
 const rabbitTop = fs.readFileSync(workdir + 'rabbit.topology.json');
 const rabbitTopology = JSON.parse(rabbitTop.toString());
-const logger = require('../loggers/log4js');
+const logger = require('../libs/loggers/log4js');
 logger.info('Rabbit Topology: ' + rabbitTop.toString());
 
 

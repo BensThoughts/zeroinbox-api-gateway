@@ -1,4 +1,4 @@
-const logger = require('../../loggers/log4js');
+const logger = require('../../libs/loggers/log4js');
 
 const Suggestion = require('../models/suggestion.model');
 

@@ -3,7 +3,7 @@
 /*******************************************************************************
 * LOGGING INIT (LOG4JS) App (console/file) logging
 *******************************************************************************/
-const logger = require('./loggers/log4js');
+const logger = require('./libs/libs/loggers/log4js');
 
 
 /*******************************************************************************
@@ -109,7 +109,7 @@ googleApi.use(morgan(morganChalk.logError, {
 /*******************************************************************************
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *******************************************************************************/
-const routeErrors = require('./error-handler/route-errors');
+const routeErrors = require('./libs/error-handler/route-errors');
 googleApi.use(routeErrors);
 
 

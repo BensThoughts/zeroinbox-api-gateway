@@ -2,7 +2,7 @@
 /*******************************************************************************
   INIT DEPS
 *******************************************************************************/
-const logger = require('../../loggers/log4js');
+const logger = require('../../libs/loggers/log4js');
 const request = require('request');
 const crypto = require('crypto');
 
