@@ -1,6 +1,6 @@
 const History = require('../../core/models/history.model');
 
-function upsertToHistory(userId, doc, callback) {
+exports.upsertToHistory = function (userId, doc, callback) {
     let conditions = { userId: userId }
     let options = {
         upsert: true,
@@ -13,12 +13,7 @@ function upsertToHistory(userId, doc, callback) {
     });
 }
 
-function findOneHistory(userId, callback) {
+exports.findOneHistory = function(userId, callback) {
     let conditions = { userId: userId }
     History.findOne(conditions, callback);
-}
-
-module.exports = {
-    upsertToHistory,
-    findOneHistory
 }
