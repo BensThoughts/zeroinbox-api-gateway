@@ -7,16 +7,22 @@ const rabbit = require('zero-rabbit');
 /*******************************************************************************
  INIT MONGOOSE
 *******************************************************************************/
-const History = require('../models/history.model');
+// const History = require('../models/history.model');
 
-const { 
-  upsertToHistory,
-  findOneHistory,
-} = require('../../libs/utils/mongoose.utils');
+const mongooseUtils = require('../../libs/utils/mongoose.utils');
+const upsertToHistory = mongooseUtils.upsertToHistory;
+const findOneHistory = mongooseUtils.findOneHistory;
 
 const {
   DEFAULT_PERCENT_LOADED
 } = require('../../config/init.config');
+
+
+exports.test = function(req, res) {
+  res.status(200).json({
+    test: 'test'
+  });
+}
 
 /**
  * The client can poll /loadingStatus to find out if the inbox is still loading.
