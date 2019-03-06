@@ -9,9 +9,9 @@ const rabbit = require('zero-rabbit');
 *******************************************************************************/
 const History = require('../models/history.model');
 
-/*******************************************************************************
- Check Loading Status
-*******************************************************************************/
+const {
+  DEFAULT_PERCENT_LOADED
+} = require('../../config/init.config');
 
 /**
  * The client can poll /loadingStatus to find out if the inbox is still loading.
@@ -58,53 +58,47 @@ exports.first_run_status = function(req, res) {
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus'
       });
-    } else if (doc === null || !doc) {
-      let passiveUpdate = {
-        "userId": userId,
-        "passive.firstRun": true,
-        "passive.firstRunDate": new Date(),
-        "passive.lastRunDate": new Date()
-      }
-      updatePassiveHistory(userId, passiveUpdate);
-      res.status(200).json({
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          firstRun: true
-        }
-      });
-    } else if (doc.passive.firstRun === undefined || !doc.passive) {
-        let passiveUpdate = {
-          "userId": userId,
-          "passive.firstRun": true,
-          "passive.firstRunDate": new Date(),
-          "passive.lastRunDate": new Date()
-        }
-        updatePassiveHistory(userId, passiveUpdate);
+    } else {
+      let firstRunEver = checkFirstRunEver(doc);
+      updatePassiveHistory(userId, firstRunEver);
+      if (firstRunEver) {
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
           data: {
-            firstRun: true
+            firstRun: firstRunEver
           }
         });
-    } else {
-      let passiveUpdate = {
-        "userId": userId,
-        "passive.lastRunDate": new Date(),
+      } else {
+        let firstRun = checkFirstRun(doc);
+        res.status(200).json({
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            firstRun: firstRun
+          }
+        });
       }
-      updatePassiveHistory(userId, passiveUpdate);
-      res.status(200).json({
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          firstRun: doc.passive.firstRun
-        }
-      });
     }
   });
 }
 
+function checkFirstRunEver(doc) {
+  if (doc === null || !doc) {
+    return true;
+  }
+  if (doc.passive === undefined) {
+    return true;
+  }
+  if (doc.passive.firstRun === undefined) {
+    return true;
+  }
+  return false;
+}
+
+function checkFirstRun(doc) {
+  return doc.passive.firstRun;
+}
 
 exports.load_suggestions = function(req, res, next) {
   let userId = req.session.user_info.userId;
@@ -119,48 +113,45 @@ exports.load_suggestions = function(req, res, next) {
         status: 'error',
         status_message: 'Internal server error at path /loadSuggestions: DB Error, cannot load suggestions',
       });
-    } else if (doc.active === undefined) {
-      // check to make sure active exists it won't exist on the users first run ever
-      // if loadingStatus is false we can safely send off the command message to start loading
-      // the inbox.  Else the inbox is already/still loading from a previous (recent) sign in.
-      publishUser(userId, access_token);
-      updateLoadingHistory(userId, (err, doc) => {
-        if (err) {
-          logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
-          res.status(500).json({
-            status: 'error',
-            status_message: 'Internal server error at /loadSuggestions: error setting loadingStatus'
-          });
-        } else {
-          res.json({
-            status: 'success',
-            status_message: 'OK'
-          });
-        } 
-      });
-    } else if (!doc.active.loadingStatus) {
-      publishUser(userId, access_token);
-      updateLoadingHistory(userId, (err, doc) => {
-        if (err) {
-          logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
-          res.status(500).json({
-            status: 'error',
-            status_message: 'Internal server error at /loadSuggestions: error setting loadingStatus'
-          });
-        } else {
-          res.status(200).json({
-            status: 'success',
-            status_message: 'OK',
-          }); 
-        }
-      });
     } else {
-      res.status(200).json({
-        status: 'success',
-        status_message: 'Already Loading',
-      });
-    }  
+      let alreadyLoading = checkLoadingStatus(doc);
+      if (alreadyLoading) {
+        res.status(200).json({
+          status: 'success',
+          status_message: 'Already Loading',
+        });
+      } else {
+        publishUser(userId, access_token);
+        updateLoadingHistory(userId, (err, doc) => {
+          if (err) {
+            logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
+            res.status(500).json({
+              status: 'error',
+              status_message: 'Internal server error at /loadSuggestions: error setting loadingStatus'
+            });
+          } else {
+            res.json({
+              status: 'success',
+              status_message: 'OK'
+            });
+          } 
+        });
+      }
+    }
   });
+}
+
+function checkLoadingStatus(doc) {
+  if (doc === null || !doc) {
+    return false;
+  }
+  if (doc.active === undefined) {
+    return false;
+  }
+  if (doc.active.loadingStatus === undefined) {
+    return false;
+  }
+  return doc.active.loadingStatus;
 }
 
 function publishUser(userId, access_token) {
@@ -180,12 +171,12 @@ function publishUser(userId, access_token) {
   });
 }
 
-function updateLoadingHistory(userId, cb) {
+function updateLoadingHistory(userId, callback) {
   let conditions = { userId: userId };
 
   let update = {
     'active.loadingStatus': true,
-    'active.percentLoaded': 5
+    'active.percentLoaded': DEFAULT_PERCENT_LOADED
   }
 
   let options = {
@@ -196,13 +187,29 @@ function updateLoadingHistory(userId, cb) {
 
     // update active.loadingStatus then tell client to start polling loadingStatus
     // by indicating firstRun
-    cb(err, doc);
+    callback(err, doc);
 
   });
 
 }
 
-function updatePassiveHistory(userId, passiveUpdate) {
+function updatePassiveHistory(userId, firstRunEver) {
+  let passiveUpdate;
+
+  if (firstRunEver) {
+    passiveUpdate = {
+      "userId": userId,
+      "passive.firstRun": true,
+      "passive.firstRunDate": new Date(),
+      "passive.lastRunDate": new Date()
+    }
+  } else {
+    passiveUpdate = {
+      "userId": userId,
+      "passive.lastRunDate": new Date()
+    }
+  }
+
   let conditions = { userId: userId };
 
   let options = {
