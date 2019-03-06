@@ -13,6 +13,12 @@ function upsertToHistory(userId, doc, callback) {
     });
 }
 
+function findOneHistory(userId, callback) {
+    let conditions = { userId: userId }
+    History.findOne(conditions, callback);
+}
+
 module.exports = {
-    upsertToHistory
+    upsertToHistory,
+    findOneHistory
 }

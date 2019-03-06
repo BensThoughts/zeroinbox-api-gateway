@@ -9,7 +9,10 @@ const rabbit = require('zero-rabbit');
 *******************************************************************************/
 const History = require('../models/history.model');
 
-const { upsertToHistory } = require('../../libs/utils/mongoose.utils');
+const { 
+  upsertToHistory,
+  findOneHistory,
+} = require('../../libs/utils/mongoose.utils');
 
 const {
   DEFAULT_PERCENT_LOADED
@@ -24,9 +27,7 @@ exports.loading_status = function (req, res) {
 
   let userId = req.session.user_info.userId;
 
-  let conditions = { userId: userId }
-
-  History.findOne(conditions, (err, loadingDoc) => {
+  findOneHistory(userId, (err, loadingDoc) => {
     if (err) {
       logger.error('Error at loading_status in history.findOne(): ' + err);
       res.status(500).json({
@@ -73,9 +74,7 @@ function checkLoadingDoc(loadingDoc) {
 exports.first_run_status = function(req, res) {
   let userId = req.session.user_info.userId;
 
-  let conditions = { userId: userId }
-
-  History.findOne(conditions, (err, doc) => {
+  findOneHistory(userId, (err, doc) => {
     if (err) {
       logger.error('Error at first_run_status in history.findOne(): ' + err);
       res.status(500).json({
@@ -123,9 +122,7 @@ exports.load_suggestions = function(req, res, next) {
   let userId = req.session.user_info.userId;
   let access_token = req.session.token.access_token;
 
-  let conditions = { userId: userId }
-
-  History.findOne(conditions, (err, doc) => {
+  findOneHistory(userId, (err, doc) => {
     if (err) {
       logger.error('Error at load_suggestions in history.findOne(): ' + err);
       res.json({
@@ -219,13 +216,5 @@ function updatePassiveHistory(userId, firstRunEver) {
     }
   }
 
-  let conditions = { userId: userId };
-
-  let options = {
-    multi: false,
-    upsert: true
-  }
-  History.updateOne(conditions, passiveUpdate, options, (err, doc) => {
-
-  });
+  upsertToHistory(userId, passiveUpdate);
 }
