@@ -9,6 +9,8 @@ const rabbit = require('zero-rabbit');
 *******************************************************************************/
 const History = require('../models/history.model');
 
+const { upsertToHistory } = require('../../libs/utils/mongoose.utils');
+
 const {
   DEFAULT_PERCENT_LOADED
 } = require('../../config/init.config');
@@ -24,7 +26,7 @@ exports.loading_status = function (req, res) {
 
   let conditions = { userId: userId }
 
-  History.findOne(conditions, (err, raw) => {
+  History.findOne(conditions, (err, loadingDoc) => {
     if (err) {
       logger.error('Error at loading_status in history.findOne(): ' + err);
       res.status(500).json({
@@ -32,19 +34,41 @@ exports.loading_status = function (req, res) {
         status_message: 'internal server error at path /loadingStatus: Error getting loadingStatus'
       });
     } else {
-      let loadingStatus = raw.active.loadingStatus;
-      let percentLoaded = raw.active.percentLoaded;
-      res.json({ 
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          loadingStatus: loadingStatus,
-          percentLoaded: percentLoaded,
-        }
-      });
+      let ok = checkLoadingDoc(loadingDoc);
+      if (ok) {
+        res.status(200).json({ 
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            loadingStatus: loadingDoc.active.loadingStatus,
+            percentLoaded: loadingDoc.active.percentLoaded,
+          }
+        });
+      } else {
+        res.status(400).json({
+          status: 'error',
+          status_message: 'Error checking /loadingStatus: Did you call /loadSuggestions first?'
+        });
+      }
     }
   });
 };
+
+function checkLoadingDoc(loadingDoc) {
+  if (loadingDoc === null || !loadingDoc) {
+    return false;
+  }
+  if (loadingDoc.active === undefined) {
+    return false;
+  }
+  if (loadingDoc.active.loadingStatus === undefined) {
+    return false;
+  }
+  if (loadingDoc.active.percentLoaded === undefined) {
+    return false;
+  }
+  return true;
+}
 
 exports.first_run_status = function(req, res) {
   let userId = req.session.user_info.userId;
@@ -70,12 +94,11 @@ exports.first_run_status = function(req, res) {
           }
         });
       } else {
-        let firstRun = checkFirstRun(doc);
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
           data: {
-            firstRun: firstRun
+            firstRun: doc.passive.firstRun
           }
         });
       }
@@ -94,10 +117,6 @@ function checkFirstRunEver(doc) {
     return true;
   }
   return false;
-}
-
-function checkFirstRun(doc) {
-  return doc.passive.firstRun;
 }
 
 exports.load_suggestions = function(req, res, next) {
@@ -172,24 +191,14 @@ function publishUser(userId, access_token) {
 }
 
 function updateLoadingHistory(userId, callback) {
-  let conditions = { userId: userId };
-
   let update = {
     'active.loadingStatus': true,
     'active.percentLoaded': DEFAULT_PERCENT_LOADED
   }
 
-  let options = {
-    multi: false,
-    upsert: true
-  }
-  History.updateOne(conditions, update, options, (err, doc) => {
-
-    // update active.loadingStatus then tell client to start polling loadingStatus
-    // by indicating firstRun
+  upsertToHistory(userId, update, (err, doc) => {
     callback(err, doc);
-
-  });
+  })
 
 }
 

@@ -1,4 +1,4 @@
-exports.retryPromise = function retryPromise(promiseCreator, retries, delay, delayMultiplier) {
+function retryPromise(promiseCreator, retries, delay, delayMultiplier) {
     return new Promise((resolve, reject) => {
       promiseCreator()
         .then(resolve)
@@ -15,4 +15,8 @@ exports.retryPromise = function retryPromise(promiseCreator, retries, delay, del
           }
         });
       });
+}
+
+module.exports = {
+  retryPromise
 }

@@ -11,13 +11,14 @@ let mongoServer;
 const sinon = require('sinon');
 
 
+const testdouble = require('testdouble');
+
+
 // const loadingController = require('../../loading.controller');
 
 
 const chai = require('chai');
 const expect = chai.expect;
-
-const nock = require('nock');
 
 let httpMocks = require('node-mocks-http');
 
@@ -192,6 +193,8 @@ describe('loadingController:', () => {
         beforeEach((done) => {
             const getPublishUserFunc = { getPublishUser: loadingController.__get__('publishUser') };
             stubGetPublishUser = sinon.stub(getPublishUserFunc, 'getPublishUser').returns(true);
+            // let publishUser = testdouble.replace(getPublishUserFunc);
+            // publishUser.
             revert = loadingController.__set__('publishUser', stubGetPublishUser);
             let opts = { useNewUrlParser: true };
             mongoServer = new MongoMemoryServer();

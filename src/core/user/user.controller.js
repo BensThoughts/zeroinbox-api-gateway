@@ -9,8 +9,8 @@ const crypto = require('crypto');
 const Profile = require('../models/profile.model');
 const History = require('../models/history.model');
 
-const apiUtils = require('../../libs/utils/api-utils');
-// const retryPromise = apiUtils.retryPromise;
+const apiUtils = require('../../libs/utils/api.utils');
+const retryPromise = apiUtils.retryPromise;
 
 const {
   BASIC_PROFILE_ENDPOINT,
@@ -42,25 +42,6 @@ function getBasicProfilePromise(options) {
       }
     })
   });
-}
-
-function retryPromise(promiseCreator, retries, delay, delayMultiplier) {
-  return new Promise((resolve, reject) => {
-    promiseCreator()
-      .then(resolve)
-      .catch((err) => {
-        if (retries == 0) {
-          reject(err);
-        } else {
-          let retryFunc = function() {
-            retries--;
-            delay = delay * delayMultiplier;
-            resolve(retryPromise(promiseCreator, retries, delay, delayMultiplier));
-          }
-          setTimeout(retryFunc, delay);
-        }
-      });
-    });
 }
 
 exports.basic_profile = function (req, res) {
