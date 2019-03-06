@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha ./src/**/*.spec.js --exit",
-    "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --timeout 60000 --exit",
+    "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --timeout 10000 --exit",
     "integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
     "start": "nodemon /usr/src/app/src/index.js",
     "start:dev": "nodemon --inspect-brk=0.0.0.0 /usr/src/app/src/index.js",
@@ -29,12 +29,12 @@
     "express-session": "^1.15.6",
     "googleapis": "^36.0.0",
     "log4js": "^4.0.2",
-    "mongoose": "^5.4.14",
+    "mongoose": "^5.4.17",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.10",
     "request": "^2.88.0",
     "uid-safe": "^2.1.5",
-    "zero-rabbit": "^1.0.9"
+    "zero-rabbit": "^1.0.12"
   },
   "devDependencies": {
     "chai": "^4.2.0",
@@ -46,7 +46,7 @@
     "nock": "^10.0.6",
     "node-mocks-http": "^1.7.3",
     "rewire": "^4.0.1",
-    "sinon": "^7.2.6",
+    "sinon": "^7.2.7",
     "sinon-express-mock": "^2.1.0",
     "supertest": "^3.4.2",
     "testdouble": "^3.11.0"
