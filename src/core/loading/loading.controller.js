@@ -13,16 +13,13 @@ const mongooseUtils = require('../../libs/utils/mongoose.utils');
 const upsertToHistory = mongooseUtils.upsertToHistory;
 const findOneHistory = mongooseUtils.findOneHistory;
 
+const rabbitUtils = require('../../libs/utils/rabbit.utils');
+const publishUser = rabbitUtils.publishUser;
+
 const {
   DEFAULT_PERCENT_LOADED
 } = require('../../config/init.config');
 
-
-exports.test = function(req, res) {
-  res.status(200).json({
-    test: 'test'
-  });
-}
 
 /**
  * The client can poll /loadingStatus to find out if the inbox is still loading.
@@ -174,23 +171,6 @@ function checkLoadingStatus(doc) {
     return false;
   }
   return doc.active.loadingStatus;
-}
-
-function publishUser(userId, access_token) {
-  let sentAt = new Date().getTime();
-  logger.debug(sentAt);
-  rabbit.publish('api.send.1', 'user.ids.ex.1', '', {
-    userId: userId,
-    access_token: access_token,
-  }, { 
-    contentType: 'application/json', 
-    type: 'user',
-    appId: 'zi-api-gateway',
-    timestamp: sentAt,
-    encoding: 'string Buffer',
-
-    persistent: true,
-  });
 }
 
 function updateLoadingHistory(userId, callback) {

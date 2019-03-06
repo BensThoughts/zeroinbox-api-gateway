@@ -1,7 +1,7 @@
 const rabbit = require('zero-rabbit');
 const logger = require('../loggers/log4js');
 
-function publishUser(userId, access_token) {
+exports.publishUser = function(userId, access_token) {
     let sentAt = new Date().getTime();
     logger.debug(sentAt);
     rabbit.publish('api.send.1', 'user.ids.ex.1', '', {
@@ -15,8 +15,4 @@ function publishUser(userId, access_token) {
       encoding: 'string Buffer',
       persistent: true,
     });
-}
-
-module.exports = {
-    publishUser
 }
