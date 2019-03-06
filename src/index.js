@@ -3,7 +3,7 @@
 /*******************************************************************************
 * LOGGING INIT (LOG4JS) App (console/file) logging
 *******************************************************************************/
-const logger = require('./libs/libs/loggers/log4js');
+const logger = require('./libs/loggers/log4js');
 
 
 /*******************************************************************************
@@ -85,7 +85,7 @@ googleApi.use(
 *******************************************************************************/
 const addRequestId = require('express-request-id')();
 const morgan = require('morgan');
-const morganChalk = require('./loggers/morgan.chalk');
+const morganChalk = require('./libs/loggers/morgan.chalk');
 
 googleApi.use(addRequestId);
 
