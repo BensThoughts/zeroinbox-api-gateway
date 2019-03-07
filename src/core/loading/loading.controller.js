@@ -142,6 +142,7 @@ exports.load_suggestions = function(req, res, next) {
       } else {
         publishUser(userId, access_token);
         updateLoadingHistory(userId, (err, doc) => {
+          // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {
             logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
             res.status(500).json({

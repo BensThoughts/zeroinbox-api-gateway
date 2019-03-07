@@ -67,7 +67,7 @@ describe('loadingController:', () => {
         });
         describe('Success paths: ', () => {
             it('should return firstRun: true if it is not already set in History', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, null);
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, null);
                 let request = getRequest();
                 let response = getResponse();
                 response.on('end', () => {
@@ -81,7 +81,7 @@ describe('loadingController:', () => {
                 loadingController.first_run_status(request, response);
             });
             it('should return firstRun: false if it is set in History DB to false', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, {
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
                     passive: {
                         firstRun: false
                     }
@@ -99,7 +99,7 @@ describe('loadingController:', () => {
                 loadingController.first_run_status(request, response);
             });
             it('should return firsRun: true if it is set in History DB to true', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, {
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
                     passive: {
                         firstRun: true
                     }
@@ -117,7 +117,7 @@ describe('loadingController:', () => {
                 loadingController.first_run_status(request, response);
             });
             it('should call upsertToHistory() with the proper arguments on firstRunEver', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, null);
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, null);
                 let request = getRequest();
                 let response = getResponse();
                 response.on('end', () => {
@@ -133,7 +133,7 @@ describe('loadingController:', () => {
                 loadingController.first_run_status(request, response); 
             });
             it('should call upsertToHistory() with the proper arguments on run where firstRun is false', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, {
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
                     passive: {
                         firstRun: false,
                         firstRunDate: new Date(),
@@ -154,7 +154,7 @@ describe('loadingController:', () => {
                 loadingController.first_run_status(request, response); 
             });
             it('should call upsertToHistory() with the proper arguments on run where firstRun is true', (done) => {
-                td.when(findOneHistory(userId)).thenCallback(null, {
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
                     passive: {
                         firstRun: true,
                         firstRunDate: new Date(),
@@ -178,7 +178,7 @@ describe('loadingController:', () => {
 
         describe('Error paths: ', () => {
             it('should respond with a 500 error message if the DB find throws an error', (done) => {
-                td.when(findOneHistory(userId)).thenCallback('Error', null);
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback('Error', null);
                 let request = getRequest();
                 let response = getResponse();
                 response.on('end', () => {
@@ -341,12 +341,12 @@ describe('loadingController:', () => {
             it('should respond with the proper response on a users firstRunEver', (done) => {
                 let request = getRequest();
                 let response = getResponse();
-                td.when(findOneHistory(userId)).thenCallback(null, null);
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, null);
                 let update = {
                     'active.loadingStatus': true,
                     'active.percentLoaded': DEFAULT_PERCENT_LOADED
                   }
-                td.when(upsertToHistory(userId, update)).thenCallback(null, {
+                td.when(upsertToHistory(userId, update), { times: 1 }).thenCallback(null, {
                     n: 1,
                     nModified: 1, 
                     ok: 1
@@ -367,17 +367,17 @@ describe('loadingController:', () => {
             it('should respond with the proper response on a users next run when loadingStatus is true', (done) => {
                 let request = getRequest();
                 let response = getResponse();
-                td.when(findOneHistory(userId)).thenCallback(null, {
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
                     active: {
                         loadingStatus: true,
-                        percentLoaded: 100
+                        percentLoaded: 10
                     }
                 });
                 let update = {
                     'active.loadingStatus': true,
                     'active.percentLoaded': DEFAULT_PERCENT_LOADED
                   }
-                td.when(upsertToHistory(userId, update)).thenCallback(null, {
+                td.when(upsertToHistory(userId, update), { times: 1 }).thenCallback(null, {
                     n: 1,
                     nModified: 1, 
                     ok: 1
@@ -392,6 +392,38 @@ describe('loadingController:', () => {
                     let publishExplanation = td.explain(publishUser);
                     expect(publishExplanation.callCount).to.eql(0);
                     expect(upsertExplanation.callCount).to.eql(0);
+                    done();
+                });
+                loadingController.load_suggestions(request, response);
+            });
+            it('should respond with the proper response on a users next run when loadingStatus is false', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId), { times: 1 }).thenCallback(null, {
+                    active: {
+                        loadingStatus: false,
+                        percentLoaded: 100
+                    }
+                });
+                let update = {
+                    'active.loadingStatus': true,
+                    'active.percentLoaded': DEFAULT_PERCENT_LOADED
+                  }
+                td.when(upsertToHistory(userId, update), { times: 1 }).thenCallback(null, {
+                    n: 1,
+                    nModified: 1, 
+                    ok: 1
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    // console.log(data);
+                    expect(data.status).to.eql('success');
+                    expect(data.status_message).to.eql('OK');
+                    expect(response._getStatusCode()).to.eql(200);
+                    let upsertExplanation = td.explain(upsertToHistory);
+                    let publishExplanation = td.explain(publishUser);
+                    expect(publishExplanation.callCount).to.eql(1);
+                    expect(upsertExplanation.callCount).to.eql(1);
                     done();
                 });
                 loadingController.load_suggestions(request, response);
