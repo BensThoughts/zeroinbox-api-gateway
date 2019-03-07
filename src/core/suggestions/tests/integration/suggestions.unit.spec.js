@@ -9,7 +9,7 @@ const {MongoMemoryServer} = require('mongodb-memory-server');
 let mongoServer;
 
 const suggestionsController = require('../../suggestions.controller');
-const Suggestions = require('../../../models/suggestion.model');
+const Suggestions = require('../../../../models/suggestion.model');
 
 const chai = require('chai');
 const expect = chai.expect;

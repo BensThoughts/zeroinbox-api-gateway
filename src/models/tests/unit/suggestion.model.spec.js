@@ -160,7 +160,7 @@ describe('models: suggestion', function() {
     describe('static methods:', () => {
         it('should have createSenderId', () => {
             let suggestion = valid_suggestion();
-            Suggestion.should.have.property('createSenderId');
+            expect(Suggestion).to.have.property('createSenderId');
         });
         it('createSenderId should create id as md5 hash in hex decimal', () => {
             let suggestion = valid_suggestion();
