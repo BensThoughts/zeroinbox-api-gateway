@@ -10,7 +10,7 @@ const Profile = require('../models/profile.model');
 const History = require('../models/history.model');
 
 const apiUtils = require('../../libs/utils/api.utils');
-const retryPromise = apiUtils.retryPromise;
+const httpRequest = apiUtils.httpRequest;
 
 const {
   BASIC_PROFILE_ENDPOINT,
@@ -24,15 +24,23 @@ const {
 Get Basic Profile
 *******************************************************************************/
 
-function getBasicProfile(options) {
+/* function getBasicProfile(access_token) {
   let retries = GAPI_MAX_RETRIES;
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => getBasicProfilePromise(options);
+  let promiseCreator = () => getBasicProfilePromise(access_token);
   return retryPromise(promiseCreator, retries, delay, delayMultiplier);
 }
 
-function getBasicProfilePromise(options) {
+function getBasicProfilePromise(access_token) {
+  
+  const options = {
+    url: BASIC_PROFILE_ENDPOINT,
+    headers: {
+      'Authorization': 'Bearer ' + access_token
+    }
+  };
+
   return new Promise((resolve, reject) => {
     request.get(options, (error, response, body) => {
       if (!error && response.statusCode == 200) {
@@ -42,20 +50,13 @@ function getBasicProfilePromise(options) {
       }
     })
   });
-}
+} */
 
 exports.basic_profile = function (req, res) {
 
   let access_token = req.session.token.access_token;
 
-  const options = {
-    url: BASIC_PROFILE_ENDPOINT,
-    headers: {
-      'Authorization': 'Bearer ' + access_token
-    }
-  };
-
-  getBasicProfile(options).then((basic_profile_response) => {
+  httpRequest(BASIC_PROFILE_ENDPOINT, access_token).then((basic_profile_response) => {
 
     if (basic_profile_response) {
       let basic_profile = JSON.parse(basic_profile_response);
@@ -147,9 +148,19 @@ exports.basic_profile = function (req, res) {
 /*******************************************************************************
 Get Email Profile
 *******************************************************************************/
-exports.email_profile = function (req, res) {
 
-  let access_token = req.session.token.access_token;
+
+
+/* function getEmailProfile(access_token) {
+  let retries = GAPI_MAX_RETRIES;
+  let delay = GAPI_INIT_RETRY_DELAY;
+  let delayMultiplier = GAPI_DELAY_MULTIPLIER;
+  let promiseCreator = () => getEmailProfilePromise(access_token);
+  return retryPromise(promiseCreator, retries, delay, delayMultiplier);
+}
+
+
+function getEmailProfilePromise(access_token) {
 
   const options = {
     url: GMAIL_PROFILE_ENDPOINT,
@@ -158,7 +169,7 @@ exports.email_profile = function (req, res) {
     }
   };
 
-  let getEmailProfile = new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     request.get(options, (error, response, body) => {
       if (!error && response.statusCode == 200) {
         resolve(body);
@@ -168,7 +179,13 @@ exports.email_profile = function (req, res) {
     });
   });
 
-  getEmailProfile.then((email_profile_response) => {
+} */
+
+exports.email_profile = function (req, res) {
+
+  let access_token = req.session.token.access_token;
+
+  httpRequest(GMAIL_PROFILE_ENDPOINT, access_token).then((email_profile_response) => {
     let email_profile = JSON.parse(email_profile_response);
     let userId = req.session.user_info.userId;
 
@@ -215,7 +232,7 @@ exports.email_profile = function (req, res) {
     });
 
   }).catch((err) => {
-    logger.error(err);
+    logger.error('Error in getEmailProfile(): ' + err);
     res.status(500).json({
       status: 'error',
       status_message: 'Google Api Error at /emailProfile: error contacting googleApi'
