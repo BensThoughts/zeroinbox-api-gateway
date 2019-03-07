@@ -1,6 +1,6 @@
 const logger = require('../../libs/loggers/log4js');
 
-const Suggestion = require('../models/suggestion.model');
+const Suggestion = require('../../models/suggestion.model');
 
 exports.suggestions = function (req, res) {
   let userId = req.session.user_info.userId;

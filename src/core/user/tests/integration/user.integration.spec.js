@@ -4,11 +4,15 @@ if (dotenv.error) {
     throw dotenv.error;
 }
 
+const {
+    GAPI_MAX_RETRIES
+} = require('../../../../config/init.config');
+
 const mongoose = require('mongoose');
 const {MongoMemoryServer} = require('mongodb-memory-server');
 let mongoServer;
 
-const Profile = require('../../../models/profile.model');
+const Profile = require('../../../../models/profile.model');
 
 const userController = require('../../user.controller');
 
@@ -88,15 +92,17 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            before(() => {
+            beforeEach(() => {
                 let basicFixture = require('../fixtures/basic_profile');
                 nock('https://www.googleapis.com')
                 .get('/oauth2/v2/userinfo')
-                .times(2)
+                .times(1)
                 .reply(200, basicFixture);
             });
-            after(() => {
+            afterEach(() => {
                 nock.cleanAll();
+            });
+            after(() => {
                 mongoose.disconnect();
                 mongoServer.stop();
             });
@@ -140,7 +146,7 @@ describe('userController:', () => {
             before(() => {
                 nock('https://www.googleapis.com')
                 .get('/oauth2/v2/userinfo')
-                .times(3)
+                .times(GAPI_MAX_RETRIES + 1)
                 .replyWithError({
                     message: 'error',
                     code: '500'
@@ -179,11 +185,11 @@ describe('userController:', () => {
         describe('googleapi calls succeed', () => {
             let emailRequest;
             let emailResponse;
-            before(() => {
+            beforeEach(() => {
                 let emailFixture = require('../fixtures/email_profile');
                 nock('https://www.googleapis.com')
                 .get('/gmail/v1/users/me/profile')
-                .times(4)
+                .times(1)
                 .reply(200, emailFixture);
             });
             before(function(done) {
@@ -195,8 +201,10 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            after(() => {
+            afterEach(() => {
                 nock.cleanAll();
+            });
+            after(() => {
                 mongoose.disconnect();
                 mongoServer.stop();
             });
@@ -265,10 +273,10 @@ describe('userController:', () => {
             });
         });
         describe('googleapi calls fails', () => {
-            before(() => {
+            beforeEach(() => {
                 nock('https://www.googleapis.com')
                 .get('/gmail/v1/users/me/profile')
-                .times(1)
+                .times(GAPI_MAX_RETRIES + 1)
                 .replyWithError({
                     message : 'error', 
                     code: '500'
@@ -283,8 +291,10 @@ describe('userController:', () => {
                     });
                 }).then(() => done());
             });
-            after(() => {
+            afterEach(() => {
                 nock.cleanAll();
+            });
+            after(() => {
                 mongoose.disconnect();
                 mongoServer.stop();
             });

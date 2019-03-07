@@ -19,7 +19,7 @@ const expect = chai.expect;
 
 let httpMocks = require('node-mocks-http');
 
-const History = require('../../../models/history.model');
+const History = require('../../../../models/history.model');
 
 function getRequest() {
     return httpMocks.createRequest({
