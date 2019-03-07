@@ -24,34 +24,6 @@ const {
 Get Basic Profile
 *******************************************************************************/
 
-/* function getBasicProfile(access_token) {
-  let retries = GAPI_MAX_RETRIES;
-  let delay = GAPI_INIT_RETRY_DELAY;
-  let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => getBasicProfilePromise(access_token);
-  return retryPromise(promiseCreator, retries, delay, delayMultiplier);
-}
-
-function getBasicProfilePromise(access_token) {
-  
-  const options = {
-    url: BASIC_PROFILE_ENDPOINT,
-    headers: {
-      'Authorization': 'Bearer ' + access_token
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    request.get(options, (error, response, body) => {
-      if (!error && response.statusCode == 200) {
-        resolve(body);
-      } else {
-        reject(error);
-      }
-    })
-  });
-} */
-
 exports.basic_profile = function (req, res) {
 
   let access_token = req.session.token.access_token;
@@ -148,38 +120,6 @@ exports.basic_profile = function (req, res) {
 /*******************************************************************************
 Get Email Profile
 *******************************************************************************/
-
-
-
-/* function getEmailProfile(access_token) {
-  let retries = GAPI_MAX_RETRIES;
-  let delay = GAPI_INIT_RETRY_DELAY;
-  let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => getEmailProfilePromise(access_token);
-  return retryPromise(promiseCreator, retries, delay, delayMultiplier);
-}
-
-
-function getEmailProfilePromise(access_token) {
-
-  const options = {
-    url: GMAIL_PROFILE_ENDPOINT,
-    headers: {
-      'Authorization': 'Bearer ' + access_token
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    request.get(options, (error, response, body) => {
-      if (!error && response.statusCode == 200) {
-        resolve(body);
-      } else {
-        reject(error);
-      }
-    });
-  });
-
-} */
 
 exports.email_profile = function (req, res) {
 
