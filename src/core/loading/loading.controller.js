@@ -32,7 +32,7 @@ exports.loading_status = function (req, res) {
 
   findOneHistory(userId, (err, loadingDoc) => {
     if (err) {
-      logger.error('Error at loading_status in history.findOne(): ' + err);
+      logger.error('MongoDB Error at loading_status in history.findOne(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /loadingStatus: Error getting loadingStatus'
@@ -79,7 +79,7 @@ exports.first_run_status = function(req, res) {
 
   findOneHistory(userId, (err, doc) => {
     if (err) {
-      logger.error('Error at first_run_status in history.findOne(): ' + err);
+      logger.error('MongoDB Error at first_run_status in history.findOne(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus'
@@ -127,7 +127,7 @@ exports.load_suggestions = function(req, res, next) {
 
   findOneHistory(userId, (err, doc) => {
     if (err) {
-      logger.error('Error at load_suggestions in history.findOne(): ' + err);
+      logger.error('MongoDB Error at load_suggestions in history.findOne(): ' + err);
       res.json({
         status: 'error',
         status_message: 'Internal server error at path /loadSuggestions: DB Error, cannot load suggestions',

@@ -4,22 +4,17 @@ if (dotenv.error) {
     throw dotenv.error;
 }
 
-const mongoose = require('mongoose');
-const {MongoMemoryServer} = require('mongodb-memory-server');
-let mongoServer;
-
-const sinon = require('sinon');
-
-
-// const loadingController = require('../../loading.controller');
-
+const {
+    DEFAULT_PERCENT_LOADED
+} = require('../../../../config/init.config');
 
 const chai = require('chai');
 const expect = chai.expect;
 
 let httpMocks = require('node-mocks-http');
+const td = require('testdouble');
 
-const History = require('../../../models/history.model');
+const userId = 'user_id';
 
 function getRequest() {
     return httpMocks.createRequest({
@@ -33,7 +28,7 @@ function getRequest() {
                 token_type: 'Bearer'
             },
             user_info: {
-                userId: '12345abc',
+                userId: userId,
                 emailId: '54321cba',
                 emailAddress: 'test@gmail.com'
             }
@@ -50,324 +45,359 @@ function getResponse(){
     });
 }
 
-const rewire = require('rewire');
-const loadingController = rewire('../../loading.controller');
-
+let loadingController; // = require('../../loading.controller');
+let upsertToHistory;
+let findOneHistory;
+let publishUser;
 
 describe('loadingController:', () => {
 
-    describe('first_run_status: ', () => {
-        before((done) => {
-            let opts = { useNewUrlParser: true };
-            mongoServer = new MongoMemoryServer();
-            mongoServer.getConnectionString().then((mongoUri) => {
-                return mongoose.connect(mongoUri, opts, (err) => {
-                    if (err) done(err);
-                });
-            }).then(() => done());
-        });
-        before((done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            let options = {
-                multi: false,
-                upsert: true
-              }
-            let activeUpdate = {
-                "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
-                "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
-            }
-            History.updateOne(conditions, activeUpdate, options, () => {
-                done();
-            });
-        });
-        after(() => {
-            mongoose.disconnect();
-            mongoServer.stop();
-        });
-        it('should return firstRun: true if it is not already set in History', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            let userId = request.session.user_info.userId;
-            // activeUpdate has already been applied if this route is being called
-            // there are checks for this in route-errors, so we set it here first.
 
-            loadingController.first_run_status(request, response);
-            response.on('end', () => {
-                let data = JSON.parse(response._getData());
-                expect(data.status).to.eql('success');
-                expect(data.status_message).to.eql('OK');
-                expect(data.data.firstRun).to.eql(true);
-                done();
-            });
+    describe('first_run_status(req, res): ', () => {
+
+        beforeEach(() => {
+            let mongooseUtils = td.replace('../../../../libs/utils/mongoose.utils');
+            upsertToHistory = mongooseUtils.upsertToHistory;
+            findOneHistory = mongooseUtils.findOneHistory;
+            loadingController = require('../../loading.controller');
         });
-        it('should have set firstRun: true in History if it is not already set', (done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            History.findOne(conditions, (err, doc) => {
-                expect(doc.passive.firstRun).to.eql(true);
-                done();
-            });
+        afterEach(() => {
+            td.reset();
+            loadingController = undefined;
         });
-        it('should have set firstRunDate to a new Date object', (done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            History.findOne(conditions, (err, doc) => {
-                let date = new Date();
-                expect(doc.passive.firstRunDate).to.be.below(date);
-                done();
-            });
-        });
-        it('should have set lastRunDate to a new Date object', (done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            History.findOne(conditions, (err, doc) => {
-                let date = new Date();
-                expect(doc.passive.lastRunDate).to.be.below(date);
-                done();
-            });
-        });
-        it('should return firstRun as doc.passive.firstRun if it is already set in History', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            let userId = request.session.user_info.userId;
-            // activeUpdate has already been applied if this route is being called
-            // there are checks for this in route-errors, so we set it here first.
-            loadingController.first_run_status(request, response);
-            response.on('end', () => {
-                let data = JSON.parse(response._getData());
-                expect(data.status).to.eql('success');
-                expect(data.status_message).to.eql('OK');
-                expect(data.data.firstRun).to.eql(true);
-                done();
-            });
-        });
-        it('should have a lastRunDate that is greater then the firstRunDate after being called again', (done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            History.findOne(conditions, (err, doc) => {
-                expect(doc.passive.lastRunDate).to.be.above(doc.passive.firstRunDate);
-                done();
-            });
-        });
-        it('should return firstRun as false after first run has been set to false in History', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            let options = {
-                multi: false,
-                upsert: true
-              }
-            let activeUpdate = {
-                "passive.firstRun": false,
-            }
-            History.updateOne(conditions, activeUpdate, options, () => {
-                loadingController.first_run_status(request, response);
+        describe('Success paths: ', () => {
+            it('should return firstRun: true if it is not already set in History', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, null);
+                let request = getRequest();
+                let response = getResponse();
                 response.on('end', () => {
                     let data = JSON.parse(response._getData());
                     expect(data.status).to.eql('success');
                     expect(data.status_message).to.eql('OK');
+                    expect(response._getStatusCode()).to.eql(200);
+                    expect(data.data.firstRun).to.eql(true);
+                    done();
+                });
+                loadingController.first_run_status(request, response);
+            });
+            it('should return firstRun: false if it is set in History DB to false', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    passive: {
+                        firstRun: false
+                    }
+                });
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('success');
+                    expect(data.status_message).to.eql('OK');
+                    expect(response._getStatusCode()).to.eql(200);
                     expect(data.data.firstRun).to.eql(false);
                     done();
                 });
+                loadingController.first_run_status(request, response);
             });
-        });
-
-    });
-
-    describe('load_suggestions:', () => {
-        let revert;
-        let stubGetPublishUser;
-        beforeEach((done) => {
-            const getPublishUserFunc = { getPublishUser: loadingController.__get__('publishUser') };
-            stubGetPublishUser = sinon.stub(getPublishUserFunc, 'getPublishUser').returns(true);
-            // let publishUser = testdouble.replace(getPublishUserFunc);
-            // publishUser.
-            revert = loadingController.__set__('publishUser', stubGetPublishUser);
-            let opts = { useNewUrlParser: true };
-            mongoServer = new MongoMemoryServer();
-            mongoServer.getConnectionString().then((mongoUri) => {
-                return mongoose.connect(mongoUri, opts, (err) => {
-                    if (err) done(err);
+            it('should return firsRun: true if it is set in History DB to true', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    passive: {
+                        firstRun: true
+                    }
                 });
-            }).then(() => done());
-        });
-        beforeEach((done) => {
-            let request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            let options = {
-                multi: false,
-                upsert: true
-              }
-            let activeUpdate = {
-                "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
-                "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
-            }
-            History.updateOne(conditions, activeUpdate, options, () => {
-                done();
-            });
-        });
-        afterEach(() => {
-            mongoose.disconnect();
-            mongoServer.stop();
-            revert();
-        });
-        it('should return success/OK the first time called', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            loadingController.load_suggestions(request, response);
-            response.on('end', () => {
-                let data = JSON.parse(response._getData());
-                expect(data.status).to.eql('success');
-                expect(data.status_message).to.eql('OK');
-                done();
-            });
-        });
-        it('should only call publishUser once', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            loadingController.load_suggestions(request, response);
-            response.on('end', () => {
-                let data = JSON.parse(response._getData());
-                expect(stubGetPublishUser.calledOnce).to.be.true;
-                done();
-            });
-        });
-        it('should not call publishUser if loading is still true', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            let request2 = getRequest();
-            let response2 = getResponse();
-            loadingController.load_suggestions(request, response);
-            response.on('end', () => {
-                loadingController.load_suggestions(request2, response2);
-                response2.on('end', () => {
-                    let data = JSON.parse(response2._getData());
-                    expect(stubGetPublishUser.calledOnce).to.be.true;
-                    done();
-                });
-            });
-        });
-        it('should skip to status message Already Loading if it is still loading suggestions', (done) => {
-            let request = getRequest();
-            let response = getResponse();
-            let request2 = getRequest();
-            let response2 = getResponse();
-            loadingController.load_suggestions(request, response);
-            response.on('end', () => {
-                loadingController.load_suggestions(request2, response2);
-                response2.on('end', () => {
-                    let data = JSON.parse(response2._getData());
-                    expect(data.status).to.eql('success');
-                    expect(data.status_message).to.eql('Already Loading');
-                    done();
-                });
-            });
-        });
-        it('should set loading to true before sending the response', (done) => { 
-            let request = getRequest();
-            let response = getResponse();
-            let conditions = { userId: request.session.user_info.userId };
-            loadingController.load_suggestions(request, response);
-            response.on('end', () => {
-                History.findOne(conditions, (err, doc) => {
-                    expect(doc.active.loadingStatus).to.eql(true);
-                    expect(doc.active.percentLoaded).to.eql(5);
-                    done();
-                });
-            });
-        });
-    });
-
-    describe('loading_status:', () => {
-        let request;
-        let response;
-        before((done) => {
-            let opts = { useNewUrlParser: true };
-            mongoServer = new MongoMemoryServer();
-            mongoServer.getConnectionString().then((mongoUri) => {
-                return mongoose.connect(mongoUri, opts, (err) => {
-                    if (err) done(err);
-                });
-            }).then(() => done());
-        });
-        before((done) => {
-            request = getRequest();
-            let userId = request.session.user_info.userId;
-            let conditions = { userId: userId };
-            let options = {
-                multi: false,
-                upsert: true
-              }
-            let activeUpdate = {
-                "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
-                "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
-                "active.loadingStatus": true,
-                "active.percentLoaded": 5,
-            }
-            History.updateOne(conditions, activeUpdate, options, () => {
-                done();
-            });
-        });
-        beforeEach((done) => {
-            request = getRequest();
-            response = getResponse();
-            loadingController.loading_status(request, response);
-            response.on('end', () => {
-                done();
-            });
-        });
-        after(() => {
-            mongoose.disconnect();
-            mongoServer.stop();
-        });
-        it('should respond with the loadingStatus', () => {
-            let data = JSON.parse(response._getData());
-            expect(data.status).to.eql('success');
-            expect(data.status_message).to.eql('OK');
-            expect(data.data.loadingStatus).to.eql(true);
-            expect(data.data.percentLoaded).to.eql(5);
-        });
-        it('should see a change in loadingStatus/percentLoaded if status is changed', (done) => {
-            let conditions = { userId: request.session.user_info.userId }
-            let update = {
-                "active.loadingStatus": false,
-                "active.percentLoaded": 10
-            }
-            let options = {
-                upsert: true,
-                multi: false,
-            }
-            History.updateOne(conditions, update, options, (err, doc) => {
-                let request2 = getRequest();
-                let response2 = getResponse();
-                loadingController.loading_status(request2, response2);
-                response2.on('end', () => {
-                    let data = JSON.parse(response2._getData());
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
                     expect(data.status).to.eql('success');
                     expect(data.status_message).to.eql('OK');
-                    expect(data.data.loadingStatus).to.eql(false);
+                    expect(response._getStatusCode()).to.eql(200);
+                    expect(data.data.firstRun).to.eql(true);
+                    done();
+                });
+                loadingController.first_run_status(request, response);
+            });
+            it('should call upsertToHistory() with the proper arguments on firstRunEver', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, null);
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let explanation = td.explain(upsertToHistory);
+                    expect(explanation.callCount).to.eql(1);
+                    expect(explanation.calls[0].args[0]).to.eql(userId);
+                    expect(explanation.calls[0].args[1]['passive.firstRun']).to.eql(true);
+                    expect(explanation.calls[0].args[1]['passive.firstRunDate']).to.be.a('Date');
+                    let lastRunDate = explanation.calls[0].args[1]['passive.lastRunDate'];
+                    expect(explanation.calls[0].args[1]['passive.firstRunDate']).to.eql(lastRunDate);
+                    done();
+                });
+                loadingController.first_run_status(request, response); 
+            });
+            it('should call upsertToHistory() with the proper arguments on run where firstRun is false', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    passive: {
+                        firstRun: false,
+                        firstRunDate: new Date(),
+                        lastRunDate: new Date()
+                    }
+                });
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let explanation = td.explain(upsertToHistory);
+                    expect(explanation.callCount).to.eql(1);
+                    expect(explanation.calls[0].args[0]).to.eql(userId);
+                    expect(explanation.calls[0].args[1]['passive.firstRun']).to.not.exist;
+                    expect(explanation.calls[0].args[1]['passive.firstRunDate']).to.not.exist;
+                    expect(explanation.calls[0].args[1]['passive.lastRunDate']).to.be.a('Date');
+                    done();
+                });
+                loadingController.first_run_status(request, response); 
+            });
+            it('should call upsertToHistory() with the proper arguments on run where firstRun is true', (done) => {
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    passive: {
+                        firstRun: true,
+                        firstRunDate: new Date(),
+                        lastRunDate: new Date()
+                    }
+                });
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let explanation = td.explain(upsertToHistory);
+                    expect(explanation.callCount).to.eql(1);
+                    expect(explanation.calls[0].args[0]).to.eql(userId);
+                    expect(explanation.calls[0].args[1]['passive.firstRun']).to.not.exist;
+                    expect(explanation.calls[0].args[1]['passive.firstRunDate']).to.not.exist;
+                    expect(explanation.calls[0].args[1]['passive.lastRunDate']).to.be.a('Date');
+                    done();
+                });
+                loadingController.first_run_status(request, response); 
+            });
+        });
+
+        describe('Error paths: ', () => {
+            it('should respond with a 500 error message if the DB find throws an error', (done) => {
+                td.when(findOneHistory(userId)).thenCallback('Error', null);
+                let request = getRequest();
+                let response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(500);
+                    done();
+                });
+                loadingController.first_run_status(request, response); 
+            });
+        });
+    });
+
+    describe('loading_status(req, res): ', () => {
+        beforeEach(() => {
+            let mongooseUtils = td.replace('../../../../libs/utils/mongoose.utils');
+            upsertToHistory = mongooseUtils.upsertToHistory;
+            findOneHistory = mongooseUtils.findOneHistory;
+            loadingController = require('../../loading.controller');
+        });
+        afterEach(() => {
+            td.reset();
+            loadingController = undefined;
+        });
+        describe('Error paths: ', () => {
+            it('should respond with a 400 error message if there is no doc yet in db', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, null);
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                loadingController.loading_status(request, response);
+            });
+            it('should respond with a 400 error message if active is not set yet in db', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    passive: {
+                        firstRun: true,
+                        firstRunDate: new Date(),
+                        lastRunDate: new Date()
+                    }
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                loadingController.loading_status(request, response);
+            });
+            it('should respond with a 400 error message if active is set but loadingStatus is not yet in db', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    active: {
+                        session: {
+                            test: 'test'
+                        },
+                        percentLoaded: 10
+                    },
+                    passive: {
+                        firstRun: true,
+                        firstRunDate: new Date(),
+                        lastRunDate: new Date()
+                    }
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                loadingController.loading_status(request, response);
+            });
+            it('should respond with a 400 error message if active is set but percentLoaded is not yet in db', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    active: {
+                        session: {
+                            test: 'test'
+                        },
+                        loadingStatus: true
+                    },
+                    passive: {
+                        firstRun: true,
+                        firstRunDate: new Date(),
+                        lastRunDate: new Date()
+                    }
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                loadingController.loading_status(request, response);
+            });
+            it('should respond with a 500 error message if the db returns an error', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback('Error', null);
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(data.status_message).to.exist;
+                    expect(response._getStatusCode()).to.eql(500);
+                    done();
+                });
+                loadingController.loading_status(request, response);
+            });
+        });
+        describe('Success paths: ', () => {
+            it('should respond with the correct loadingStatus and percentLoaded', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    active: {
+                        loadingStatus: true,
+                        percentLoaded: 10
+                    }
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('success');
+                    expect(data.status_message).to.eql('OK');
+                    expect(response._getStatusCode()).to.eql(200);
+                    expect(data.data.loadingStatus).to.eql(true);
                     expect(data.data.percentLoaded).to.eql(10);
                     done();
                 });
+                loadingController.loading_status(request, response);
             });
         });
+    });
+    describe('loading_suggestions(req, res): ', () => {
+        beforeEach(() => {
+            let mongooseUtils = td.replace('../../../../libs/utils/mongoose.utils');
+            upsertToHistory = mongooseUtils.upsertToHistory;
+            findOneHistory = mongooseUtils.findOneHistory;
+            let rabbitUtils = td.replace('../../../../libs/utils/rabbit.utils');
+            publishUser = rabbitUtils.publishUser;
+            loadingController = require('../../loading.controller');
+        });
+        afterEach(() => {
+            td.reset();
+            loadingController = undefined;
+        });
+        describe('Success paths: ', () => {
+            it('should respond with the proper response on a users firstRunEver', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, null);
+                let update = {
+                    'active.loadingStatus': true,
+                    'active.percentLoaded': DEFAULT_PERCENT_LOADED
+                  }
+                td.when(upsertToHistory(userId, update)).thenCallback(null, {
+                    n: 1,
+                    nModified: 1, 
+                    ok: 1
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('success');
+                    expect(data.status_message).to.eql('OK');
+                    expect(response._getStatusCode()).to.eql(200);
+                    let upsertExplanation = td.explain(upsertToHistory);
+                    let publishExplanation = td.explain(publishUser);
+                    expect(upsertExplanation.callCount).to.eql(1);
+                    expect(publishExplanation.callCount).to.eql(1);
+                    done();
+                });
+                loadingController.load_suggestions(request, response);
+            });
+            it('should respond with the proper response on a users next run when loadingStatus is true', (done) => {
+                let request = getRequest();
+                let response = getResponse();
+                td.when(findOneHistory(userId)).thenCallback(null, {
+                    active: {
+                        loadingStatus: true,
+                        percentLoaded: 100
+                    }
+                });
+                let update = {
+                    'active.loadingStatus': true,
+                    'active.percentLoaded': DEFAULT_PERCENT_LOADED
+                  }
+                td.when(upsertToHistory(userId, update)).thenCallback(null, {
+                    n: 1,
+                    nModified: 1, 
+                    ok: 1
+                });
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    // console.log(data);
+                    expect(data.status).to.eql('success');
+                    expect(data.status_message).to.eql('Already Loading');
+                    expect(response._getStatusCode()).to.eql(200);
+                    let upsertExplanation = td.explain(upsertToHistory);
+                    let publishExplanation = td.explain(publishUser);
+                    expect(publishExplanation.callCount).to.eql(0);
+                    expect(upsertExplanation.callCount).to.eql(0);
+                    done();
+                });
+                loadingController.load_suggestions(request, response);
+            });
+        });
+
     
     });
 
