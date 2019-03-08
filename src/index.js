@@ -121,16 +121,16 @@ oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO**/
 
 const authRouter = require('./core/auth/auth.routes');
 const userRouter = require('./core/user/user.routes');
-const labelsRouter = require('./core/labels/labels.routes');
 const suggestionsRouter = require('./core/suggestions/suggestions.routes');
 const loadingRouter = require('./core/loading/loading.routes');
+const statsRouter = require('./core/stats/stats.routes');
 
 
 googleApi.use('/v1', authRouter);
 googleApi.use('/v1', userRouter);
-googleApi.use('/v1', labelsRouter);
 googleApi.use('/v1', suggestionsRouter);
 googleApi.use('/v1', loadingRouter);
+googleApi.use('/v1', statsRouter);
 
 /*******************************************************************************
 Connections INIT
