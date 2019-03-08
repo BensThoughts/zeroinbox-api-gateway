@@ -22,7 +22,7 @@ const token = {
 
 const cookie = 'connect.sid=s%3An6CClgs-7_2Sy82NG5N91iQj.GaVqQIA06eMWJbaDoZrmnMaqc4rmF';
 
-function getRequest() {
+function getRequest(queryParams) {
     return httpMocks.createRequest({
         method: 'GET',
         url: '/v1/stats',
@@ -36,6 +36,9 @@ function getRequest() {
         },
         headers: {
             cookie: cookie
+        },
+        query: {
+            ...queryParams
         }
     });
 } 
@@ -56,14 +59,91 @@ describe('statsController: ', () => {
 
         });
         it('should respond properly', (done) => {
-            const request = getRequest();
+            let queryParams = {
+                    filter: 'thread_count',
+                    stats: 'size'
+            }
+            const request = getRequest(queryParams);
             const response = getResponse();
             response.on('end', () => {
                 let data = JSON.parse(response._getData());
-                console.log(data);
+                expect(response._getStatusCode()).to.eql(200);
+                expect(data.status).to.eql('success');
                 done();
             });
             statsController.stats(request, response);
         });
+        describe('query parameter checks', () => {
+            it('should respond with an error if there are no query parameters sent', (done) => {
+                const request = getRequest();
+                const response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                statsController.stats(request, response);
+            });
+            it('should respond with an error if filter query is not sent', (done) => {
+                let queryParams = {
+                    stats: 'size'
+                }
+                const request = getRequest(queryParams);
+                const response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                statsController.stats(request, response);
+            });
+            it('should respond with an error if stats query is not sent', (done) => {
+                let queryParams = {
+                    filter: 'thread_count'
+                }
+                const request = getRequest(queryParams);
+                const response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                statsController.stats(request, response);
+            });
+            it('should respond with an error if filter query is not a correct value', (done) => {
+                let queryParams = {
+                    filter: 'threa',
+                    stats: 'size'
+                }
+                const request = getRequest(queryParams);
+                const response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                statsController.stats(request, response);
+            });
+            it('should respond with an error if stats query is not a correct value', (done) => {
+                let queryParams = {
+                    filter: 'thread_count',
+                    stats: 'siz'
+                }
+                const request = getRequest(queryParams);
+                const response = getResponse();
+                response.on('end', () => {
+                    let data = JSON.parse(response._getData());
+                    expect(data.status).to.eql('error');
+                    expect(response._getStatusCode()).to.eql(400);
+                    done();
+                });
+                statsController.stats(request, response);
+            });
+        });
+
     });
 });
