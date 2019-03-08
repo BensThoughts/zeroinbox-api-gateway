@@ -2,12 +2,6 @@
  INIT DEPS
 *******************************************************************************/
 const logger = require('../../libs/loggers/log4js');
-const rabbit = require('zero-rabbit');
-
-/*******************************************************************************
- INIT MONGOOSE
-*******************************************************************************/
-// const History = require('../models/history.model');
 
 const mongooseUtils = require('../../libs/utils/mongoose.utils');
 const upsertToHistory = mongooseUtils.upsertToHistory;
@@ -147,7 +141,7 @@ exports.load_suggestions = function(req, res, next) {
             logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
             res.status(500).json({
               status: 'error',
-              status_message: 'Internal server error at /loadSuggestions: error setting loadingStatus'
+              status_message: 'error at /loadSuggestions: error setting loadingStatus in database'
             });
           } else {
             res.json({

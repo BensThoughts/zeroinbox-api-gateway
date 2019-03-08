@@ -141,10 +141,9 @@ googleApi.use('/v1', loadingRouter);
 
 
 /*******************************************************************************
- MONGOOSE INIT
+Connections INIT
 *******************************************************************************/
 const mongoose = require('mongoose');
-// const rabbit = require('./helpers/rabbit.helper');
 const rabbit = require('zero-rabbit');
 
 

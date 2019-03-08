@@ -77,12 +77,8 @@ exports.oauth2callback = function(req, res) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
-
-      logger.debug('This Token: ' + token);
-
       let refresh_token = token.refresh_token;
-
-      logger.debug('Refresh token: ' + refresh_token);
+      logger.debug('Token: ' + token);
 
       req.session.token = {
         access_token: token.access_token,
