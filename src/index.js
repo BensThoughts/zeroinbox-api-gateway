@@ -1,13 +1,7 @@
 'use strict';
 
 /*******************************************************************************
-* LOGGING INIT (LOG4JS) App (console/file) logging
-*******************************************************************************/
-const logger = require('./libs/loggers/log4js');
-
-
-/*******************************************************************************
-* EXPRESS INIT
+* Config Init
 *******************************************************************************/
 const {
   express_port,
@@ -19,8 +13,13 @@ const {
   mongo_uri,
  } = require('./config/init.config');
 
- const { rabbit_config } = require('./config/rabbit.config');
+const { rabbit_config } = require('./config/rabbit.config');
 
+const logger = require('./libs/loggers/log4js');
+
+/*******************************************************************************
+* EXPRESS INIT
+*******************************************************************************/
 const express = require('express');
 const googleApi = express();
 
@@ -32,7 +31,6 @@ googleApi.get('/', (req, res) => {
 // Naive health check
 const healthRouter = require('./core/health/health.routes')
 googleApi.use('/', healthRouter);
-
 
 /*******************************************************************************
 * EXPRESS CORS SETUP
@@ -112,7 +110,6 @@ googleApi.use(morgan(morganChalk.logError, {
 const routeErrors = require('./libs/error-handler/route-errors');
 googleApi.use(routeErrors);
 
-
 /**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
   ____                       _             _            _
  / ___|  ___    ___    __ _ | |  ___      / \    _ __  (_)
@@ -130,22 +127,16 @@ const loadingRouter = require('./core/loading/loading.routes');
 
 
 googleApi.use('/v1', authRouter);
-
 googleApi.use('/v1', userRouter);
-
 googleApi.use('/v1', labelsRouter);
-
 googleApi.use('/v1', suggestionsRouter);
-
 googleApi.use('/v1', loadingRouter);
-
 
 /*******************************************************************************
 Connections INIT
 *******************************************************************************/
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
-
 
 mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
@@ -161,7 +152,9 @@ mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
   }
 });
 
-// SIG Handling
+/*******************************************************************************
+Signal handling for graceful shutdown
+*******************************************************************************/
 const signals = {
   'SIGTERM': 15
 };
@@ -175,7 +168,6 @@ function processHandler(server) {
   });
 }
 
-// App shutdown logic
 const shutdown = (server, signal, value) => {
   logger.info('shutdown!');
   server.close(() => {
@@ -186,6 +178,5 @@ const shutdown = (server, signal, value) => {
     });
   });
 }
-
 
 module.exports = googleApi;
