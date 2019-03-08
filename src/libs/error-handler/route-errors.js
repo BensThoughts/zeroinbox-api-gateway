@@ -26,6 +26,8 @@ function routeErrors(req, res, next) {
         return checkUserId(req, res, next);
       case '/v1/suggestions':
         return checkUserId(req, res, next);
+      case'/v1/stats':
+        return next();
       default:
         return checkAuth(req, res, next);
     }
