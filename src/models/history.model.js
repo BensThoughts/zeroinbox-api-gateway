@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const sessionSchema = new Schema({
-  cookie: { type: String, required: false },
+  sessionID: { type: String, required: false },
   access_token: { type: String, required: false },
   expiry_date: { type: String, required: false },
   token_type: { type: String, required: false },

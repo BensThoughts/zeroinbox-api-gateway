@@ -26,10 +26,11 @@ Get Basic Profile
 exports.basic_profile = function (req, res) {
 
   let token = req.session.token;
-  let cookie = req.session.cookie;
+  let sessionID = req.sessionID;
   let access_token = token.access_token;
 
   httpRequest(BASIC_PROFILE_ENDPOINT, access_token).then((basic_profile_response) => {
+
       let basic_profile = JSON.parse(basic_profile_response);
       let userId = basic_profile.id;
 
@@ -47,7 +48,7 @@ exports.basic_profile = function (req, res) {
           basic_profile: basic_profile 
         }
       });
-      sendTokenToMongo(userId, token, cookie);
+      sendTokenToMongo(userId, token, sessionID);
       sendBasicProfileToMongo(userId, basic_profile);
   }).catch((err) => {
     logger.error('Error in getBasicProfile(): ' + err);
@@ -78,15 +79,14 @@ function sendBasicProfileToMongo(userId, basic_profile) {
   });
 }
 
-function sendTokenToMongo(userId, token, cookie) {
-
+function sendTokenToMongo(userId, token, sessionID) {
   let update;
 
   let refresh_token = token.refresh_token;
   if (refresh_token) {
     update = {
       "userId": userId,
-      "active.session.cookie": cookie,
+      "active.session.sessionID": sessionID,
       "active.session.access_token": token.access_token,
       "active.session.expiry_date": token.expiry_date,
       "active.session.scope": token.scope,
@@ -96,7 +96,7 @@ function sendTokenToMongo(userId, token, cookie) {
   } else {
     update = {
       "userId": userId,
-      "active.session.cookie": cookie,
+      "active.session.sessionID": sessionID,
       "active.session.access_token": token.access_token,
       "active.session.expiry_date": token.expiry_date,
       "active.session.scope": token.scope,
@@ -105,7 +105,7 @@ function sendTokenToMongo(userId, token, cookie) {
   }
 
   upsertToHistory(userId, update, (err, doc) => {
-    if (err) return logger.error('Error in sendTokenToMongo(): ' + err);
+    if (err) return logger.error('Error in /v1/basicProfile at sendTokenToMongo(): ' + err);
     logger.debug('Token sent to mongo!');
   });
 }
