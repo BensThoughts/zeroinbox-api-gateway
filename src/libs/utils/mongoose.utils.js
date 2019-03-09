@@ -43,22 +43,39 @@ exports.upsertToProfile = function(userId, doc, callback) {
     });
 }
 
-exports.findSuggestion = function(userId, callback) {
-    let conditions = { userId: userId };
 
-    let senderProjection = {
-      "senderAddress": 1,
-      "senderNames": 1,
-      "totalSizeEstimate": 1,
-      "senderId": 1,
-      "count": 1,
-      _id: 0
-    }
-/*     Suggestion.find().distinct('senderId', conditions, (err, doc) => {
-        Sender.find
-    }); */
+function findSenderPromise(userId, senderId) {
+    return new Promise((resolve, reject) => {
+        let conditions = {
+            userId: userId,
+            senderId: senderId
+        }
+        let senderProjection = {
+            "senderAddress": 1,
+            "senderNames": 1,
+            "totalSizeEstimate": 1,
+            "senderId": 1,
+            "count": 1,
+            _id: 0
+          }
+        Sender.find(conditions, senderProjection, (err, raw) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(raw);
+            }
+        });
+    });
+}
 
-    Sender.find(conditions, senderProjection, (err, raw) => {
+exports.findSender = function(userId, senderId) {
+    return findSenderPromise(userId, senderId);
+}
+
+exports.findSenderIds = function(userId, callback) {
+    let criteria = { userId, userId };
+    
+    Suggestion.find().distinct('senderId', criteria, (err, raw) => {
         callback(err, raw);
     });
 }

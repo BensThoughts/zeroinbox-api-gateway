@@ -52,3 +52,9 @@ exports.httpRequest = function(url, access_token) {
   let promiseCreator = () => httpPromise(url, access_token);
   return retryHttpRequest(url, promiseCreator, retries, delay, delayMultiplier);
 }
+
+exports.asyncForEach = async function(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
