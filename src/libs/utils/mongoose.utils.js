@@ -44,7 +44,34 @@ exports.upsertToProfile = function(userId, doc, callback) {
 }
 
 
-function findSenderPromise(userId, senderId) {
+
+
+exports.findSenders = function(userId, callback) {
+    let conditions = {
+        userId: userId,
+    }
+    let senderProjection = {
+        "senderAddress": 1,
+        "senderNames": 1,
+        "totalSizeEstimate": 1,
+        "senderId": 1,
+        "count": 1,
+        _id: 0
+    };
+    Sender.find(conditions, senderProjection, (err, raw) => {
+        callback(err, raw);
+    });
+}
+
+exports.findSuggestions = function(userId, callback) {
+    let criteria = { userId, userId };
+    
+    Suggestion.find().distinct('senderId', criteria, (err, raw) => {
+        callback(err, raw);
+    });
+}
+
+/* function findSenderPromise(userId, senderId) {
     return new Promise((resolve, reject) => {
         let conditions = {
             userId: userId,
@@ -70,12 +97,4 @@ function findSenderPromise(userId, senderId) {
 
 exports.findSender = function(userId, senderId) {
     return findSenderPromise(userId, senderId);
-}
-
-exports.findSenderIds = function(userId, callback) {
-    let criteria = { userId, userId };
-    
-    Suggestion.find().distinct('senderId', criteria, (err, raw) => {
-        callback(err, raw);
-    });
-}
+} */

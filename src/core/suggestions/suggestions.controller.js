@@ -1,8 +1,9 @@
 const logger = require('../../libs/loggers/log4js');
 
 const { 
-  findSenderIds,
-  findSender
+  // findSenderIds,
+  // findSender,
+  findSuggestions,
 } = require('../../libs/utils/mongoose.utils');
 
 const {
@@ -12,8 +13,7 @@ const {
 exports.suggestions = function (req, res) {
   let userId = req.session.user_info.userId;
 
-  findSuggestions(userId, (err, suggestions) => {
-    logger.trace(suggestions);
+  findSuggestions(userId, (err, senderIds) => {
     if (err) {
       logger.error('Error in suggestion.find(): ' + err);
       res.json({
@@ -25,14 +25,16 @@ exports.suggestions = function (req, res) {
         status: 'success',
         status_message: 'OK',
         data: {
-          suggestions: suggestions 
+          suggestions: {
+            senderIds: senderIds
+          }
         }
       });
     }
   });
 }
 
-async function findSuggestions(userId, callback) {
+/* function findSuggestions(userId, callback) {
   let suggestions = [];
   findSenderIds(userId, async (findIdsErr, senderIds) => {
     if (findIdsErr) {
@@ -40,7 +42,6 @@ async function findSuggestions(userId, callback) {
       callback(findIdsErr, undefined);
     }
     await asyncForEach(senderIds, async (senderId) => {
-      logger.trace(senderId);
       await findSender(userId, senderId)
       .then((sender) => {
         suggestions.push(sender[0]);
@@ -48,7 +49,6 @@ async function findSuggestions(userId, callback) {
         logger.error('Error in findSuggestions() at findSender(): ' + err);
       });
     });
-    logger.trace(suggestions);
     callback(undefined, suggestions);    
   });
-}
+} */

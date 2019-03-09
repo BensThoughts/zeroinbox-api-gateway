@@ -107,8 +107,17 @@ googleApi.use(morgan(morganChalk.logError, {
 /*******************************************************************************
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *******************************************************************************/
-const routeErrors = require('./libs/error-handler/route-errors');
-googleApi.use(routeErrors);
+const sessionErrors = require('./libs/error-handlers/session-errors');
+const authErrors = require('./libs/error-handlers/auth-errors');
+const userIdErrors = require('./libs/error-handlers/userid-errors');
+const emailIdErrors = require('./libs/error-handlers/emailid-errors');
+const actionPostErrors = require('./libs/error-handlers/action-post-errors');
+
+googleApi.use(sessionErrors);
+googleApi.use(authErrors);
+googleApi.use(userIdErrors);
+googleApi.use(emailIdErrors);
+googleApi.use(actionPostErrors);
 
 /**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
   ____                       _             _            _
@@ -125,7 +134,7 @@ const suggestionsRouter = require('./core/suggestions/suggestions.routes');
 const loadingRouter = require('./core/loading/loading.routes');
 // const statsRouter = require('./core/stats/stats.routes');
 const actionsRouter = require('./core/actions/actions.routes');
-
+const sendersRouter = require('./core/senders/senders.routes');
 
 googleApi.use('/v1', authRouter);
 googleApi.use('/v1', userRouter);
@@ -133,6 +142,7 @@ googleApi.use('/v1', suggestionsRouter);
 googleApi.use('/v1', loadingRouter);
 // googleApi.use('/v1', statsRouter);
 googleApi.use('/v1', actionsRouter);
+googleApi.use('/v1', sendersRouter);
 
 /*******************************************************************************
 Connections INIT
