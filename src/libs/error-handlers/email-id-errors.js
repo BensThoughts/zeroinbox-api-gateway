@@ -15,7 +15,12 @@ function emailIdErrors(req, res, next) {
 }
 
 function checkEmailId(req, res, next) {
-    if (!req.session.user_info.emailId) {
+    if (!req.session.user_info) {
+      return res.status(400).json({
+        status: 'error',
+        status_message: 'Must call /v1/basicProfile, followed by /v1/emailProfile, before calling ' + req.route + '!'
+      })
+    } else if (!req.session.user_info.emailId) {
       return res.status(400).json({
         status: 'error',
         status_message: 'Must call /v1/basicProfile, followed by /v1/emailProfile, before calling ' + req.route + '!'

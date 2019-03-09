@@ -109,8 +109,8 @@ googleApi.use(morgan(morganChalk.logError, {
 *******************************************************************************/
 const sessionErrors = require('./libs/error-handlers/session-errors');
 const authErrors = require('./libs/error-handlers/auth-errors');
-const userIdErrors = require('./libs/error-handlers/userid-errors');
-const emailIdErrors = require('./libs/error-handlers/emailid-errors');
+const userIdErrors = require('./libs/error-handlers/user-id-errors');
+const emailIdErrors = require('./libs/error-handlers/email-id-errors');
 const actionPostErrors = require('./libs/error-handlers/action-post-errors');
 
 googleApi.use(sessionErrors);

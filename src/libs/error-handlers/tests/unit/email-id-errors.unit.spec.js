@@ -10,7 +10,8 @@ const expect = chai.expect;
 let httpMocks = require('node-mocks-http');
 
 const userId = 'user_id';
-
+const emailId = 'email_id';
+const emailAddress = 'test@gmail.com';
 const token = {
     access_token: 'test_token',
     expiry_date: '1551501417831',
@@ -22,6 +23,8 @@ const cookie = 'connect.sid=s%3An6CClgs-7_2Sy82NG5N91iQj.GaVqQIA06eMWJbaDoZrmnMa
 
 const user_info = {
     userId: userId,
+    emailId: emailId,
+    emailAddress: emailAddress
 }
 
 function getRequest(path, method, session) {
@@ -41,10 +44,10 @@ function getResponse(){
     });
 }
 
-describe('userIdErrors: ', () => {
-        let userIdErrors;
+describe('emailIdErrors: ', () => {
+        let emailIdErrors;
         beforeEach(() => {
-            userIdErrors = require('../../user-id-errors');
+            emailIdErrors = require('../../email-id-errors');
         });
         afterEach(() => {
 
@@ -56,7 +59,7 @@ describe('userIdErrors: ', () => {
                 let request = getRequest(path, method);
                 let response = getResponse();
                 let nextCalled = 0;
-                userIdErrors(request, response, () => {
+                emailIdErrors(request, response, () => {
                     nextCalled += 1;
                     expect(nextCalled).to.eql(1);
                     done();
@@ -68,7 +71,7 @@ describe('userIdErrors: ', () => {
                 let request = getRequest(path, method);
                 let response = getResponse();
                 let nextCalled = 0;
-                userIdErrors(request, response, () => {
+                emailIdErrors(request, response, () => {
                     nextCalled += 1;
                     expect(nextCalled).to.eql(1);
                     done();
@@ -80,7 +83,7 @@ describe('userIdErrors: ', () => {
                 let request = getRequest(path, method);
                 let response = getResponse();
                 let nextCalled = 0;
-                userIdErrors(request, response, () => {
+                emailIdErrors(request, response, () => {
                     nextCalled += 1;
                     expect(nextCalled).to.eql(1);
                     done();
@@ -96,7 +99,7 @@ describe('userIdErrors: ', () => {
                 let request = getRequest(path, method, sessionWithUserInfo);
                 let response = getResponse();
                 let nextCalled = 0;
-                userIdErrors(request, response, () => {
+                emailIdErrors(request, response, () => {
                     nextCalled += 1;
                     expect(nextCalled).to.eql(1);
                     done();
@@ -117,7 +120,7 @@ describe('userIdErrors: ', () => {
                     expect(data.status).to.eql('error');
                     done();
                 });
-                userIdErrors(request, response);
+                emailIdErrors(request, response);
             });
             it('should respond with an error if there is no userId set on any other path', (done) => {
                 let path = '/anypath';
@@ -135,7 +138,7 @@ describe('userIdErrors: ', () => {
                     expect(data.status).to.eql('error');
                     done();
                 });
-                userIdErrors(request, response);
+                emailIdErrors(request, response);
             });
         });
 });
