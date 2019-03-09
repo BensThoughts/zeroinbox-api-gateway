@@ -40,7 +40,7 @@ const cors = require('cors');
 logger.debug('Cors Whitelist: ' + cors_whitelist);
 let whitelist;
 
-if (cors_whitelist.indexOf(',')) {
+if (cors_whitelist.indexOf(',') !== -1) {
   whitelist = cors_whitelist.split(',');
 } else {
   whitelist = cors_whitelist
