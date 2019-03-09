@@ -1,8 +1,11 @@
 const logger = require('../../libs/loggers/log4js');
+const { publishActions } = require('../../libs/utils/rabbit.utils');
 
 exports.postActions = function(req, res) {
+    let userId = req.session.user_info.userId;
     let body = req.body;
     logger.trace(body);
+    logger.trace(userId);
     let bodyCheck = checkBody(body);
     if (bodyCheck.error) {
         res.status(400).json({
@@ -10,12 +13,28 @@ exports.postActions = function(req, res) {
             status_message: bodyCheck.error_message
         });
     } else {
+        if (body.label && body.delete) {
+            let duplicateLabelCheck = checkDuplicate(body.label, body.delete);
+            if (duplicateLabelCheck) {
+                return res.status(400).json({
+                    status: 'error',
+                    status_message: 'Cannot delete and label the same threadId'
+                });       
+            }
+        }
+        if (body.filter && body.delete) {
+            let duplicateFilterCheck = checkDuplicate(body.filter, body.delete);
+            if (duplicateFilterCheck) {
+                return res.status(400).json({
+                    status: 'error',
+                    status_message: 'Cannot delete and filter the same threadId'
+                });
+            }
+        }
+        publishActions(userId, body);
         res.status(200).json({
             status: 'success',
             status_message: 'OK',
-            data: {
-                body: body
-            }
         });
     }
 }
@@ -71,5 +90,19 @@ function checkArrayType(array) {
             error: false,
         }
     }
+}
+
+function checkDuplicate(array1, array2) {
+    let elementsInBoth = array1.filter((threadId) => {
+        let index = array2.indexOf(threadId);
+        if (index === -1) {
+            return false;
+        }
+        return true;
+    });
+    if (elementsInBoth.length > 0) {
+        return true;
+    }
+    return false;
 }
 

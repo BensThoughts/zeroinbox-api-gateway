@@ -2,7 +2,9 @@ const logger = require('../loggers/log4js');
 
 const History = require('../../models/history.model');
 const Profile = require('../../models/profile.model');
+const Sender = require('../../models/sender.model');
 const Suggestion = require('../../models/suggestion.model');
+
 
 exports.upsertToHistory = function (userId, doc, callback) {
     let conditions = { userId: userId }
@@ -44,7 +46,7 @@ exports.upsertToProfile = function(userId, doc, callback) {
 exports.findSuggestion = function(userId, callback) {
     let conditions = { userId: userId };
 
-    let projection = {
+    let senderProjection = {
       "senderAddress": 1,
       "senderNames": 1,
       "totalSizeEstimate": 1,
@@ -52,8 +54,11 @@ exports.findSuggestion = function(userId, callback) {
       "count": 1,
       _id: 0
     }
+/*     Suggestion.find().distinct('senderId', conditions, (err, doc) => {
+        Sender.find
+    }); */
 
-    Suggestion.find(conditions, projection, (err, raw) => {
+    Sender.find(conditions, senderProjection, (err, raw) => {
         callback(err, raw);
     });
 }

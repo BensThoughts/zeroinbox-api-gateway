@@ -3,12 +3,16 @@
 *******************************************************************************/
 const logger = require('../../libs/loggers/log4js');
 
-const mongooseUtils = require('../../libs/utils/mongoose.utils');
-const upsertToHistory = mongooseUtils.upsertToHistory;
-const findOneHistory = mongooseUtils.findOneHistory;
+// const mongooseUtils = require('../../libs/utils/mongoose.utils');
+// const upsertToHistory = mongooseUtils.upsertToHistory;
+// const findOneHistory = mongooseUtils.findOneHistory;
+const {
+  upsertToHistory,
+  findOneHistory
+} = require('../../libs/utils/mongoose.utils');
 
-const rabbitUtils = require('../../libs/utils/rabbit.utils');
-const publishUser = rabbitUtils.publishUser;
+const {publishUser } = require('../../libs/utils/rabbit.utils');
+// const publishUser = rabbitUtils.publishUser;
 
 const {
   DEFAULT_PERCENT_LOADED
