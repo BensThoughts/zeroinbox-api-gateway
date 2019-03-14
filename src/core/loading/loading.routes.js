@@ -7,6 +7,6 @@ loadingRouter.get('/loadingStatus', loadingController.loading_status);
 
 loadingRouter.get('/firstRunStatus', loadingController.first_run_status);
 
-loadingRouter.get('/loadSuggestions', loadingController.load_suggestions);
+loadingRouter.get('/loadSenders', loadingController.load_suggestions);
 
 module.exports = loadingRouter;

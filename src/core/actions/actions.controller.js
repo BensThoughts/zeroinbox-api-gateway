@@ -9,7 +9,7 @@ exports.postActions = function(req, res) {
     res.status(200).json({
         status: 'success',
         status_message: 'OK'
-    })
+    });
 }
 
 exports.getActions = function(req, res) {

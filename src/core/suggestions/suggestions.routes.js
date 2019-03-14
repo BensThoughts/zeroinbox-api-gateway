@@ -5,4 +5,8 @@ const suggestionsController = require('./suggestions.controller');
 
 suggestionsRouter.get('/suggestions', suggestionsController.suggestions);
 
+suggestionsRouter.post('/suggestions', suggestionsController.postSuggestions);
+
+
+
 module.exports = suggestionsRouter;

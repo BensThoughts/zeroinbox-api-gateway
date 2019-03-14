@@ -4,9 +4,14 @@ const History = require('../../models/history.model');
 const Profile = require('../../models/profile.model');
 const Sender = require('../../models/sender.model');
 const Suggestion = require('../../models/suggestion.model');
+const LoadingStatus = require('../../models/loading.model');
+
+const {
+    DEFAULT_PERCENT_LOADED
+  } = require('../../config/init.config');
 
 
-exports.upsertToHistory = function (userId, doc, callback) {
+exports.upsertToHistory = function upsertToHistory(userId, doc, callback) {
     let conditions = { userId: userId }
     let options = {
         upsert: true,
@@ -64,37 +69,44 @@ exports.findSenders = function(userId, callback) {
 }
 
 exports.findSuggestions = function(userId, callback) {
-    let criteria = { userId, userId };
+    let conditions = { userId, userId };
     
-    Suggestion.find().distinct('senderId', criteria, (err, raw) => {
+    let suggestionProjection = {
+        "senderId": 1,
+        "labelByName": 1,
+        "labelBySize": 1,
+        "delete": 1,
+        "labelNames": 1,
+        _id: 0
+    }
+    
+    Suggestion.find(conditions, suggestionProjection, (err, raw) => {
         callback(err, raw);
     });
+    // Suggestion.find().distinct('senderId', criteria, (err, raw) => {
+    //    callback(err, raw);
+    // });
 }
 
-/* function findSenderPromise(userId, senderId) {
-    return new Promise((resolve, reject) => {
-        let conditions = {
-            userId: userId,
-            senderId: senderId
-        }
-        let senderProjection = {
-            "senderAddress": 1,
-            "senderNames": 1,
-            "totalSizeEstimate": 1,
-            "senderId": 1,
-            "count": 1,
-            _id: 0
-          }
-        Sender.find(conditions, senderProjection, (err, raw) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(raw);
-            }
-        });
+exports.findOneLoadingStatus = function(userId, callback) {
+    let conditions = { userId: userId };
+    LoadingStatus.findOne(conditions, (err, doc) => {
+        callback(err, doc);
     });
 }
 
-exports.findSender = function(userId, senderId) {
-    return findSenderPromise(userId, senderId);
-} */
+exports.updateLoadingStatus = function(userId, callback) {
+    let conditions = { userId: userId }
+    let update = {
+        'loadingStatus': true,
+        'percentLoaded': DEFAULT_PERCENT_LOADED
+    }
+    let options = {
+        upsert: true,
+        multi: false
+    }
+    LoadingStatus.updateOne(conditions, update, options, (err, raw) => {
+        callback(err, raw);
+    })    
+}
+

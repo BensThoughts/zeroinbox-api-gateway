@@ -7,16 +7,13 @@ const logger = require('../../libs/loggers/log4js');
 // const upsertToHistory = mongooseUtils.upsertToHistory;
 // const findOneHistory = mongooseUtils.findOneHistory;
 const {
+  updateLoadingStatus,
+  findOneLoadingStatus,
+  findOneHistory,
   upsertToHistory,
-  findOneHistory
 } = require('../../libs/utils/mongoose.utils');
 
 const {publishUser } = require('../../libs/utils/rabbit.utils');
-// const publishUser = rabbitUtils.publishUser;
-
-const {
-  DEFAULT_PERCENT_LOADED
-} = require('../../config/init.config');
 
 
 /**
@@ -28,7 +25,7 @@ exports.loading_status = function (req, res) {
 
   let userId = req.session.user_info.userId;
 
-  findOneHistory(userId, (err, loadingDoc) => {
+  findOneLoadingStatus(userId, (err, loadingDoc) => {
     if (err) {
       logger.error('MongoDB Error at loading_status in history.findOne(): ' + err);
       res.status(500).json({
@@ -42,8 +39,8 @@ exports.loading_status = function (req, res) {
           status: 'success',
           status_message: 'OK',
           data: {
-            loadingStatus: loadingDoc.active.loadingStatus,
-            percentLoaded: loadingDoc.active.percentLoaded,
+            loadingStatus: loadingDoc.loadingStatus,
+            percentLoaded: loadingDoc.percentLoaded,
           }
         });
       } else {
@@ -60,13 +57,13 @@ function checkLoadingDoc(loadingDoc) {
   if (loadingDoc === null || !loadingDoc) {
     return false;
   }
-  if (loadingDoc.active === undefined) {
+  if (loadingDoc === undefined) {
     return false;
   }
-  if (loadingDoc.active.loadingStatus === undefined) {
+  if (loadingDoc.loadingStatus === undefined) {
     return false;
   }
-  if (loadingDoc.active.percentLoaded === undefined) {
+  if (loadingDoc.percentLoaded === undefined) {
     return false;
   }
   return true;
@@ -123,7 +120,7 @@ exports.load_suggestions = function(req, res, next) {
   let userId = req.session.user_info.userId;
   let access_token = req.session.token.access_token;
 
-  findOneHistory(userId, (err, doc) => {
+  findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
       logger.error('MongoDB Error at load_suggestions in history.findOne(): ' + err);
       res.json({
@@ -139,7 +136,7 @@ exports.load_suggestions = function(req, res, next) {
         });
       } else {
         publishUser(userId, access_token);
-        updateLoadingHistory(userId, (err, doc) => {
+        updateLoadingStatus(userId, (err, doc) => {
           // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {
             logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
@@ -163,26 +160,15 @@ function checkLoadingStatus(doc) {
   if (doc === null || !doc) {
     return false;
   }
-  if (doc.active === undefined) {
+  if (doc === undefined) {
     return false;
   }
-  if (doc.active.loadingStatus === undefined) {
+  if (doc.loadingStatus === undefined) {
     return false;
   }
-  return doc.active.loadingStatus;
+  return doc.loadingStatus;
 }
 
-function updateLoadingHistory(userId, callback) {
-  let update = {
-    'active.loadingStatus': true,
-    'active.percentLoaded': DEFAULT_PERCENT_LOADED
-  }
-
-  upsertToHistory(userId, update, (err, doc) => {
-    callback(err, doc);
-  })
-
-}
 
 function updatePassiveHistory(userId, firstRunEver) {
   let passiveUpdate;
@@ -203,3 +189,4 @@ function updatePassiveHistory(userId, firstRunEver) {
 
   upsertToHistory(userId, passiveUpdate);
 }
+
