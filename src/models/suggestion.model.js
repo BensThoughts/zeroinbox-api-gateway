@@ -7,7 +7,8 @@ const suggestionSchema = new Schema({
   delete: { type: Boolean, required: true },
   labelByName: { type: Boolean, required: true },
   labelBySize: { type: Boolean, required: true },
-  labelNames: { type: [String], required: true }
+  labelNames: { type: [String], required: true },
+  sizeGroup: { type: String, required: false },
 });
 
 const Suggestion = mongoose.model('suggestion', suggestionSchema);
