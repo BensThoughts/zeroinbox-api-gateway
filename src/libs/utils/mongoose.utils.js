@@ -77,7 +77,7 @@ exports.findSuggestions = function(userId, callback) {
         "labelBySize": 1,
         "delete": 1,
         "labelNames": 1,
-        "sizeGroup": 1,
+        "subscriptionList": 1,
         _id: 0
     }
     
