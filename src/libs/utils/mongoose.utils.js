@@ -59,6 +59,8 @@ exports.findSenders = function(userId, callback) {
         "senderAddress": 1,
         "senderNames": 1,
         "totalSizeEstimate": 1,
+        "unsubscribeEmail": 1,
+        "unsubscribeWeb": 1,
         "senderId": 1,
         "count": 1,
         _id: 0
