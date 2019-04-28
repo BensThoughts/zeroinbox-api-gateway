@@ -12,8 +12,3 @@ exports.postActions = function(req, res) {
     });
 }
 
-exports.getActions = function(req, res) {
-    let userId = req.session.user_info.userId
-
-}
-
