@@ -8,13 +8,25 @@
         },
         {
             "channel": "api.send.1",
-            "name": "user.actions.ex.1",
-            "type": "topic",
+            "name": "batch.actions.ex.1",
+            "type": "direct",
             "options": {}
         }
     ],
     "queues": [
+        {
+            "channel": "api.send.1",
+            "name": "batch.actions.q.1",
+            "options": { "autoDelete": false }
+        }
     ],
     "bindings": [
+        {
+            "channel": "api.send.1",
+            "queue": "batch.actions.q.1",
+            "exchange": "batch.actions.ex.1",
+            "key": "",
+            "options": {}
+        }
     ]
 }

@@ -3,7 +3,6 @@ const logger = require('../loggers/log4js');
 const History = require('../../models/history.model');
 const Profile = require('../../models/profile.model');
 const Sender = require('../../models/sender.model');
-const Suggestion = require('../../models/suggestion.model');
 const LoadingStatus = require('../../models/loading.model');
 
 const {
@@ -70,26 +69,6 @@ exports.findSenders = function(userId, callback) {
     });
 }
 
-exports.findSuggestions = function(userId, callback) {
-    let conditions = { userId, userId };
-    
-    let suggestionProjection = {
-        "senderId": 1,
-        "labelByName": 1,
-        "labelBySize": 1,
-        "delete": 1,
-        "labelNames": 1,
-        "subscriptionList": 1,
-        _id: 0
-    }
-    
-    Suggestion.find(conditions, suggestionProjection, (err, raw) => {
-        callback(err, raw);
-    });
-    // Suggestion.find().distinct('senderId', criteria, (err, raw) => {
-    //    callback(err, raw);
-    // });
-}
 
 exports.findOneLoadingStatus = function(userId, callback) {
     let conditions = { userId: userId };
