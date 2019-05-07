@@ -16,12 +16,12 @@ exports.publishUser = function(userId, access_token) {
     });
 }
 
-exports.publishActions = function(userId, access_token, senderId, actionType, filter, labelName) {
+exports.publishActions = function(userId, access_token, senderIds, actionType, filter, labelName) {
     let sentAt = new Date().getTime();
     rabbit.publish('api.send.1', 'batch.actions.ex.1', '', {
         userId: userId,
         access_token: access_token,
-        senderId: senderId,
+        senderIds: senderIds,
         actionType: actionType,
         filter: filter,
         labelName: labelName

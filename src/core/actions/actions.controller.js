@@ -6,10 +6,10 @@ exports.postActions = function(req, res) {
     let access_token = req.session.token.access_token
     let body = req.body;
     let actionType = body.actionType;
-    let senderId = body.senderId;
+    let senderIds = body.senderIds;
     logger.trace(body);
     logger.trace(userId);
-    publishActions(userId, access_token, senderId, actionType, false, '');
+    publishActions(userId, access_token, senderIds, actionType, false, '');
     res.status(200).json({
         status: 'success',
         status_message: 'OK'
