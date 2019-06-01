@@ -16,15 +16,32 @@ exports.publishUser = function(userId, access_token) {
     });
 }
 
-exports.publishActions = function(userId, access_token, senderIds, actionType, filter, labelName) {
+/**
+ * actionsObj - {
+ *  senderIds: string,
+ *  actionType: string,
+ *  filter: boolean,
+ *  labelName: string,
+ *  category: string,
+ * }
+ */
+
+exports.publishActions = function(userId, access_token, actionsObj) {
     let sentAt = new Date().getTime();
+    let senderIds = actionsObj.senderIds;
+    let actionType = actionsObj.actionType;
+    let filter = actionsObj.filter;
+    let labelName = actionsObj.labelName;
+    let category = actionsObj.category;
+
     rabbit.publish('api.send.1', 'batch.actions.ex.1', '', {
         userId: userId,
         access_token: access_token,
         senderIds: senderIds,
         actionType: actionType,
         filter: filter,
-        labelName: labelName
+        labelName: labelName,
+        category: category
     }, {
         contentType: 'application/json',
         type: 'actions',

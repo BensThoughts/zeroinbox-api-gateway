@@ -29,7 +29,8 @@ exports.oauth2init = function(req, res) {
 
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: access_type,
-    scope: scope,
+    scope: ['https://www.googleapis.com/auth/gmail.modify','https://www.googleapis.com/auth/userinfo.profile'],
+    // scope: scope,
     prompt: prompt,
   });
 
