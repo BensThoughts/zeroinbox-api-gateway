@@ -7,19 +7,18 @@ const {
   GAPI_INIT_RETRY_DELAY
 } = require('../../config/init.config');
 
-function retryHttpRequest(url, promiseCreator, retries, delay, delayMultiplier) {
+function retryHttpRequest(promiseCreator, retries, delay, delayMultiplier) {
     return new Promise((resolve, reject) => {
       promiseCreator()
         .then(resolve)
         .catch((err) => {
-          logger.error('Error contacting ' + url + ': ' + JSON.stringify(err));
           if (retries == 0) {
             reject(err);
           } else {
             let retryFunc = function() {
               retries--;
               delay = delay * delayMultiplier;
-              resolve(retryHttpRequest(url, promiseCreator, retries, delay, delayMultiplier));
+              resolve(retryHttpRequest(promiseCreator, retries, delay, delayMultiplier));
             }
             setTimeout(retryFunc, delay);
           }
@@ -39,6 +38,7 @@ function httpPromise(url, access_token) {
       if (!error && response.statusCode == 200) {
         resolve(body);
       } else {
+        logger.error('Error contacting ' + url + ': ' + JSON.stringify(error));
         reject(error);
       }
     })
@@ -50,7 +50,8 @@ exports.httpRequest = function(url, access_token) {
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
   let promiseCreator = () => httpPromise(url, access_token);
-  return retryHttpRequest(url, promiseCreator, retries, delay, delayMultiplier);
+
+  return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
 }
 
 exports.asyncForEach = async function(array, callback) {
