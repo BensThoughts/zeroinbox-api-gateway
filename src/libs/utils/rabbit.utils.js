@@ -18,7 +18,7 @@ exports.publishUser = function(userId, access_token) {
 
 /**
  * actionsObj - {
- *  senderIds: string,
+ *  senderId: string,
  *  actionType: string,
  *  filter: boolean,
  *  labelName: string,
@@ -28,7 +28,7 @@ exports.publishUser = function(userId, access_token) {
 
 exports.publishActions = function(userId, access_token, actionsObj) {
     let sentAt = new Date().getTime();
-    let senderIds = actionsObj.senderIds;
+    let senderId = actionsObj.senderId;
     let actionType = actionsObj.actionType;
     let filter = actionsObj.filter;
     let labelName = actionsObj.labelName;
@@ -37,7 +37,7 @@ exports.publishActions = function(userId, access_token, actionsObj) {
     rabbit.publish('api.send.1', 'batch.actions.ex.1', '', {
         userId: userId,
         access_token: access_token,
-        senderIds: senderIds,
+        senderId: senderId,
         actionType: actionType,
         filter: filter,
         labelName: labelName,
