@@ -12,7 +12,6 @@ const {
   prompt,
   auth_success_redirect_url,
   auth_failure_redirect_url,
-  scope,
 } = require('../../config/auth.config');
 
 

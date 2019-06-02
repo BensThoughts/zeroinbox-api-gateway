@@ -6,5 +6,4 @@ module.exports = {
     prompt: process.env.G_OAUTH_PROMPT,
     auth_success_redirect_url: process.env.AUTH_SUCCESS_REDIRECT_URL,
     auth_failure_redirect_url: process.env.AUTH_FAILURE_REDIRECT_URL,
-    scope: process.env.G_OAUTH_SCOPE.split(','),
 }
