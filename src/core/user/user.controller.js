@@ -5,8 +5,6 @@
 const logger = require('../../libs/loggers/log4js');
 const crypto = require('crypto');
 
-const Profile = require('../../models/profile.model');
-
 const apiUtils = require('../../libs/utils/api.utils');
 const httpRequest = apiUtils.httpRequest;
 
@@ -91,7 +89,8 @@ function sendTokenToMongo(userId, token, sessionID) {
       "active.session.expiry_date": token.expiry_date,
       "active.session.scope": token.scope,
       "active.session.token_type": token.token_type,
-      "active.session.refresh_token": token.refresh_token
+      "active.session.refresh_token": token.refresh_token,
+      "active.loggedIn": true
     }
   } else {
     update = {
@@ -101,6 +100,7 @@ function sendTokenToMongo(userId, token, sessionID) {
       "active.session.expiry_date": token.expiry_date,
       "active.session.scope": token.scope,
       "active.session.token_type": token.token_type,
+      "active.loggedIn": true
     }
   }
 

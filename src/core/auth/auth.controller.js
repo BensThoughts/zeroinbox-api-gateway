@@ -14,6 +14,10 @@ const {
   auth_failure_redirect_url,
 } = require('../../config/auth.config');
 
+const {
+  upsertToHistory
+} = require('../../libs/utils/mongoose.utils');
+
 
 /*******************************************************************************
  * OAuth2 Init
@@ -103,7 +107,19 @@ exports.oauth2callback = function(req, res) {
 };
 
 exports.logout = function(req, res) {
+  let userId = req.session.user_info.userId;
   req.session.destroy();
+  
+  let historyUpdate = {
+    "userId": userId,
+    "active.loggedIn": false,
+  }
+  upsertToHistory(userId, historyUpdate, (err, response) => {
+    if (err) {
+      logger.error(err);
+    }
+  });
+
   res.json({
     status: 'success',
     status_message: 'OK',

@@ -16,7 +16,8 @@ const sessionSchema = new Schema({
 const historySchema = new Schema({
   userId: String,
   active: {
-    session: sessionSchema
+    session: sessionSchema,
+    loggedIn: Boolean
   },
   passive: {
     firstRun: Boolean,
