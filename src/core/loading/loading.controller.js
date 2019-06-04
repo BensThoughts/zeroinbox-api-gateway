@@ -80,6 +80,12 @@ exports.first_run_status = function(req, res) {
         status_message: 'internal server error at path /firstRunStatus'
       });
     } else {
+      // checkFirstRunEver() will return true if the doc or property does not exist
+      // in which case we assume this is the first run ever.
+      // if it does exist, we just return whatever value it has
+      // it may have a value of true if we manually set it to true in the database
+      // to force a re download of the users entire inbox while they wait
+      // for trouble shooting, otherwise it will always be false
       let firstRunEver = checkFirstRunEver(doc);
       updatePassiveHistory(userId, firstRunEver);
       if (firstRunEver) {
@@ -120,18 +126,34 @@ exports.load_suggestions = function(req, res, next) {
   let userId = req.session.user_info.userId;
   let access_token = req.session.token.access_token;
 
+  load_suggestions_meta(userId, access_token, (response) => {
+    let status_code = response.status_code;
+    let status = response.status;
+    let status_message = response.status_message;
+    res.status(status_code).json({
+      status: status,
+      status_code: status_code,
+      status_message: status_message
+    });
+  });
+}
+
+
+function load_suggestions_meta(userId, access_token, callback) {
   findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
       logger.error('MongoDB Error at load_suggestions in history.findOne(): ' + err);
-      res.json({
+      callback({
         status: 'error',
+        status_code: 500,
         status_message: 'Internal server error at path /loadSuggestions: DB Error, cannot load suggestions',
       });
     } else {
       let alreadyLoading = checkLoadingStatus(doc);
       if (alreadyLoading) {
-        res.status(200).json({
+        callback({
           status: 'success',
+          status_code: 200,
           status_message: 'Already Loading',
         });
       } else {
@@ -140,13 +162,15 @@ exports.load_suggestions = function(req, res, next) {
           // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {
             logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
-            res.status(500).json({
+            callback({
               status: 'error',
+              status_code: 500,
               status_message: 'error at /loadSuggestions: error setting loadingStatus in database'
             });
           } else {
-            res.json({
+            callback({
               status: 'success',
+              status_code: 200,
               status_message: 'OK'
             });
           } 
@@ -154,7 +178,10 @@ exports.load_suggestions = function(req, res, next) {
       }
     }
   });
+
 }
+
+exports.load_suggestions_meta = load_suggestions_meta;
 
 function checkLoadingStatus(doc) {
   if (doc === null || !doc) {
