@@ -7,6 +7,11 @@ const {
   GAPI_INIT_RETRY_DELAY
 } = require('../../config/init.config');
 
+const {
+  client_id,
+  client_secret
+} = require('../../config/auth.config');
+
 function retryHttpRequest(promiseCreator, retries, delay, delayMultiplier) {
     return new Promise((resolve, reject) => {
       promiseCreator()
@@ -45,11 +50,40 @@ function httpPromise(url, access_token) {
   });
 }
 
+function httpPostRefreshTokenPromise(refresh_token) {
+  return new Promise((resolve, reject) => {
+    request.post('https://www.googleapis.com/oauth2/v4/token', {
+      form: {
+        client_id: client_id,
+        client_secret: client_secret,
+        refresh_token: refresh_token,
+        grant_type: 'refresh_token'
+      }
+    }, (err, res, body) => {
+      if (!err && res.statusCode == 200) {
+        resolve(body)
+      } else {
+        logger.error('Error using refresh_token to get access_token' + JSON.stringify(err));
+        reject(err);
+      }
+    });
+  });
+}
+
 exports.httpRequest = function(url, access_token) {
   let retries = GAPI_MAX_RETRIES;
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
   let promiseCreator = () => httpPromise(url, access_token);
+
+  return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
+}
+
+exports.httpRefreshTokenRequest = function(refresh_token) {
+  let retries = GAPI_MAX_RETRIES;
+  let delay = GAPI_INIT_RETRY_DELAY;
+  let delayMultiplier = GAPI_DELAY_MULTIPLIER;
+  let promiseCreator = () => httpPostRefreshTokenPromise(refresh_token);
 
   return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
 }

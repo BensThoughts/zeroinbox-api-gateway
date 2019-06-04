@@ -72,13 +72,19 @@ exports.oauth2callback = function(req, res) {
       oauth_redirect_url
     );
 
+    oauth2Client.on('tokens', (creds) => {
+      if (creds.refresh_token) {
+        console.log('REFRESH RECEIVED: ' + creds.refresh_token);
+      }
+      console.log('ACCESS TOKEN RECEIVED: ' + creds.access_token);
+    })
+
     oauth2Client.getToken(code, (err, token) => {
       if (err) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
         res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
       let refresh_token = token.refresh_token;
-      logger.debug('Token: ' + token);
 
       req.session.token = {
         access_token: token.access_token,

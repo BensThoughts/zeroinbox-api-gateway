@@ -117,13 +117,19 @@ const sessionErrors = require('./libs/error-handlers/session-errors');
 const authErrors = require('./libs/error-handlers/auth-errors');
 const userIdErrors = require('./libs/error-handlers/user-id-errors');
 const emailIdErrors = require('./libs/error-handlers/email-id-errors');
+
+const refreshToken = require('./libs/middleware/refresh-token');
+
 const actionPostErrors = require('./libs/error-handlers/action-post-errors');
+
 
 googleApi.use(sessionErrors);
 googleApi.use(authErrors);
 googleApi.use(userIdErrors);
 googleApi.use(emailIdErrors);
+googleApi.use(refreshToken);
 googleApi.use(actionPostErrors);
+
 
 /**oO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO0OooO
   ____                       _             _            _

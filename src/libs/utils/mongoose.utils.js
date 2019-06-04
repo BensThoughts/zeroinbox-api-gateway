@@ -92,3 +92,15 @@ exports.updateLoadingStatus = function(userId, callback) {
     })    
 }
 
+exports.findStoredSession = function(userId, callback) {
+    let conditions = { userId: userId }
+    let projection = {
+        "active.session": 1,
+        _id: 0
+    }
+
+    History.findOne(conditions, projection, (err, res) => {
+        callback(err, res);
+    });
+}
+
