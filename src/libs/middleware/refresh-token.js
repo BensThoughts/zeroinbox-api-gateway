@@ -6,6 +6,9 @@ const {
 const {
   httpRefreshTokenRequest
 } = require('../utils/api.utils');
+const {
+  load_suggestions_meta
+} = require('../../core/loading/loading.controller')
 
 
 function refreshToken(req, res, next) {
@@ -40,13 +43,17 @@ function checkRefreshToken(req, res, next) {
           let expires_in = parsedResponse.expires_in; // this is in seconds, always 3600
           let expiry_date = req.session.token.expiry_date; // this is in milli (epoch)
           let new_expiry_date = expiry_date + (expires_in * 1000);
-          
+
           let new_access_token = parsedResponse.access_token;
           
           req.session.token.access_token = new_access_token;
           req.session.token.expiry_date = new_expiry_date;
 
           sendNewTokenToMongo(userId, new_access_token, new_expiry_date);
+          
+          load_suggestions_meta(userId, new_access_token, (loadingResponse) => {
+            logger.trace('Reload from token refresh: ' + JSON.stringify(loadingResponse));
+          });
 
           return next();
         }).catch((err) => {
