@@ -28,9 +28,11 @@ function refreshToken(req, res, next) {
 function checkRefreshToken(req, res, next) {
     let userId = req.session.user_info.userId;
     let currentDate = new Date().getTime();
-    let expiry_date = req.session.expiry_date;
-    
+    let expiry_date = req.session.token.expiry_date;
+
+
     if (currentDate >= expiry_date) {
+      logger.trace('Refreshing token for userId: ' + userId);
       findStoredSession(userId, (err, activeSession) => {
         let session = activeSession.active.session;
         // let currentDate = new Date().getTime();
@@ -50,9 +52,9 @@ function checkRefreshToken(req, res, next) {
           req.session.token.expiry_date = new_expiry_date;
 
           sendNewTokenToMongo(userId, new_access_token, new_expiry_date);
-          
+
           load_suggestions_meta(userId, new_access_token, (loadingResponse) => {
-            logger.trace('Reload from token refresh: ' + JSON.stringify(loadingResponse));
+            logger.trace('Reload senders from token refresh: ' + JSON.stringify(loadingResponse));
           });
 
           return next();

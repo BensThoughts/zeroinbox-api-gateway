@@ -78,7 +78,8 @@ googleApi.use(
     },
     secret: session_secret,
     cookie: {
-      maxAge: 60 * 60 * 1000
+      expires: new Date(2147483647000)
+      // maxAge: 60 * 60 * 1000
     },
     saveUninitialized: false
   })
