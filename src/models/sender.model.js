@@ -14,14 +14,15 @@ var notEmpty = function(features){
 const senderSchema = new Schema({
   userId: { type: String, required: true },
   senderId: { type: String, required: true },
-  senderNames: { type: [String], required: true, validate: [notEmpty, 'Please add at least one threadId'] },
+  senderNames: { type: [String], required: true, validate: [notEmpty, 'Please add at least one string to senderNames[]'] },
   senderAddress: { type: String, required: true },
   unsubscribeWeb: { type: String, required: false },
   unsubscribeEmail: { type: String, required: false },
+  threadIds: { type: [String], required: true, validate: [notEmpty, 'Please add a threadId to threadIds[]']},
   threadIds_internalDates: { type: [{ 
     threadId: {type: String, required: true}, 
     internalDate: {type: Number, required: true } }
-  ], required: true, validate: [notEmpty, 'Please add a threadId_internalDate'] },
+  ], required: false, validate: [notEmpty, 'Please add a threadId_internalDate'] },
   totalSizeEstimate: { type: Number, required: true },
   count: { type: Number, required: true },
 });
@@ -39,3 +40,4 @@ const Sender = mongoose.model('senders', senderSchema);
 
 
 module.exports = Sender
+
