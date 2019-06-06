@@ -24,7 +24,7 @@ const express = require('express');
 const googleApi = express();
 
 googleApi.get('/', (req, res) => {
-  logger.debug('GKE Ingress health checked!');
+  // logger.debug('GKE Ingress health checked!');
   res.status(200).send();
 });
 
