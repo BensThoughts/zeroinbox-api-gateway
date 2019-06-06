@@ -28,11 +28,15 @@ function refreshToken(req, res, next) {
 function checkRefreshToken(req, res, next) {
     let userId = req.session.user_info.userId;
     let currentDate = new Date().getTime();
-    let expiry_date = req.session.token.expiry_date;
+    let expiry_date = req.session.token.expiry_date; // in millis since epoch
+
+    logger.trace('CURREN DATE: ' + currentDate);
+    logger.trace('EXPIRY DATE: ' + expiry_date);
 
 
     if (currentDate >= expiry_date) {
       logger.trace('Refreshing token for userId: ' + userId);
+      
       findStoredSession(userId, (err, activeSession) => {
         let session = activeSession.active.session;
         // let currentDate = new Date().getTime();
@@ -40,11 +44,13 @@ function checkRefreshToken(req, res, next) {
         let refresh_token = session.refresh_token;
 
         httpRefreshTokenRequest(refresh_token).then((response) => {
+          logger.trace(response);
           let parsedResponse = JSON.parse(response);
   
           let expires_in = parsedResponse.expires_in; // this is in seconds, always 3600
-          let expiry_date = req.session.token.expiry_date; // this is in milli (epoch)
+          // let expiry_date = req.session.token.expiry_date; // this is in milli (epoch)
           let new_expiry_date = expiry_date + (expires_in * 1000);
+          logger.trace('NEW EXPIRY DATE: ' + new_expiry_date);
 
           let new_access_token = parsedResponse.access_token;
           
