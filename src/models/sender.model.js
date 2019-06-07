@@ -18,6 +18,7 @@ const senderSchema = new Schema({
   senderAddress: { type: String, required: true },
   unsubscribeWeb: { type: String, required: false },
   unsubscribeEmail: { type: String, required: false },
+  unsubscribed: { type: Boolean, required: true },
   threadIds: { type: [String], required: true, validate: [notEmpty, 'Please add a threadId to threadIds[]']},
   threadIds_internalDates: { type: [{ 
     threadId: {type: String, required: true}, 
