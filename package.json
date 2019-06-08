@@ -1,6 +1,6 @@
 {
   "name": "zero-inbox-api-gateway",
-  "version": "1.5.12",
+  "version": "1.5.13",
   "description": "Backend for zero inbox. The Api Gateway",
   "main": "/src/index.js",
   "directories": {
