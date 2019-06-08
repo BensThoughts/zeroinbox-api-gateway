@@ -63,7 +63,7 @@ function httpPostRefreshTokenPromise(refresh_token) {
       if (!err && res.statusCode == 200) {
         resolve(body)
       } else {
-        logger.error('Error using refresh_token to get access_token' + JSON.stringify(err));
+        logger.error('Error using refresh_token to get access_token ' + JSON.stringify(err));
         reject(err);
       }
     });
