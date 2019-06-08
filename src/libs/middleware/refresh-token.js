@@ -63,7 +63,7 @@ function checkRefreshToken(req, res, next) {
     
             let expires_in = parsedResponse.expires_in; // this is in seconds, always 3600
             // let expiry_date = req.session.token.expiry_date; // this is in milli (epoch)
-            let new_expiry_date = expiry_date + (expires_in * 1000);
+            let new_expiry_date = currentDate + (expires_in * 1000);
             logger.trace('NEW EXPIRY DATE: ' + new_expiry_date);
   
             let new_access_token = parsedResponse.access_token;
