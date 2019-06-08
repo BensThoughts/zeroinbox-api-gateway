@@ -65,7 +65,7 @@ function checkRefreshToken(req, res, next) {
 
           return next();
         }).catch((err) => {
-          logger.err(err);
+          logger.error(err);
           return res.status(401).json({
             status: 'error',
             status_message: 'Error obtaining new access_token with refresh_token!'
