@@ -33,6 +33,8 @@ exports.publishActions = function(userId, access_token, actionsObj) {
     let filter = actionsObj.filter;
     let labelName = actionsObj.labelName;
     let category = actionsObj.category;
+    let unsubscribeEmail = actionsObj.unsubscribeEmail;
+    let unsubscribeWeb = actionsObj.unsubscribeWeb;
 
     rabbit.publish('api.send.1', 'batch.actions.ex.1', '', {
         userId: userId,
@@ -41,7 +43,9 @@ exports.publishActions = function(userId, access_token, actionsObj) {
         actionType: actionType,
         filter: filter,
         labelName: labelName,
-        category: category
+        category: category,
+        unsubscribeEmail: unsubscribeEmail,
+        unsubscribeWeb: unsubscribeWeb
     }, {
         contentType: 'application/json',
         type: 'actions',

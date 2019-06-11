@@ -18,18 +18,24 @@ exports.postActions = function(req, res) {
     let body = req.body;
     let senderIds = body.senderIds;
 
+    logger.trace(body);
+
     senderIds.forEach((senderId) => {
         let actionType = body.actionType;
         let filter = body.filter;
         let labelName = body.labelName;
         let category = body.category;
+        let unsubscribeEmail = body.unsubscribeEmail;
+        let unsubscribeWeb = body.unsubscribeWeb;
 
         let actionsObj = {
             senderId: senderId,
             actionType: actionType,
             filter: filter,
             category: category,
-            labelName: labelName
+            labelName: labelName,
+            unsubscribeEmail: unsubscribeEmail,
+            unsubscribeWeb: unsubscribeWeb
         }
     
         publishActions(userId, access_token, actionsObj);
