@@ -19,7 +19,7 @@ exports.publishUser = function(userId, access_token) {
 
 function publishActionsUserId(userId) {
   let sentAt = new Date().getTime();
-  rabbit.publish('api.send.1', 'actions.userIds.ex.1', 'userId.' + userId, {
+  rabbit.publish('api.send.1', 'actions.userIds.ex.1', '', {
     userId: userId
   },
   {
@@ -45,9 +45,43 @@ function publishActionsUserId(userId) {
  */
 exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
 
-    publishActionsUserId(userId);
+  for (i = 0; i < senderIds.length; i++) {
+    let senderId = senderIds[i];
+    let sentAt = new Date().getTime();
+    let actionType = actionsObj.actionType;
+    let filter = actionsObj.filter;
+    let labelName = actionsObj.labelName;
+    let category = actionsObj.category;
+    let unsubscribeEmail = actionsObj.unsubscribeEmail;
+    let unsubscribeWeb = actionsObj.unsubscribeWeb;
 
-    rabbit.assertQueue('api.send.1', 'actions.userId.' + userId, { autoDelete: false, durable: true }, (assertQueueErr, q) => {
+/*     let lastMsg = false;
+    if (i === (senderIds.length -1)) {
+      lastMsg = true;
+    } */
+
+    rabbit.publish('api.send.1', 'actions.direct.ex.1', '', {
+        userId: userId,
+        access_token: access_token,
+        senderId: senderId,
+        actionType: actionType,
+        filter: filter,
+        labelName: labelName,
+        category: category,
+        unsubscribeEmail: unsubscribeEmail,
+        unsubscribeWeb: unsubscribeWeb,
+        // lastMsg: lastMsg,
+    }, {
+        contentType: 'application/json',
+        type: 'actions',
+        appId: 'zi-api-gateway',
+        timestamp: sentAt,
+        encoding: 'string Buffer',
+        persistent: true,
+    });
+  } 
+}
+  /*   rabbit.assertQueue('api.send.1', 'actions.userId.' + userId, { autoDelete: false, durable: true }, (assertQueueErr, q) => {
       if (assertQueueErr) {
         return logger.error(assertQueueErr);
       } else {
@@ -70,7 +104,7 @@ exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
                 lastMsg = true;
               }
           
-              rabbit.publish('api.send.1', 'actions.topic.ex.1' + userId, 'userId.' + userId, {
+              rabbit.publish('api.send.1', 'actions.topic.ex.1', 'userId.' + userId, {
                   userId: userId,
                   access_token: access_token,
                   senderId: senderId,
@@ -88,12 +122,11 @@ exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
                   timestamp: sentAt,
                   encoding: 'string Buffer',
                   persistent: true,
-              });   
+              });
+              publishActionsUserId(userId);
+   
             } 
           }
         });
       }
-    });
-
-  
-}
+    }); */

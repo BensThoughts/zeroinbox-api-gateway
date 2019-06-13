@@ -17,6 +17,12 @@
           "name": "actions.topic.ex.1",
           "type": "topic",
           "options": {}
+        },
+        {
+          "channel": "api.send.1",
+          "name": "actions.direct.ex.1",
+          "type": "direct",
+          "options": {}
         }
     ],
     "queues": [
@@ -24,6 +30,11 @@
             "channel": "api.send.1",
             "name": "actions.userIds.q.1",
             "options": { "autoDelete": false }
+        },
+        {
+          "channel": "api.send.1",
+          "name": "actions.direct.q.1",
+          "options": { "autoDelete": false }
         }
     ],
     "bindings": [
@@ -33,6 +44,13 @@
             "exchange": "actions.userIds.ex.1",
             "key": "",
             "options": {}
+        },
+        {
+          "channel": "api.send.1",
+          "queue": "actions.direct.q.1",
+          "exchange": "actions.direct.ex.1",
+          "key": "",
+          "options": {}
         }
     ]
 }

@@ -105,3 +105,12 @@ exports.findStoredSession = function(userId, callback) {
     });
 }
 
+exports.lockActionsPipeline = function(userId, callback) {
+  let conditions = { userId: userId }
+  let update = {
+    actionsLock: true
+  }
+  LoadingStatus.updateOne(conditions, update, (err, res) => {
+    callback(err, res);
+  });
+}

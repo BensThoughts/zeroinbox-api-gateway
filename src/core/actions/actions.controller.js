@@ -16,6 +16,8 @@ const { publishActions } = require('../../libs/utils/rabbit.utils');
 exports.postActions = function(req, res) {
     let userId = req.session.user_info.userId;
     let access_token = req.session.token.access_token
+
+
     let body = req.body;
     let senderIds = body.senderIds;
 
