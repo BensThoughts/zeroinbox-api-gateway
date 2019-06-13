@@ -8,23 +8,29 @@
         },
         {
             "channel": "api.send.1",
-            "name": "batch.actions.ex.1",
+            "name": "actions.userIds.ex.1",
             "type": "direct",
             "options": {}
+        },
+        {
+          "channel": "api.send.1",
+          "name": "actions.topic.ex.1",
+          "type": "topic",
+          "options": {}
         }
     ],
     "queues": [
         {
             "channel": "api.send.1",
-            "name": "batch.actions.q.1",
+            "name": "actions.userIds.q.1",
             "options": { "autoDelete": false }
         }
     ],
     "bindings": [
         {
             "channel": "api.send.1",
-            "queue": "batch.actions.q.1",
-            "exchange": "batch.actions.ex.1",
+            "queue": "actions.userIds.q.1",
+            "exchange": "actions.userIds.ex.1",
             "key": "",
             "options": {}
         }
