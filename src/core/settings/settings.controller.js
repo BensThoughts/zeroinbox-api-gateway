@@ -64,5 +64,12 @@ function checkCategories(categories) {
 }
 
 exports.setCategories = function(req, res) {
-
+  let userId = req.session.user_info.userId;
+  let body = req.body;
+  logger.debug(body);
+  res.status(200).json({
+    status: 'success',
+    status_code: 200,
+    status_message: 'OK',
+  })
 }
