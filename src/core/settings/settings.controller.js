@@ -31,6 +31,7 @@ exports.getCategories = function(req, res) {
       } else {
         let categories = [
           { name: 'Friends', value: 'Friends' },
+          { name: 'Social', value: 'Social'},
           { name: 'Shopping', value: 'Shopping' },
           { name: 'News', value: 'News' },
           { name: 'Work', value: 'Work' },
