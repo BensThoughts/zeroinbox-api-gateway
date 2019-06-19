@@ -22,19 +22,38 @@ exports.findCategories = function(userId, callback) {
   });
 }
 
-exports.updateCategories = function(userId, categories, callback) {
+exports.addToCategories = function(userId, categories, callback) {
   let conditions = { userId: userId };
   let options = {
     upsert: true,
     multi: false
   }
   
-  let doc = {
-    userId: userId,
-    categories: categories
+  let update = {
+    // userId: userId,
+    "$addToSet": {
+      categories: categories
+    }
   }
 
-  Categories.updateOne(conditions, doc, options, (err, res) => {
+  Categories.updateOne(conditions, update, options, (err, res) => {
+    callback(err, res);
+  });
+}
+
+exports.removeCategory = function(userId, category, callback) {
+  let conditions = { userId: userId }
+  let options = {
+    upsert: true,
+    multi: false
+  }
+  let update = {
+    "$pull": {
+      categories: category
+    }
+  }
+
+  Categories.updateOne(conditions, update, options, (err, res) => {
     callback(err, res);
   });
 }

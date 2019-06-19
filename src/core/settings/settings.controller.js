@@ -1,7 +1,8 @@
 const logger = require('../../libs/loggers/log4js');
 const {
   findCategories,
-  updateCategories
+  addToCategories,
+  removeCategory
 } = require('../../libs/utils/mongoose.utils');
 
 exports.getCategories = function(req, res) {
@@ -45,7 +46,7 @@ exports.getCategories = function(req, res) {
             categories: categories
           }
         })
-        updateCategories(userId, categories, (err, updateResponse) => {
+        addToCategories(userId, categories, (err, updateResponse) => {
           if (err) {
             logger.error(err);
           }
@@ -67,9 +68,43 @@ exports.setCategories = function(req, res) {
   let userId = req.session.user_info.userId;
   let body = req.body;
   logger.debug(body);
-  res.status(200).json({
-    status: 'success',
-    status_code: 200,
-    status_message: 'OK',
-  })
+  let add = body.add;
+  let category = body.category;
+  if (add) {
+    let categories = [category];
+    addToCategories(userId, categories, (err, updateResponse) => {
+      if (err) {
+        logger.error(err);
+        res.status(500).json({
+          status: 'error',
+          status_code: 500,
+          status_message: 'Error adding to categories'
+        });
+      } else {
+        res.status(200).json({
+          status: 'success',
+          status_code: 200,
+          status_message: 'OK',
+        })
+      }
+    });
+  } else {
+    removeCategory(userId, category, (err, updateResponse) => {
+      if (err) {
+        logger.error(err);
+        res.status(500).json({
+          status: 'error',
+          status_code: 500,
+          status_message: 'Error adding to categories'
+        });
+      } else {
+        res.status(200).json({
+          status: 'success',
+          status_code: 200,
+          status_message: 'OK',
+        })
+      }
+    });
+  }
+
 }
