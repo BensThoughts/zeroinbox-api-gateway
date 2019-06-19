@@ -4,10 +4,40 @@ const History = require('../../models/history.model');
 const Profile = require('../../models/profile.model');
 const Sender = require('../../models/sender.model');
 const LoadingStatus = require('../../models/loading.model');
+const Categories = require('../../models/categories.model');
 
 const {
     DEFAULT_PERCENT_LOADED
   } = require('../../config/init.config');
+
+exports.findCategories = function(userId, callback) {
+  let conditions = { userId: userId };
+  let projection = {
+    _id: 0,
+    'categories.name': 1,
+    'categories.value': 1 
+  }
+  Categories.findOne(conditions, projection, (err, doc) => {
+    callback(err, doc);
+  });
+}
+
+exports.updateCategories = function(userId, categories, callback) {
+  let conditions = { userId: userId };
+  let options = {
+    upsert: true,
+    multi: false
+  }
+  
+  let doc = {
+    userId: userId,
+    categories: categories
+  }
+
+  Categories.updateOne(conditions, doc, options, (err, res) => {
+    callback(err, res);
+  });
+}
 
 
 exports.upsertToHistory = function upsertToHistory(userId, doc, callback) {
@@ -26,7 +56,7 @@ exports.upsertToHistory = function upsertToHistory(userId, doc, callback) {
 }
 
 exports.findOneHistory = function(userId, callback) {
-    let conditions = { userId: userId }
+    let conditions = { userId: userId };
     History.findOne(conditions, (err, doc) => {
         callback(err, doc);
     });

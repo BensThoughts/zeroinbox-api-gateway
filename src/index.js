@@ -147,6 +147,7 @@ const loadingRouter = require('./core/loading/loading.routes');
 // const statsRouter = require('./core/stats/stats.routes');
 const actionsRouter = require('./core/actions/actions.routes');
 const sendersRouter = require('./core/senders/senders.routes');
+const settingsRouter = require('./core/settings/settings.routes');
 
 googleApi.use('/v1', authRouter);
 googleApi.use('/v1', userRouter);
@@ -154,6 +155,7 @@ googleApi.use('/v1', loadingRouter);
 // googleApi.use('/v1', statsRouter);
 googleApi.use('/v1', actionsRouter);
 googleApi.use('/v1', sendersRouter);
+googleApi.use('/v1', settingsRouter);
 
 /*******************************************************************************
 Connections INIT
