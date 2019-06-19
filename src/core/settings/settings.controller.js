@@ -6,8 +6,8 @@ const {
 
 exports.getCategories = function(req, res) {
   let userId = req.session.user_info.userId;
-  findCategories(userId, (err, categories) => {
-    logger.trace(categories);
+  findCategories(userId, (err, categoriesResponse) => {
+    logger.trace(categoriesResponse);
     if (err) {
       logger.error(err);
       res.status(500).json({
@@ -16,9 +16,19 @@ exports.getCategories = function(req, res) {
         status_message: 'Error finding categories'
       });
     } else {
-      ok = checkCategories(categories);
-      if (!ok) {
-        categories = [
+      ok = checkCategories(categoriesResponse);
+      if (ok) {
+        let categories = categoriesResponse.categories;
+        res.status(200).json({
+          status: 'success',
+          status_code: 200,
+          status_message: 'ok',
+          data: {
+            categories: categories
+          }
+        })
+      } else {
+        let categories = [
           { name: 'Friends', value: 'Friends' },
           { name: 'Shopping', value: 'Shopping' },
           { name: 'News', value: 'News' },
@@ -26,7 +36,7 @@ exports.getCategories = function(req, res) {
           { name: 'Finance', value: 'Finance' },
           { name: 'Travel', value: 'Travel' },
           { name: 'Misc', value: 'Misc' },
-        ]
+        ];
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -41,15 +51,6 @@ exports.getCategories = function(req, res) {
           }
           logger.debug(updateResponse);
         });
-      } else {
-        res.status(200).json({
-          status: 'success',
-          status_code: 200,
-          status_message: 'ok',
-          data: {
-            categories: categories
-          }
-        })
       }
     }
   });
