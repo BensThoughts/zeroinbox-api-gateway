@@ -17,7 +17,7 @@ exports.senders = function(req, res) {
               status: 'success',
               status_message: 'OK',
               data: {
-                suggestions: senders
+                senders: senders
               }
             });
           }

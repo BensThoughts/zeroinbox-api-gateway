@@ -111,7 +111,7 @@ exports.findSenders = function(userId, callback) {
         "unsubscribeWeb": 1,
         "unsubscribed": 1,
         "senderId": 1,
-        "count": 1,
+        "threadIdCount": 1,
         _id: 0
     };
     Sender.find(conditions, senderProjection, (err, raw) => {
