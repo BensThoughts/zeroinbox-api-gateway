@@ -6,7 +6,6 @@ const {
 exports.senders = function(req, res) {
     let userId = req.session.user_info.userId;
     findSenders(userId, (err, senders) => {
-        logger.debug(senders);
         if (err) {
             logger.error('Error in suggestion.find(): ' + err);
             res.json({
@@ -23,7 +22,8 @@ exports.senders = function(req, res) {
                 unsubscribeWeb: sender.unsubscribeWeb,
                 unsubscribed: sender.unsubscribed,
                 senderId: sender.senderId,
-                threadIdCount: sender.threadIds.length
+                threadIdCount: sender.threadIds.length,
+                messageIdCount: sender.messageIds.length
               }
 
             });

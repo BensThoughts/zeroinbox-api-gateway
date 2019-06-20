@@ -112,6 +112,7 @@ exports.findSenders = function(userId, callback) {
         "unsubscribed": 1,
         "senderId": 1,
         "threadIds": 1,
+        "messageIds": 1,
         _id: 0
     };
 
