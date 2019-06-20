@@ -14,14 +14,22 @@ const {
 function refreshToken(req, res, next) {
     let path = req.path;
     switch(path) {
-      case '/v1/oauth2init':
-        return next();
-      case '/v1/oauth2callback':
-        return next();
-      case '/v1/basicProfile':
-        return next();
-      default:
+      // case '/v1/oauth2init':
+      //  return next();
+      // case '/v1/oauth2callback':
+      //  return next();
+      // case '/v1/basicProfile':
+      //  return next();
+      case '/v1/senders':
         return checkRefreshToken(req, res, next);
+
+      case '/v1/actions':
+        return checkRefreshToken(req, res, next);
+      
+      default:
+        return next();
+      // default:
+      //  return checkRefreshToken(req, res, next);
     }
 }
 
