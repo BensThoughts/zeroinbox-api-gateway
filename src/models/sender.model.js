@@ -20,10 +20,8 @@ const senderSchema = new Schema({
   unsubscribeEmail: { type: String, required: false },
   unsubscribed: { type: Boolean, required: true },
   threadIds: { type: [String], required: true, validate: [notEmpty, 'Please add a threadId to threadIds[]']},
-  totalSizeEstimate: { type: Number, required: true },
-  threadIdCount: { type: Number, required: true },
   messageIds: { type: [String], required: true, validate: [notEmpty, 'Please add a messageId to messageIds[]']},
-  messageCount: { type: Number, required: true}
+  totalSizeEstimate: { type: Number, required: true },
 });
 
 senderSchema.statics.createSenderId = function(senderAddress) {

@@ -111,9 +111,10 @@ exports.findSenders = function(userId, callback) {
         "unsubscribeWeb": 1,
         "unsubscribed": 1,
         "senderId": 1,
-        "threadIdCount": 1,
+        "threadIds": 1,
         _id: 0
     };
+
     Sender.find(conditions, senderProjection, (err, raw) => {
         callback(err, raw);
     });
@@ -163,3 +164,24 @@ exports.lockActionsPipeline = function(userId, callback) {
     callback(err, res);
   });
 }
+
+
+/*     Sender.aggregate([
+      {
+        "$project": {
+          _id: 0,
+          "senderAddress": 1,
+          "senderNames": 1,
+          "totalSizeEstimate": 1,
+          "unsubscribeEmail": 1,
+          "unsubscribeWeb": 1,
+          "unsubscribed": 1,
+          "senderId": 1,
+          // "threadIdCount": 1,
+          "threadIdCount": { "$cond": { "if": { "$isArray": "$threadIdCount" }, "then": { "$size": "$threadIdCount" }, "else": "NA" } },
+
+        }
+      }
+    ], (err, raw) => {
+      callback(err, raw);
+    }) */

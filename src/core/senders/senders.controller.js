@@ -6,6 +6,7 @@ const {
 exports.senders = function(req, res) {
     let userId = req.session.user_info.userId;
     findSenders(userId, (err, senders) => {
+        logger.debug(senders);
         if (err) {
             logger.error('Error in suggestion.find(): ' + err);
             res.json({
@@ -13,11 +14,24 @@ exports.senders = function(req, res) {
               status_message: 'Error at /senders: Error in MongoDb find'
             });
           } else {
+            sendersProjection = senders.map((sender) => {
+              return {
+                senderAddress: sender.senderAddress,
+                senderNames: sender.senderNames,
+                totalSizeEstimate: sender.totalSizeEstimate,
+                unsubscribeEmail: sender.unsubscribeEmail,
+                unsubscribeWeb: sender.unsubscribeWeb,
+                unsubscribed: sender.unsubscribed,
+                senderId: sender.senderId,
+                threadIdCount: sender.threadIds.length
+              }
+
+            });
             res.json({ 
               status: 'success',
               status_message: 'OK',
               data: {
-                senders: senders
+                senders: sendersProjection
               }
             });
           }
