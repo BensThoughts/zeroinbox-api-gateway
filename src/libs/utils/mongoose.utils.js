@@ -144,15 +144,23 @@ exports.updateLoadingStatus = function(userId, callback) {
     })    
 }
 
-exports.findStoredSession = function(userId, callback) {
+exports.findRefreshToken = function(userId, callback) {
     let conditions = { userId: userId }
     let projection = {
-        "active.session": 1,
+        "active.session.refresh_token": 1,
         _id: 0
     }
 
     History.findOne(conditions, projection, (err, res) => {
+      if (err) {
         callback(err, res);
+      } else if (res === null) {
+        let errorMessage = 'Refresh token for ' + userId + ' not found!';
+        callback(errorMessage, res);
+      } else {
+        let refresh_token = res.active.session.refresh_token;
+        callback(err, refresh_token);
+      }
     });
 }
 

@@ -1,6 +1,6 @@
 const logger = require('../loggers/log4js');
 const {
-    findStoredSession,
+    findRefreshToken,
     upsertToHistory,
 } = require('../utils/mongoose.utils');
 const {
@@ -45,14 +45,14 @@ function checkRefreshToken(req, res, next) {
     if (currentDate >= expiry_date) {
       logger.trace('Refreshing token for userId: ' + userId);
       
-      findStoredSession(userId, (err, storedSession) => {
+      findRefreshToken(userId, (err, refresh_token) => {
         if (err) {
           logger.error(err);
           return res.status(401).json({
             status: 'error',
             status_message: 'Error obtaining new access_token with refresh_token!'
           });
-        } else if (storedSession === null) {
+        } else if (refresh_token === null) {
           logger.error('findStoredSession(userId, (err, storedSession)): storedSession === null');
           return res.status(401).json({
             status: 'error',
@@ -63,8 +63,8 @@ function checkRefreshToken(req, res, next) {
           // storedSession = activeSession.active.session;
           // let currentDate = new Date().getTime();
           // let expiry_date = session.expiry_date;
-          let refresh_token = storedSession.active.session.refresh_token;
-          logger.debug('storedSession for' + userId + ': ' + storedSession);
+          // let refresh_token = storedSession.active.session.refresh_token;
+          // logger.debug('storedSession for' + userId + ': ' + storedSession);
           logger.debug('Refresh token for ' + userId + ': ' + refresh_token);
   
           httpRefreshTokenRequest(refresh_token).then((response) => {
