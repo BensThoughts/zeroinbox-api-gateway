@@ -21,6 +21,7 @@ const senderSchema = new Schema({
   unsubscribed: { type: Boolean, required: true },
   threadIds: { type: [String], required: true, validate: [notEmpty, 'Please add a threadId to threadIds[]']},
   messageIds: { type: [String], required: true, validate: [notEmpty, 'Please add a messageId to messageIds[]']},
+  messageIdsAlpha: { type: [String], required: true, validate: [notEmpty, 'Please add a messageId to messageIds[]']},
   totalSizeEstimate: { type: Number, required: true },
 });
 
