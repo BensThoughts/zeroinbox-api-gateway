@@ -59,11 +59,12 @@ function checkRefreshToken(req, res, next) {
             status_message: 'Error obtaining new access_token with refresh_token!'
           });
         } else {
-          storedSession = storedSession.active.session; // This is rather hacky, need better var names
+          // storedSession = storedSession.active.session; // This is rather hacky, need better var names
           // storedSession = activeSession.active.session;
           // let currentDate = new Date().getTime();
           // let expiry_date = session.expiry_date;
           let refresh_token = storedSession.refresh_token;
+          logger.debug('Refresh token for ' + userId + ': ' + refreshToken);
   
           httpRefreshTokenRequest(refresh_token).then((response) => {
             logger.trace(response);
