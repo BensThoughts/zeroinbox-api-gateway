@@ -64,7 +64,8 @@ function checkRefreshToken(req, res, next) {
           // let currentDate = new Date().getTime();
           // let expiry_date = session.expiry_date;
           let refresh_token = storedSession.refresh_token;
-          logger.debug('Refresh token for ' + userId + ': ' + refreshToken);
+          logger.debug('storedSession for' + userId + ': ' + storedSession);
+          logger.debug('Refresh token for ' + userId + ': ' + refresh_token);
   
           httpRefreshTokenRequest(refresh_token).then((response) => {
             logger.trace(response);
