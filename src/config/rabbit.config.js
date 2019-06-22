@@ -41,6 +41,21 @@ if (RABBIT_HOSTNAME) {
     }
 }
 
+const rabbit_topology = {
+  channels: {
+    send: 'api.send.1'
+  },
+  exchanges: {
+    fanout: {
+      getMessages: 'api.get-messages.user-ids.fanout.ex.1',
+    },
+    direct: {
+      actions: 'api.do-actions.actions.direct.ex.1'
+    }
+  }
+}
+
 module.exports = {
-    rabbit_config
+    rabbit_config,
+    rabbit_topology
 }
