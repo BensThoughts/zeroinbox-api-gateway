@@ -13,7 +13,10 @@ const {
   upsertToHistory,
 } = require('../../libs/utils/mongoose.utils');
 
-const {publishUser } = require('../../libs/utils/rabbit.utils');
+const {
+  publishGetMessagesUserId,
+  publishGetThreadsUserId 
+} = require('../../libs/utils/rabbit.utils');
 
 
 /**
@@ -157,7 +160,7 @@ function load_suggestions_meta(userId, access_token, callback) {
           status_message: 'Already Loading',
         });
       } else {
-        publishUser(userId, access_token);
+        publishGetMessagesUserId(userId, access_token);
         updateLoadingStatus(userId, (err, doc) => {
           // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {
