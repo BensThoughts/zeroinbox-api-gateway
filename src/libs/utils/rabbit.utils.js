@@ -59,7 +59,8 @@ exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
     let unsubscribeEmail = actionsObj.unsubscribeEmail;
     let unsubscribeWeb = actionsObj.unsubscribeWeb;
 
-    rabbit.publish('api.send.1', 'actions.direct.ex.1', '', {
+    let actionsExchange = rabbit_topology.exchanges.direct.actions;
+    rabbit.publish(rabbit_topology.channels.send, actionsExchange, '', {
         userId: userId,
         access_token: access_token,
         senderId: senderId,
