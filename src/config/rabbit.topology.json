@@ -1,54 +1,54 @@
 {
     "exchanges" : [
         {
-            "channel": "api.send.1",
-            "name": "user.ids.ex.1",
-            "type": "fanout",
-            "options": {}
-        },
-        {
-            "channel": "api.send.1",
-            "name": "actions.userIds.ex.1",
-            "type": "direct",
-            "options": {}
-        },
-        {
           "channel": "api.send.1",
-          "name": "actions.topic.ex.1",
-          "type": "topic",
+          "name": "api.get-messages.user-ids.fanout.ex.1",
+          "type": "fanout",
           "options": {}
         },
         {
           "channel": "api.send.1",
-          "name": "actions.direct.ex.1",
+          "name": "api.do-actions.actions.direct.ex.1",
           "type": "direct",
           "options": {}
         }
     ],
     "queues": [
-        {
-            "channel": "api.send.1",
-            "name": "actions.userIds.q.1",
-            "options": { "autoDelete": false }
-        },
-        {
-          "channel": "api.send.1",
-          "name": "actions.direct.q.1",
-          "options": { "autoDelete": false }
-        }
+      {
+        "channel": "api.send.1",
+        "name": "actions.do-actions.actions.q.1",
+        "options": { "autoDelete": false }
+      },
+      {
+        "channel": "api.send.1",
+        "name": "batch-messages.get-messages.user-ids.q.1",
+        "options": { "autoDelete": false }
+      },
+      {
+        "channel": "api.send.1",
+        "name": "message-ids.get-messages.user-ids.q.1",
+        "options": { "autoDelete": false }
+      }
     ],
     "bindings": [
         {
-            "channel": "api.send.1",
-            "queue": "actions.userIds.q.1",
-            "exchange": "actions.userIds.ex.1",
-            "key": "",
-            "options": {}
+          "channel": "api.send.1",
+          "queue": "actions.do-actions.actions.q.1",
+          "exchange": "api.do-actions.actions.direct.ex.1",
+          "key": "",
+          "options": {}
         },
         {
           "channel": "api.send.1",
-          "queue": "actions.direct.q.1",
-          "exchange": "actions.direct.ex.1",
+          "queue": "batch-messages.get-messages.user-ids.q.1",
+          "exchange": "api.get-messages.user-ids.fanout.ex.1",
+          "key": "",
+          "options": {}
+        },
+        {
+          "channel": "api.send.1",
+          "queue": "message-ids.get-messages.user-ids.q.1",
+          "exchange": "api.get-messages.user-ids.fanout.ex.1",
           "key": "",
           "options": {}
         }
