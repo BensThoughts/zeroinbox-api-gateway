@@ -9,6 +9,7 @@ module.exports = {
     log_level: String(process.env.LOG_LEVEL) || 'production',
     BASIC_PROFILE_ENDPOINT: String(process.env.BASIC_PROFILE_ENDPOINT) || 'https://www.googleapis.com/oauth2/v2/userinfo',
     GMAIL_PROFILE_ENDPOINT: String(process.env.GMAIL_PROFILE_ENDPOINT) || 'https://www.googleapis.com/gmail/v1/users/me/profile',
+    OAUTH_TOKEN_URL: String(process.env.OAUTH_TOKEN_URL) || 'https://www.googleapis.com/oauth2/v4/token',
     GAPI_INIT_RETRY_DELAY: Number(process.env.GAPI_INIT_RETRY_DELAY) || 500,
     GAPI_DELAY_MULTIPLIER: Number(process.env.GAPI_DELAY_MULTIPLIER) || 2,
     GAPI_MAX_RETRIES: Number(process.env.GAPI_MAX_RETRIES) || 3,

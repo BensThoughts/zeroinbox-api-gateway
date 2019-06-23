@@ -4,7 +4,8 @@ const request = require('request');
 const {
   GAPI_DELAY_MULTIPLIER,
   GAPI_MAX_RETRIES,
-  GAPI_INIT_RETRY_DELAY
+  GAPI_INIT_RETRY_DELAY,
+  OAUTH_TOKEN_URL
 } = require('../../config/init.config');
 
 const {
@@ -31,7 +32,7 @@ function retryHttpRequest(promiseCreator, retries, delay, delayMultiplier) {
       });
 }
 
-function httpPromise(url, access_token) {
+function httpGetPromise(url, access_token) {
   const options = {
     url: url,
     headers: {
@@ -43,8 +44,11 @@ function httpPromise(url, access_token) {
       if (!error && response.statusCode == 200) {
         resolve(body);
       } else {
-        logger.error('Error contacting ' + url + ': ' + JSON.stringify(error));
-        reject(error);
+        let httpError = {
+          errorUrl: 'GET - Error contacting ' + url + ': ' + error,
+          errorBody: JSON.stringify(body)
+        }
+        reject(httpError);
       }
     })
   });
@@ -52,7 +56,8 @@ function httpPromise(url, access_token) {
 
 function httpPostRefreshTokenPromise(refresh_token) {
   return new Promise((resolve, reject) => {
-    request.post('https://www.googleapis.com/oauth2/v4/token', {
+    let url = OAUTH_TOKEN_URL;
+    request.post(url, {
       form: {
         client_id: client_id,
         client_secret: client_secret,
@@ -63,19 +68,21 @@ function httpPostRefreshTokenPromise(refresh_token) {
       if (!err && res.statusCode == 200) {
         resolve(body)
       } else {
-        logger.error('Error using refresh_token to get access_token ' + JSON.stringify(err));
-        logger.error('Error body: ' + body);
-        reject(err);
+        let httpError = {
+          errorUrl: 'POST - Error contacting ' + url + ': ' + error,
+          errorBody: JSON.stringify(body)
+        }
+        reject(httpErr);
       }
     });
   });
 }
 
-exports.httpRequest = function(url, access_token) {
+exports.httpGetRequest = function(url, access_token) {
   let retries = GAPI_MAX_RETRIES;
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => httpPromise(url, access_token);
+  let promiseCreator = () => httpGetPromise(url, access_token);
 
   return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
 }

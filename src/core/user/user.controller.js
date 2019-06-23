@@ -5,12 +5,14 @@
 const logger = require('../../libs/loggers/log4js');
 const crypto = require('crypto');
 
-const apiUtils = require('../../libs/utils/api.utils');
-const httpRequest = apiUtils.httpRequest;
+const {
+  httpGetRequest
+ } = require('../../libs/utils/api.utils');
 
-const mongooseUtils = require('../../libs/utils/mongoose.utils');
-const upsertToHistory = mongooseUtils.upsertToHistory;
-const upsertToProfile = mongooseUtils.upsertToProfile;
+const {
+  upsertToHistory,
+  upsertToProfile
+} = require('../../libs/utils/mongoose.utils');
 
 const {
   BASIC_PROFILE_ENDPOINT,
@@ -27,7 +29,7 @@ exports.basic_profile = function (req, res) {
   let sessionID = req.sessionID;
   let access_token = token.access_token;
 
-  httpRequest(BASIC_PROFILE_ENDPOINT, access_token).then((basic_profile_response) => {
+  httpGetRequest(BASIC_PROFILE_ENDPOINT, access_token).then((basic_profile_response) => {
 
       let basic_profile = JSON.parse(basic_profile_response);
       let userId = basic_profile.id;
@@ -118,7 +120,7 @@ exports.email_profile = function (req, res) {
 
   let access_token = req.session.token.access_token;
 
-  httpRequest(GMAIL_PROFILE_ENDPOINT, access_token).then((email_profile_response) => {
+  httpGetRequest(GMAIL_PROFILE_ENDPOINT, access_token).then((email_profile_response) => {
     let email_profile = JSON.parse(email_profile_response);
     let userId = req.session.user_info.userId;
 
