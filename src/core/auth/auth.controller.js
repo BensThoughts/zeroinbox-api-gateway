@@ -5,13 +5,13 @@ const logger = require('../../libs/loggers/log4js');
 const {google} = require('googleapis');
 
 const {
-  client_id,
-  client_secret,
-  oauth_redirect_url,
-  access_type,
-  prompt,
-  auth_success_redirect_url,
-  auth_failure_redirect_url,
+  CLIENT_ID,
+  CLIENT_SECRET,
+  OAUTH_REDIRECT_URL,
+  ACCESS_TYPE,
+  PROMPT,
+  AUTH_SUCCESS_REDIRECT_URL,
+  AUTH_FAILURE_REDIRECT_URL,
 } = require('../../config/auth.config');
 
 const {
@@ -25,16 +25,16 @@ const {
 exports.oauth2init = function(req, res) {
 
   const oauth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    oauth_redirect_url
+    CLIENT_ID,
+    CLIENT_SECRET,
+    OAUTH_REDIRECT_URL
   );
 
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: access_type,
+    access_type: ACCESS_TYPE,
     scope: ['https://www.googleapis.com/auth/gmail.modify','https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/gmail.settings.basic'],
     // scope: scope,
-    prompt: prompt,
+    prompt: PROMPT,
   });
 
   // Reset the session after init because leaving the site to log in
@@ -67,13 +67,13 @@ exports.oauth2callback = function(req, res) {
   const code = req.query.code;
 
   if (code === undefined || !code) {
-    res.redirect(auth_failure_redirect_url)
+    res.redirect(AUTH_FAILURE_REDIRECT_URL)
   } else {
 
     const oauth2Client = new google.auth.OAuth2(
-      client_id,
-      client_secret,
-      oauth_redirect_url
+      CLIENT_ID,
+      CLIENT_SECRET,
+      OAUTH_REDIRECT_URL
     );
 
     oauth2Client.getToken(code, (err, token) => {
@@ -91,7 +91,7 @@ exports.oauth2callback = function(req, res) {
         refresh_token: refresh_token
       };
 
-      res.redirect(auth_success_redirect_url);
+      res.redirect(AUTH_SUCCESS_REDIRECT_URL);
     });
 
   }

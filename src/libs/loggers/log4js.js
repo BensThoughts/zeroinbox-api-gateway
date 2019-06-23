@@ -62,8 +62,8 @@ log4js.configure({
     }
 });
 
-const { log_level } = require('../../config/init.config');
+const { LOG_LEVEL } = require('../../config/init.config');
 
-const logger = log4js.getLogger(log_level);
+const logger = log4js.getLogger(LOG_LEVEL);
 
 module.exports = logger;

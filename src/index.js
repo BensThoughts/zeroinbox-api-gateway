@@ -4,13 +4,13 @@
 * Config Init
 *******************************************************************************/
 const {
-  express_port,
-  express_host,
-  cors_whitelist,
-  session_redis_host,
-  session_redis_port,
-  session_secret,
-  mongo_uri,
+  EXPRESS_HOST,
+  EXPRESS_PORT,
+  CORS_WHITELIST,
+  SESSION_REDIS_HOST,
+  SESSION_REDIS_PORT,
+  SESSION_SECRET,
+  MONGO_URI,
  } = require('./config/init.config');
 
 const { rabbit_config } = require('./config/rabbit.config');
@@ -37,13 +37,13 @@ googleApi.use('/', healthRouter);
 *******************************************************************************/
 const cors = require('cors');
 
-logger.debug('Cors Whitelist: ' + cors_whitelist);
+logger.info('Cors Whitelist: ' + CORS_WHITELIST);
 let whitelist;
 
-if (cors_whitelist.indexOf(',') !== -1) {
-  whitelist = cors_whitelist.split(',');
+if (CORS_WHITELIST.indexOf(',') !== -1) {
+  whitelist = CORS_WHITELIST.split(',');
 } else {
-  whitelist = cors_whitelist
+  whitelist = CORS_WHITELIST
 }
 
 googleApi.use(
@@ -69,14 +69,14 @@ const genuuid = require('uid-safe');
 googleApi.use(
   session({
     store: new RedisStore({
-     host: session_redis_host,
-     port: session_redis_port,
+     host: SESSION_REDIS_HOST,
+     port: SESSION_REDIS_PORT,
     }),
     resave: false,
     genid: function(req) {
       return genuuid.sync(18); // use UUIDs for session IDs
     },
-    secret: session_secret,
+    secret: SESSION_SECRET,
     cookie: {
       expires: new Date(2147483647000)
       // maxAge: 60 * 60 * 1000
@@ -163,16 +163,16 @@ Connections INIT
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
-mongoose.connect(mongo_uri, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(MONGO_URI, {useNewUrlParser: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
     logger.info('Connected to MongoDB!');
     rabbit.connect(rabbit_config, (err, conn) => {
       logger.info('Connected to RabbitMQ!')
-      let server = googleApi.listen(express_port, express_host);
+      let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
       processHandler(server);
-      logger.info(`Running on http://${express_host}:${express_port}`);
+      logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
     });
   }
 });
