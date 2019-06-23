@@ -79,7 +79,7 @@ exports.oauth2callback = function(req, res) {
     oauth2Client.getToken(code, (err, token) => {
       if (err) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
-        res.status(500).send('Something went wrong: check the logs.');// reject(err);
+        return res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
       let refresh_token = token.refresh_token;
 
@@ -91,7 +91,6 @@ exports.oauth2callback = function(req, res) {
         refresh_token: refresh_token
       };
 
-      // res.cookie('c_tok', my_token);
       res.redirect(auth_success_redirect_url);
     });
 
@@ -107,11 +106,12 @@ exports.logout = function(req, res) {
     "userId": userId,
     "active.loggedIn": false,
   }
+
   upsertToHistory(userId, historyUpdate, (err, response) => {
-    if (err) {
-      logger.error(err);
-    }
+    if (err) return logger.error(err);
   });
+
+  logger.trace(userId + ' - Logged out successfully');
 
   res.json({
     status: 'success',

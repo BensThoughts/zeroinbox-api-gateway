@@ -8,7 +8,6 @@ const {
 exports.getCategories = function(req, res) {
   let userId = req.session.user_info.userId;
   findCategories(userId, (err, categoriesResponse) => {
-    logger.trace(categoriesResponse);
     if (err) {
       logger.error(err);
       res.status(500).json({
@@ -20,6 +19,7 @@ exports.getCategories = function(req, res) {
       ok = checkCategories(categoriesResponse);
       if (ok) {
         let categories = categoriesResponse.categories;
+        logger.trace(userId + ' - Categories sent back' + JSON.stringify(categories));
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -48,10 +48,8 @@ exports.getCategories = function(req, res) {
           }
         })
         addToCategories(userId, categories, (err, updateResponse) => {
-          if (err) {
-            logger.error(err);
-          }
-          logger.debug(updateResponse);
+          if (err) return logger.error(userId + ' - ' + err);
+          logger.trace(userId + ' - categories initialize to default');
         });
       }
     }
@@ -72,16 +70,17 @@ exports.setCategories = function(req, res) {
   let add = body.add;
   let category = body.category;
   if (add) {
-    let categories = [category];
-    addToCategories(userId, categories, (err, updateResponse) => {
+    // let categories = [category];
+    addToCategories(userId, category, (err, updateResponse) => {
       if (err) {
-        logger.error(err);
+        logger.error(userId + ' - ' + err);
         res.status(500).json({
           status: 'error',
           status_code: 500,
           status_message: 'Error adding to categories'
         });
       } else {
+        logger.trace(userId + ' - Category added: ' + category);
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -92,13 +91,14 @@ exports.setCategories = function(req, res) {
   } else {
     removeCategory(userId, category, (err, updateResponse) => {
       if (err) {
-        logger.error(err);
+        logger.error(userId + ' - ' + err);
         res.status(500).json({
           status: 'error',
           status_code: 500,
           status_message: 'Error adding to categories'
         });
       } else {
+        logger.trace(userId + ' - Category removed: ' + category);
         res.status(200).json({
           status: 'success',
           status_code: 200,

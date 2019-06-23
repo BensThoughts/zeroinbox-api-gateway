@@ -22,7 +22,7 @@ exports.findCategories = function(userId, callback) {
   });
 }
 
-exports.addToCategories = function(userId, categories, callback) {
+exports.addToCategories = function(userId, category, callback) {
   let conditions = { userId: userId };
   let options = {
     upsert: true,
@@ -32,7 +32,7 @@ exports.addToCategories = function(userId, categories, callback) {
   let update = {
     // userId: userId,
     "$addToSet": {
-      categories: categories
+      categories: category
     }
   }
 
@@ -163,34 +163,3 @@ exports.findRefreshToken = function(userId, callback) {
       }
     });
 }
-
-exports.lockActionsPipeline = function(userId, callback) {
-  let conditions = { userId: userId }
-  let update = {
-    actionsLock: true
-  }
-  LoadingStatus.updateOne(conditions, update, (err, res) => {
-    callback(err, res);
-  });
-}
-
-
-/*     Sender.aggregate([
-      {
-        "$project": {
-          _id: 0,
-          "senderAddress": 1,
-          "senderNames": 1,
-          "totalSizeEstimate": 1,
-          "unsubscribeEmail": 1,
-          "unsubscribeWeb": 1,
-          "unsubscribed": 1,
-          "senderId": 1,
-          // "threadIdCount": 1,
-          "threadIdCount": { "$cond": { "if": { "$isArray": "$threadIdCount" }, "then": { "$size": "$threadIdCount" }, "else": "NA" } },
-
-        }
-      }
-    ], (err, raw) => {
-      callback(err, raw);
-    }) */

@@ -17,12 +17,11 @@ exports.postActions = function(req, res) {
     let userId = req.session.user_info.userId;
     let access_token = req.session.token.access_token
 
-
     let body = req.body;
+
+    logger.trace(userId + ' - POST request to /v1/actions received: ' + JSON.stringify(body));
+
     let senderIds = body.senderIds;
-
-    logger.trace(body);
-
     let actionType = body.actionType;
     let filter = body.filter;
     let category = body.category;

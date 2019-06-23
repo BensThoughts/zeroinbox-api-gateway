@@ -27,10 +27,11 @@ const {
 exports.loading_status = function (req, res) {
 
   let userId = req.session.user_info.userId;
+  logger.trace(userId + ' - /v1/checkLoadingStatus');
 
   findOneLoadingStatus(userId, (err, loadingDoc) => {
     if (err) {
-      logger.error('MongoDB Error at loading_status in history.findOne(): ' + err);
+      logger.error(userId + ' - MongoDB Error at loading_status in history.findOne(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /loadingStatus: Error getting loadingStatus'
@@ -38,15 +39,18 @@ exports.loading_status = function (req, res) {
     } else {
       let ok = checkLoadingDoc(loadingDoc);
       if (ok) {
+        let data = {
+          loadingStatus: loadingDoc.loadingStatus,
+          percentLoaded: loadingDoc.percentLoaded,
+        }
+        logger.trace(userId + ' - Loading Status: ' + JSON.stringify(data));
         res.status(200).json({ 
           status: 'success',
           status_message: 'OK',
-          data: {
-            loadingStatus: loadingDoc.loadingStatus,
-            percentLoaded: loadingDoc.percentLoaded,
-          }
+          data: data
         });
       } else {
+        logger.error(userId + ' - Was /loadSuggestions called before /loadingStatus? loadingDoc is null!');
         res.status(400).json({
           status: 'error',
           status_message: 'Error checking /loadingStatus: Did you call /loadSuggestions first?'
@@ -75,9 +79,11 @@ function checkLoadingDoc(loadingDoc) {
 exports.first_run_status = function(req, res) {
   let userId = req.session.user_info.userId;
 
+  logger.trace(userId + ' - Checking /firstRunStatus!');
+
   findOneHistory(userId, (err, doc) => {
     if (err) {
-      logger.error('MongoDB Error at first_run_status in history.findOne(): ' + err);
+      logger.error(userId + ' - MongoDB Error at first_run_status in history.findOne(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus'
@@ -92,6 +98,7 @@ exports.first_run_status = function(req, res) {
       let firstRunEver = checkFirstRunEver(doc);
       updatePassiveHistory(userId, firstRunEver);
       if (firstRunEver) {
+        logger.trace(userId + ' - First Run Ever!');
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
@@ -100,6 +107,7 @@ exports.first_run_status = function(req, res) {
           }
         });
       } else {
+        logger.trace(userId + '/firstRunStatus: ' + doc.passive.firstRun);
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
@@ -145,7 +153,7 @@ exports.load_suggestions = function(req, res, next) {
 function load_suggestions_meta(userId, access_token, callback) {
   findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
-      logger.error('MongoDB Error at load_suggestions in history.findOne(): ' + err);
+      logger.error(userId + ' - MongoDB Error at load_suggestions in history.findOne(): ' + err);
       callback({
         status: 'error',
         status_code: 500,
@@ -154,6 +162,7 @@ function load_suggestions_meta(userId, access_token, callback) {
     } else {
       let alreadyLoading = checkLoadingStatus(doc);
       if (alreadyLoading) {
+        logger.trace(userId + ' - Tried to hit /loadSuggestions while already loading');
         callback({
           status: 'success',
           status_code: 200,
@@ -164,13 +173,14 @@ function load_suggestions_meta(userId, access_token, callback) {
         updateLoadingStatus(userId, (err, doc) => {
           // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {
-            logger.error('Error at load_suggestions in updateLoadingStatus(): ' + err);
+            logger.error(userId + ' - Error at load_suggestions in updateLoadingStatus(): ' + err);
             callback({
               status: 'error',
               status_code: 500,
               status_message: 'error at /loadSuggestions: error setting loadingStatus in database'
             });
           } else {
+            logger.trace(userId + ' - Loading status updated in mongo to true');
             callback({
               status: 'success',
               status_code: 200,

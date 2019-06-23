@@ -7,7 +7,7 @@ exports.senders = function(req, res) {
     let userId = req.session.user_info.userId;
     findSenders(userId, (err, senders) => {
         if (err) {
-            logger.error('Error in suggestion.find(): ' + err);
+            logger.error(userId + ' - Error in suggestion.find(): ' + err);
             res.json({
               status: 'error',
               status_message: 'Error at /senders: Error in MongoDb find'
