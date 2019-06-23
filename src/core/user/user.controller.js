@@ -75,7 +75,7 @@ function sendBasicProfileToMongo(userId, basic_profile) {
   };
   upsertToProfile(userId, profileUpdate, (err, doc) => {
     if (err) return logger.error(err);
-    logger.debug('Basic profile updated!');
+    logger.trace(userId + ' - Basic profile updated!');
   });
 }
 
@@ -108,7 +108,7 @@ function sendTokenToMongo(userId, token, sessionID) {
 
   upsertToHistory(userId, update, (err, doc) => {
     if (err) return logger.error('Error in /v1/basicProfile at sendTokenToMongo(): ' + err);
-    logger.debug('Token sent to mongo!');
+    logger.trace(userId + ' - Token sent to mongo!');
   });
 }
 
@@ -168,6 +168,6 @@ function sendEmailProfileToMongo(userId, emailId, email_profile) {
   };
   upsertToProfile(userId, update, (err, doc) => {
     if(err) return logger.error(err);
-    logger.debug('Email profile updated!');
+    logger.trace(userId + ' - Email profile updated!');
   });
 }

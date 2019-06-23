@@ -82,12 +82,15 @@ exports.oauth2callback = function(req, res) {
         return res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
       let refresh_token = token.refresh_token;
+      
+      const TEN_MINUTES = 600000;
+      let expiry_date = token.expiry_date - TEN_MINUTES; 
 
       req.session.token = {
         access_token: token.access_token,
         scope: token.scope,
         token_type: token.token_type,
-        expiry_date: token.expiry_date,
+        expiry_date: expiry_date,
         refresh_token: refresh_token
       };
 

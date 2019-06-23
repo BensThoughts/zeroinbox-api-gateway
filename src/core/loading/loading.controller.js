@@ -27,7 +27,7 @@ const {
 exports.loading_status = function (req, res) {
 
   let userId = req.session.user_info.userId;
-  logger.trace(userId + ' - /v1/checkLoadingStatus');
+  logger.trace(userId + ' - /v1/loadingStatus');
 
   findOneLoadingStatus(userId, (err, loadingDoc) => {
     if (err) {
@@ -107,7 +107,7 @@ exports.first_run_status = function(req, res) {
           }
         });
       } else {
-        logger.trace(userId + '/firstRunStatus: ' + doc.passive.firstRun);
+        logger.trace(userId + ' - /firstRunStatus: ' + doc.passive.firstRun);
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
