@@ -3,6 +3,7 @@
 /*******************************************************************************
 * Config Init
 *******************************************************************************/
+
 const {
   EXPRESS_HOST,
   EXPRESS_PORT,
@@ -16,6 +17,16 @@ const {
 const { rabbit_config } = require('./config/rabbit.config');
 
 const logger = require('./libs/loggers/log4js');
+
+// Print out the value of all env vars
+let envVars = require('./config/init.config');
+Object.keys(envVars).forEach((envVar) => {
+  logger.info(envVar + ': ' + envVars[envVar]);
+});
+let authEnvVars = require('./config/auth.config');
+Object.keys(authEnvVars).forEach((authEnvVar) => {
+  logger.info(authEnvVar + ': ' + authEnvVars[authEnvVar]);
+});
 
 /*******************************************************************************
 * EXPRESS INIT
