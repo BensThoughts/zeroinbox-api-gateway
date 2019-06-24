@@ -66,7 +66,7 @@ function checkCategories(categories) {
 exports.setCategories = function(req, res) {
   let userId = req.session.user_info.userId;
   let body = req.body;
-  logger.debug(body);
+  logger.trace(userId + ' - POST - /v1/settings/categories: ' + JSON.stringify(body));
   let add = body.add;
   let category = body.category;
   if (add) {
@@ -80,7 +80,7 @@ exports.setCategories = function(req, res) {
           status_message: 'Error adding to categories'
         });
       } else {
-        logger.trace(userId + ' - Category added: ' + category);
+        logger.trace(userId + ' - Category added: ' + JSON.stringify(category));
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -98,7 +98,7 @@ exports.setCategories = function(req, res) {
           status_message: 'Error adding to categories'
         });
       } else {
-        logger.trace(userId + ' - Category removed: ' + category);
+        logger.trace(userId + ' - Category removed: ' + JSON.stringify(category));
         res.status(200).json({
           status: 'success',
           status_code: 200,
