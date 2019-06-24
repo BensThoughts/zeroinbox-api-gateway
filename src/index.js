@@ -48,7 +48,6 @@ googleApi.use('/', healthRouter);
 *******************************************************************************/
 const cors = require('cors');
 
-logger.info('Cors Whitelist: ' + CORS_WHITELIST);
 let whitelist;
 
 if (CORS_WHITELIST.indexOf(',') !== -1) {
