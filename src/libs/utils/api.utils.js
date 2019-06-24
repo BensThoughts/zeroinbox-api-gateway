@@ -9,8 +9,8 @@ const {
 } = require('../../config/init.config');
 
 const {
-  client_id,
-  client_secret
+  CLIENT_ID,
+  CLIENT_SECRET
 } = require('../../config/auth.config');
 
 function retryHttpRequest(promiseCreator, retries, delay, delayMultiplier) {
@@ -59,20 +59,20 @@ function httpPostRefreshTokenPromise(refresh_token) {
     let url = OAUTH_TOKEN_URL;
     request.post(url, {
       form: {
-        client_id: client_id,
-        client_secret: client_secret,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
         refresh_token: refresh_token,
         grant_type: 'refresh_token'
       }
-    }, (err, res, body) => {
-      if (!err && res.statusCode == 200) {
+    }, (error, res, body) => {
+      if (!error && res.statusCode == 200) {
         resolve(body)
       } else {
         let httpError = {
           errorUrl: 'POST - Error contacting ' + url + ': ' + error,
           errorBody: JSON.stringify(body)
         }
-        reject(httpErr);
+        reject(httpError);
       }
     });
   });
