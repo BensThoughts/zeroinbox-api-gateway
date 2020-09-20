@@ -4,6 +4,11 @@
 * Config Init
 *******************************************************************************/
 
+const logger = require('./libs/loggers/log4js');
+const configLogger = require('./libs/loggers/config.logger');
+
+configLogger.logConfig();
+
 const {
   EXPRESS_HOST,
   EXPRESS_PORT,
@@ -15,18 +20,6 @@ const {
  } = require('./config/init.config');
 
 const { rabbit_config } = require('./config/rabbit.config');
-
-const logger = require('./libs/loggers/log4js');
-
-// Print out the value of all env vars
-let envVars = require('./config/init.config');
-Object.keys(envVars).forEach((envVar) => {
-  logger.info(envVar + ': ' + envVars[envVar]);
-});
-let authEnvVars = require('./config/auth.config');
-Object.keys(authEnvVars).forEach((authEnvVar) => {
-  logger.info(authEnvVar + ': ' + authEnvVars[authEnvVar]);
-});
 
 /*******************************************************************************
 * EXPRESS INIT
@@ -173,7 +166,7 @@ Connections INIT
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
-mongoose.connect(MONGO_URI, {useNewUrlParser: true}, (err, db) => {;
+mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
