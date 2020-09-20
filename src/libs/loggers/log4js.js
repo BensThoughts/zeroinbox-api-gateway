@@ -6,21 +6,21 @@ log4js.configure({
         stderr: { type: 'stderr' },
         debug: { 
             type: 'file', 
-            filename: '../logs/debug.log', 
+            filename: './logs/debug.log', 
             maxLogSize: 5485760, 
             backups: 5, 
             compress: true 
         },
         error: {
             type: 'file', 
-            filename: '../logs/error.log', 
+            filename: './logs/error.log', 
             maxLogSize: 10485760, 
             backups: 3, 
             compress: true 
         },
         info: {
             type: 'file', 
-            filename: '../logs/info.log', 
+            filename: './logs/info.log', 
             maxLogSize: 10485760, 
             backups: 3, 
             compress: true  
@@ -61,6 +61,8 @@ log4js.configure({
         test: { appenders: ['_test'], level: 'fatal' }
     }
 });
+
+
 
 const { LOG_LEVEL } = require('../../config/init.config');
 
