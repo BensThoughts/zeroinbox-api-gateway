@@ -65,15 +65,19 @@ googleApi.use(express.urlencoded({ extended: false, limit: '5mb' }));
 /*******************************************************************************
 * EXPRESS WITH SESSIONS (uses cookies) AND REDIS SETUP
 *******************************************************************************/
+const redis = require('redis');
 const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
+let RedisStore = require('connect-redis')(session);
+const REDIS_URL = 'redis://' + SESSION_REDIS_HOST + ':' + SESSION_REDIS_PORT;
+let redisClient = redis.createClient(REDIS_URL);
 const genuuid = require('uid-safe');
+
+
 
 googleApi.use(
   session({
     store: new RedisStore({
-     host: SESSION_REDIS_HOST,
-     port: SESSION_REDIS_PORT,
+      client: redisClient,
     }),
     resave: false,
     genid: function(req) {
