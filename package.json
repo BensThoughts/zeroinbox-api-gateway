@@ -48,7 +48,7 @@
     "rewire": "^5.0.0",
     "sinon": "^11.1.2",
     "sinon-express-mock": "^2.2.1",
-    "supertest": "^3.4.2",
+    "supertest": "^6.1.4",
     "testdouble": "^3.16.1"
   },
   "private": true
