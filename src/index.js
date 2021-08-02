@@ -170,16 +170,21 @@ Connections INIT
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
+let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+processHandler(server);
+logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
+
 mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {;
   if (err) {
     logger.error('Error in index.js at mongoose.connect(): ' + err);
   } else {
     logger.info('Connected to MongoDB!');
     rabbit.connect(rabbit_config, (err, conn) => {
+      if (err) {
+        logger.error('Error in rabbit.connect: ' + err);
+      }
       logger.info('Connected to RabbitMQ!')
-      let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
-      processHandler(server);
-      logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
+
     });
   }
 });
