@@ -194,10 +194,8 @@ const signals = {
   'SIGHUP': 1,
   'SIGINT': 2,
   'SIGQUIT': 3,
-  'SIGILL': 4,
   'SIGABRT': 6,
-  'SIGKILL': 9,
-  'SIGSEGV': 11,
+  // 'SIGKILL': 9, // doesn't work
   'SIGTERM': 15,
 };
 
