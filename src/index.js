@@ -179,7 +179,7 @@ mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (
     logger.info('Connected to MongoDB!');
     rabbit.connect(rabbit_config, (err, conn) => {
       if (err) {
-        logger.error('Error in rabbit.connect: ' + err);
+        logger.error('Error in index.js at rabbit.connect(): ' + err);
       }
       logger.info('Connected to RabbitMQ!')
 
