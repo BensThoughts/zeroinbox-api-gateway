@@ -213,12 +213,14 @@ function processHandler(server) {
 }
 
 const shutdown = (server, signal, value) => {
-  logger.info('shutdown!');
+  logger.info(`Server stopped by ${signal} with value ${value}`);
   server.close(() => {
-    logger.info(`Server stopped by ${signal} with value ${value}`);
+    logger.info('expressjs server closed')
     rabbit.disconnect(() => {
-      logger.info('rabbit disconnected');
-      mongoose.disconnect();
+      logger.info('disconnected from zero-rabbit (RabbitMQ)');
+      mongoose.disconnect().then(() => {
+        logger.info('disconnected from mongoose (MongoDB)')
+      });
     });
   });
 }
