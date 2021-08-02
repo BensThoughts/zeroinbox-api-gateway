@@ -170,9 +170,7 @@ Connections INIT
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
-let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
-processHandler(server);
-logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
+
 
 mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {;
   if (err) {
@@ -193,8 +191,19 @@ mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (
 Signal handling for graceful shutdown
 *******************************************************************************/
 const signals = {
-  'SIGTERM': 15
+  'SIGHUP': 1,
+  'SIGINT': 2,
+  'SIGQUIT': 3,
+  'SIGILL': 4,
+  'SIGABRT': 6,
+  'SIGKILL': 9,
+  'SIGSEGV': 11,
+  'SIGTERM': 15,
 };
+
+let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+processHandler(server);
+logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
 
 function processHandler(server) {
   Object.keys(signals).forEach((signal) => {
