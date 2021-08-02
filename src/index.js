@@ -73,7 +73,6 @@ let redisClient = redis.createClient(REDIS_URL);
 const genuuid = require('uid-safe');
 
 
-
 googleApi.use(
   session({
     store: new RedisStore({
@@ -170,19 +169,22 @@ Connections INIT
 const mongoose = require('mongoose');
 const rabbit = require('zero-rabbit');
 
-
-
 mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (err, db) => {;
   if (err) {
-    logger.error('Error in index.js at mongoose.connect(): ' + err);
+    throw new Error('Error in index.js at mongoose.connect(): ' + err);
   } else {
     logger.info('Connected to MongoDB!');
     rabbit.connect(rabbit_config, (err, conn) => {
       if (err) {
-        logger.error('Error in index.js at rabbit.connect(): ' + err);
+        throw new Error('Error in index.js at rabbit.connect(): ' + err);
       }
-      logger.info('Connected to RabbitMQ!')
+      logger.info('Connected to RabbitMQ!');
 
+      // If getting EADDR Already in use, probably rabbit.connect has
+      // tried to reconnect/reload
+      let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+      processHandler(server);
+      logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
     });
   }
 });
@@ -190,20 +192,17 @@ mongoose.connect(MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, (
 /*******************************************************************************
 Signal handling for graceful shutdown
 *******************************************************************************/
-const signals = {
-  'SIGHUP': 1,
-  'SIGINT': 2,
-  'SIGQUIT': 3,
-  'SIGABRT': 6,
-  // 'SIGKILL': 9, // doesn't work
-  'SIGTERM': 15,
-};
-
-let server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
-processHandler(server);
-logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
 
 function processHandler(server) {
+  const signals = {
+    'SIGHUP': 1,
+    'SIGINT': 2,
+    'SIGQUIT': 3,
+    'SIGABRT': 6,
+    // 'SIGKILL': 9, // doesn't work
+    'SIGTERM': 15,
+  };
+  
   Object.keys(signals).forEach((signal) => {
     process.on(signal, () => {
       logger.info(`Process received a ${signal} signal`);
