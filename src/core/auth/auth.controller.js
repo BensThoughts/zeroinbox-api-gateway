@@ -1,4 +1,4 @@
-/*******************************************************************************
+/**
  * INIT DEPS
 *******************************************************************************/
 const logger = require('../../libs/loggers/log4js');
@@ -15,71 +15,74 @@ const {
 } = require('../../config/auth.config');
 
 const {
-  upsertToHistory
+  upsertToHistory,
 } = require('../../libs/utils/mongoose.utils');
 
 
-/*******************************************************************************
+/**
  * OAuth2 Init
-*******************************************************************************/
-exports.oauth2init = function(req, res) {
+*****************************************************************************/
 
+exports.oauth2init = function(req, res) {
   const oauth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    OAUTH_REDIRECT_URL
+      CLIENT_ID,
+      CLIENT_SECRET,
+      OAUTH_REDIRECT_URL,
   );
 
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: ACCESS_TYPE,
-    scope: ['https://www.googleapis.com/auth/gmail.modify','https://www.googleapis.com/auth/userinfo.profile','https://www.googleapis.com/auth/gmail.settings.basic'],
-    // scope: scope,
+    scope: [
+      'https://www.googleapis.com/auth/gmail.modify',
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/gmail.settings.basic',
+    ],
     prompt: PROMPT,
   });
 
-  // Reset the session after init because leaving the site to log in
+  // Reset the session after init because redirect from website to login
   // and then coming back to it after login creates 2 sessions, and one
   // is empty
   req.session.destroy();
 
   if (authUrl === undefined) {
-    res.json({ 
-      status: 'error', 
-      status_message: 'Error obtaining authUrl'
-    })
+    res.json({
+      status: 'error',
+      status_message: 'Error obtaining authUrl',
+    });
   }
 
   res.json({
-    status: 'success', 
+    status: 'success',
     status_message: 'OK',
     data: {
-      auth_url: authUrl
-    }
+      auth_url: authUrl,
+    },
   });
-
 };
 
-/*******************************************************************************
+/**
  * OAuth2 Callback
-*******************************************************************************/
-exports.oauth2callback = function(req, res) {
+*****************************************************************************/
 
+exports.oauth2callback = function(req, res) {
   const code = req.query.code;
 
   if (code === undefined || !code) {
-    res.redirect(AUTH_FAILURE_REDIRECT_URL)
+    res.redirect(AUTH_FAILURE_REDIRECT_URL);
   } else {
-
     const oauth2Client = new google.auth.OAuth2(
-      CLIENT_ID,
-      CLIENT_SECRET,
-      OAUTH_REDIRECT_URL
+        CLIENT_ID,
+        CLIENT_SECRET,
+        OAUTH_REDIRECT_URL,
     );
 
     oauth2Client.getToken(code, (err, token) => {
       if (err) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
-        return res.status(500).send('Something went wrong: check the logs.');// reject(err);
+        return res
+            .status(500)
+            .send('Something went wrong: check the logs.');
       }
 
       const accessToken = token.access_token;
@@ -89,31 +92,29 @@ exports.oauth2callback = function(req, res) {
       const refreshToken = token.refresh_token;
 
       const TEN_MINUTES = 600000;
-      let expiryDate = token.expiry_date - TEN_MINUTES; 
+      const expiryDate = token.expiry_date - TEN_MINUTES;
 
       req.session.token = {
         accessToken: accessToken,
         scope: scope,
         tokenType: tokenType,
         expiryDate: expiryDate,
-        refreshToken: refreshToken
+        refreshToken: refreshToken,
       };
 
       res.redirect(AUTH_SUCCESS_REDIRECT_URL);
     });
-
   }
-
 };
 
 exports.logout = function(req, res) {
-  let userId = req.session.userInfo.userId;
+  const userId = req.session.userInfo.userId;
   req.session.destroy();
-  
-  let historyUpdate = {
-    "userId": userId,
-    "active.loggedIn": false,
-  }
+
+  const historyUpdate = {
+    'userId': userId,
+    'active.loggedIn': false,
+  };
 
   upsertToHistory(userId, historyUpdate, (err, response) => {
     if (err) return logger.error(err);
@@ -125,7 +126,7 @@ exports.logout = function(req, res) {
     status: 'success',
     status_message: 'OK',
     data: {
-      message: 'Session Reset!'
-    }
+      message: 'Session Reset!',
+    },
   });
-}
+};

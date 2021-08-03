@@ -1,11 +1,11 @@
-var express = require('express');
-var userRouter = express.Router();
+const express = require('express');
+const userRouter = express.Router();
 
-var userController = require('./user.controller');
+const userController = require('./user.controller');
 
-userRouter.get('/emailProfile', userController.email_profile);
+userRouter.get('/emailProfile', userController.emailProfile);
 
-userRouter.get('/basicProfile', userController.basic_profile);
+userRouter.get('/basicProfile', userController.basicProfile);
 
 
 module.exports = userRouter;

@@ -1,5 +1,5 @@
-var express = require('express');
-var sendersRouter = express.Router();
+const express = require('express');
+const sendersRouter = express.Router();
 
 const sendersController = require('./senders.controller');
 

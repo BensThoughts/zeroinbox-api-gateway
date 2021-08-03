@@ -1,5 +1,5 @@
-var express = require('express');
-var actionsRouter = express.Router();
+const express = require('express');
+const actionsRouter = express.Router();
 
 const actionsController = require('./actions.controller');
 

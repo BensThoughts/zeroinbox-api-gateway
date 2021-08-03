@@ -1,77 +1,75 @@
-
-/*******************************************************************************
-  INIT DEPS
-*******************************************************************************/
 const logger = require('../../libs/loggers/log4js');
 const crypto = require('crypto');
-
 const {
-  httpGetRequest
- } = require('../../libs/utils/api.utils');
-
+  httpGetRequest,
+} = require('../../libs/utils/api.utils');
 const {
   upsertToHistory,
-  upsertToProfile
+  upsertToProfile,
 } = require('../../libs/utils/mongoose.utils');
-
 const {
   BASIC_PROFILE_ENDPOINT,
   GMAIL_PROFILE_ENDPOINT,
 } = require('../../config/init.config');
 
-/*******************************************************************************
+/**
 Get Basic Profile
-*******************************************************************************/
+*****************************************************************************/
 
-exports.basic_profile = function (req, res) {
+exports.basicProfile = function(req, res) {
+  const token = req.session.token;
+  const sessionID = req.sessionID;
+  const accessToken = token.accessToken;
 
-  let token = req.session.token;
-  let sessionID = req.sessionID;
-  let accessToken = token.accessToken;
+  httpGetRequest(
+      BASIC_PROFILE_ENDPOINT,
+      accessToken,
+  ).then((basicProfileResponse) => {
+    const basicProfile = JSON.parse(basicProfileResponse);
+    const userId = basicProfile.id;
 
-  httpGetRequest(BASIC_PROFILE_ENDPOINT, accessToken).then((basic_profile_response) => {
+    req.session.userInfo = {
+      userId: userId,
+      emailId: '',
+      emailAddress: '',
+    };
 
-      let basic_profile = JSON.parse(basic_profile_response);
-      let userId = basic_profile.id;
-
-      req.session.userInfo = {
-        userId: basic_profile.id,
-        emailId: '',
-        emailAddress: '',
-      }
-
-      // need to make sure userId is in express-session before client proceeds
-      res.json({ 
-        status: 'success',
-        status_message: 'OK',
-        data: {
-          basic_profile: basic_profile 
-        }
-      });
-      sendTokenToMongo(userId, token, sessionID);
-      sendBasicProfileToMongo(userId, basic_profile);
+    // need to make sure userId is in express-session before client proceeds
+    res.json({
+      status: 'success',
+      status_message: 'OK',
+      data: {
+        basic_profile: basicProfile,
+      },
+    });
+    sendTokenToMongo(userId, token, sessionID);
+    sendBasicProfileToMongo(userId, basicProfile);
   }).catch((err) => {
     logger.error('Error in getBasicProfile(): ' + err);
     res.status(500).json({
       status: 'error',
-      status_message: 'Google Api Error at /basicProfile: error contacting googleApi'
+      status_message: 'Google Api Error at /basicProfile: ' +
+                      'error contacting googleApi',
     });
   });
-
 };
 
-function sendBasicProfileToMongo(userId, basic_profile) {
-  let profileUpdate = {
+/**
+ * @param  {string} userId
+ * @param  {basicProfileSchema} basicProfile
+ */
+function sendBasicProfileToMongo(userId, basicProfile) {
+  const profileUpdate = {
     userId: userId,
     basic: {
-      id: basic_profile.id,
-      name: basic_profile.name,
-      given_name: basic_profile.given_name,
-      family_name: basic_profile.family_name,
-      link: basic_profile.link,
-      picture: basic_profile.picture,
-      locale: basic_profile.locale
-    }
+      id: basicProfile.id,
+      name: basicProfile.name,
+      given_name: basicProfile.given_name,
+      family_name: basicProfile.family_name,
+      link: basicProfile.link,
+      picture: basicProfile.picture,
+      locale: basicProfile.locale,
+    },
   };
   upsertToProfile(userId, profileUpdate, (err, doc) => {
     if (err) return logger.error(err);
@@ -79,95 +77,109 @@ function sendBasicProfileToMongo(userId, basic_profile) {
   });
 }
 
+/**
+ * @param  {string} userId
+ * @param  {GapiToken} token
+ * @param  {string} sessionID
+ */
 function sendTokenToMongo(userId, token, sessionID) {
   let update;
 
-  let refreshToken = token.refreshToken;
+  const refreshToken = token.refreshToken;
   if (refreshToken) {
     update = {
-      "userId": userId,
-      "active.session.sessionID": sessionID,
-      "active.session.accessToken": token.accessToken,
-      "active.session.expiryDate": token.expiryDate,
-      "active.session.scope": token.scope,
-      "active.session.tokenType": token.tokenType,
-      "active.session.refreshToken": token.refreshToken,
-      "active.loggedIn": true
-    }
+      'userId': userId,
+      'active.session.sessionID': sessionID,
+      'active.session.accessToken': token.accessToken,
+      'active.session.expiryDate': token.expiryDate,
+      'active.session.scope': token.scope,
+      'active.session.tokenType': token.tokenType,
+      'active.session.refreshToken': token.refreshToken,
+      'active.loggedIn': true,
+    };
   } else {
     update = {
-      "userId": userId,
-      "active.session.sessionID": sessionID,
-      "active.session.accessToken": token.accessToken,
-      "active.session.expiryDate": token.expiryDate,
-      "active.session.scope": token.scope,
-      "active.session.tokenType": token.tokenType,
-      "active.loggedIn": true
-    }
+      'userId': userId,
+      'active.session.sessionID': sessionID,
+      'active.session.accessToken': token.accessToken,
+      'active.session.expiryDate': token.expiryDate,
+      'active.session.scope': token.scope,
+      'active.session.tokenType': token.tokenType,
+      'active.loggedIn': true,
+    };
   }
 
   upsertToHistory(userId, update, (err, doc) => {
-    if (err) return logger.error('Error in /v1/basicProfile at sendTokenToMongo(): ' + err);
+    if (err) {
+      return logger.error(
+          'Error in /v1/basicProfile at sendTokenToMongo(): ' + err);
+    }
     logger.trace(userId + ' - Token sent to mongo!');
   });
 }
 
-/*******************************************************************************
+/**
 Get Email Profile
-*******************************************************************************/
+*****************************************************************************/
 
-exports.email_profile = function (req, res) {
+exports.emailProfile = function(req, res) {
+  const accessToken = req.session.token.accessToken;
 
-  let accessToken = req.session.token.accessToken;
+  httpGetRequest(GMAIL_PROFILE_ENDPOINT, accessToken)
+      .then((emailProfileResponse) => {
+        const emailProfile = JSON.parse(emailProfileResponse);
+        const userId = req.session.userInfo.userId;
 
-  httpGetRequest(GMAIL_PROFILE_ENDPOINT, accessToken).then((email_profile_response) => {
-    let email_profile = JSON.parse(email_profile_response);
-    let userId = req.session.userInfo.userId;
+        const md5sum = crypto.createHash('md5');
 
-    let md5sum = crypto.createHash('md5');
+        md5sum.update(emailProfile.emailAddress);
+        const emailId = md5sum.digest('hex');
 
-    md5sum.update(email_profile.emailAddress);
-    let emailId = md5sum.digest('hex');
+        req.session.userInfo = {
+          userId: userId,
+          emailId: emailId,
+          emailAddress: emailProfile.emailAddress,
+        };
 
-    req.session.userInfo = {
-      userId: userId,
-      emailId: emailId,
-      emailAddress: email_profile.emailAddress
-    };
+        // respond after writing emailId to the session so it is avail for every
+        // other route called after
+        res.status(200).json({
+          status: 'success',
+          status_message: 'OK',
+          data: {
+            email_profile: emailProfile,
+          },
+        });
 
-    // respond after writing emailId to the session so it is avail for every
-    // other route called after
-    res.status(200).json({
-      status: 'success',
-      status_message: 'OK',
-      data: {
-        email_profile: email_profile
-      } 
-    });
+        sendEmailProfileToMongo(userId, emailId, email_profile);
+      }).catch((err) => {
+        logger.error('Error in getEmailProfile(): ' + err);
+        res.status(500).json({
+          status: 'error',
+          status_message: 'Google Api Error at /emailProfile: ' +
+                          'error contacting googleApi',
+        });
+      });
+};
 
-    sendEmailProfileToMongo(userId, emailId, email_profile);
-  }).catch((err) => {
-    logger.error('Error in getEmailProfile(): ' + err);
-    res.status(500).json({
-      status: 'error',
-      status_message: 'Google Api Error at /emailProfile: error contacting googleApi'
-    });
-  });
-}
-
-function sendEmailProfileToMongo(userId, emailId, email_profile) {
-  let update = {
+/**
+ * @param  {string} userId
+ * @param  {string} emailId
+ * @param  {emailSchema} emailProfile
+ */
+function sendEmailProfileToMongo(userId, emailId, emailProfile) {
+  const update = {
     userId: userId,
     email: {
       emailId: emailId,
       emailAddress: email_profile.emailAddress,
       messagesTotal: email_profile.messagesTotal,
       threadsTotal: email_profile.threadsTotal,
-      historyId: email_profile.historyId
-    }
+      historyId: email_profile.historyId,
+    },
   };
   upsertToProfile(userId, update, (err, doc) => {
-    if(err) return logger.error(err);
+    if (err) return logger.error(err);
     logger.trace(userId + ' - Email profile updated!');
   });
 }

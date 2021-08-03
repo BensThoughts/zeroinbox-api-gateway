@@ -1,40 +1,40 @@
+// const logger = require('../loggers/log4js');
 const rabbit = require('zero-rabbit');
-const logger = require('../loggers/log4js');
 const {
-  userTopology
+  userTopology,
 } = require('../../config/rabbit.config');
 
-exports.publishGetMessagesUserId = function (userId, accessToken) {
-  let sentAt = new Date().getTime();
-  let getMessagesExchange = userTopology.exchanges.fanout.getMessages;
+exports.publishGetMessagesUserId = function(userId, accessToken) {
+  const sentAt = new Date().getTime();
+  const getMessagesExchange = userTopology.exchanges.fanout.getMessages;
   rabbit.publish(userTopology.channels.send, getMessagesExchange, '', {
     userId: userId,
     accessToken: accessToken,
-  }, { 
-    contentType: 'application/json', 
+  }, {
+    contentType: 'application/json',
     type: 'user',
     appId: 'zi-api-gateway',
     timestamp: sentAt,
     encoding: 'string Buffer',
     persistent: true,
   });
-}
+};
 
 exports.publishGetThreadsUserId = function(userId, accessToken) {
-    let sentAt = new Date().getTime();
-    let getThreadsExchange = userTopology.exchanges.fanout.getThreads;
-    rabbit.publish(userTopology.channels.send, getThreadsExchange, '', {
-      userId: userId,
-      accessToken: accessToken,
-    }, { 
-      contentType: 'application/json', 
-      type: 'user',
-      appId: 'zi-api-gateway',
-      timestamp: sentAt,
-      encoding: 'string Buffer',
-      persistent: true,
-    });
-}
+  const sentAt = new Date().getTime();
+  const getThreadsExchange = userTopology.exchanges.fanout.getThreads;
+  rabbit.publish(userTopology.channels.send, getThreadsExchange, '', {
+    userId: userId,
+    accessToken: accessToken,
+  }, {
+    contentType: 'application/json',
+    type: 'user',
+    appId: 'zi-api-gateway',
+    timestamp: sentAt,
+    encoding: 'string Buffer',
+    persistent: true,
+  });
+};
 
 /**
  * actionsObj - {
@@ -47,36 +47,36 @@ exports.publishGetThreadsUserId = function(userId, accessToken) {
  *  unsubscribeEmail: string
  * }
  */
+
 exports.publishActions = function(userId, accessToken, actionsObj, senderIds) {
-
   for (i = 0; i < senderIds.length; i++) {
-    let senderId = senderIds[i];
-    let sentAt = new Date().getTime();
-    let actionType = actionsObj.actionType;
-    let filter = actionsObj.filter;
-    let labelName = actionsObj.labelName;
-    let category = actionsObj.category;
-    let unsubscribeEmail = actionsObj.unsubscribeEmail;
-    let unsubscribeWeb = actionsObj.unsubscribeWeb;
+    const senderId = senderIds[i];
+    const sentAt = new Date().getTime();
+    const actionType = actionsObj.actionType;
+    const filter = actionsObj.filter;
+    const labelName = actionsObj.labelName;
+    const category = actionsObj.category;
+    const unsubscribeEmail = actionsObj.unsubscribeEmail;
+    const unsubscribeWeb = actionsObj.unsubscribeWeb;
 
-    let actionsExchange = userTopology.exchanges.direct.actions;
+    const actionsExchange = userTopology.exchanges.direct.actions;
     rabbit.publish(userTopology.channels.send, actionsExchange, '', {
-        userId: userId,
-        accessToken: accessToken,
-        senderId: senderId,
-        actionType: actionType,
-        filter: filter,
-        labelName: labelName,
-        category: category,
-        unsubscribeEmail: unsubscribeEmail,
-        unsubscribeWeb: unsubscribeWeb,
+      userId: userId,
+      accessToken: accessToken,
+      senderId: senderId,
+      actionType: actionType,
+      filter: filter,
+      labelName: labelName,
+      category: category,
+      unsubscribeEmail: unsubscribeEmail,
+      unsubscribeWeb: unsubscribeWeb,
     }, {
-        contentType: 'application/json',
-        type: 'actions',
-        appId: 'zi-api-gateway',
-        timestamp: sentAt,
-        encoding: 'string Buffer',
-        persistent: true,
+      contentType: 'application/json',
+      type: 'actions',
+      appId: 'zi-api-gateway',
+      timestamp: sentAt,
+      encoding: 'string Buffer',
+      persistent: true,
     });
-  } 
-}
+  }
+};

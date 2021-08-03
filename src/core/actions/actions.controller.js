@@ -1,5 +1,5 @@
-const logger = require('../../libs/loggers/log4js');
-const { publishActions } = require('../../libs/utils/rabbit.utils');
+// const logger = require('../../libs/loggers/log4js');
+const {publishActions} = require('../../libs/utils/rabbit.utils');
 
 
 /**
@@ -14,35 +14,35 @@ const { publishActions } = require('../../libs/utils/rabbit.utils');
  */
 
 exports.postActions = function(req, res) {
-    let userId = req.session.userInfo.userId;
-    let accessToken = req.session.token.accessToken
+  const userId = req.session.userInfo.userId;
+  const accessToken = req.session.token.accessToken;
 
-    let body = req.body;
+  const body = req.body;
 
-    logger.trace(userId + ' - POST request to /v1/actions received: ' + JSON.stringify(body));
+  // logger.trace(userId + ' - POST request to /v1/actions received: ' +
+  // JSON.stringify(body));
 
-    let senderIds = body.senderIds;
-    let actionType = body.actionType;
-    let filter = body.filter;
-    let category = body.category;
-    let labelName = body.labelName;
-    let unsubscribeEmail = body.unsubscribeEmail;
-    let unsubscribeWeb = body.unsubscribeWeb;
+  const senderIds = body.senderIds;
+  const actionType = body.actionType;
+  const filter = body.filter;
+  const category = body.category;
+  const labelName = body.labelName;
+  const unsubscribeEmail = body.unsubscribeEmail;
+  const unsubscribeWeb = body.unsubscribeWeb;
 
-    let actionsObj = {
-        actionType: actionType,
-        filter: filter,
-        category: category,
-        labelName: labelName,
-        unsubscribeEmail: unsubscribeEmail,
-        unsubscribeWeb: unsubscribeWeb
-    }
+  const actionsObj = {
+    actionType: actionType,
+    filter: filter,
+    category: category,
+    labelName: labelName,
+    unsubscribeEmail: unsubscribeEmail,
+    unsubscribeWeb: unsubscribeWeb,
+  };
 
-    publishActions(userId, accessToken, actionsObj, senderIds);
+  publishActions(userId, accessToken, actionsObj, senderIds);
 
-    res.status(200).json({
-        status: 'success',
-        status_message: 'OK'
-    });
-}
-
+  res.status(200).json({
+    status: 'success',
+    status_message: 'OK',
+  });
+};

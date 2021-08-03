@@ -1,12 +1,12 @@
-var express = require('express');
-var loadingRouter = express.Router();
+const express = require('express');
+const loadingRouter = express.Router();
 
-var loadingController = require('./loading.controller');
+const loadingController = require('./loading.controller');
 
-loadingRouter.get('/loadingStatus', loadingController.loading_status);
+loadingRouter.get('/loadingStatus', loadingController.loadingStatus);
 
-loadingRouter.get('/firstRunStatus', loadingController.first_run_status);
+loadingRouter.get('/firstRunStatus', loadingController.firstRunStatus);
 
-loadingRouter.get('/loadSenders', loadingController.load_suggestions);
+loadingRouter.get('/loadSenders', loadingController.loadSenders);
 
 module.exports = loadingRouter;

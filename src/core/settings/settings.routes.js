@@ -1,9 +1,8 @@
-var express = require('express');
-var settingsRouter = express.Router();
+const express = require('express');
+const settingsController = require('./settings.controller');
 
-var settingsController = require('./settings.controller');
+const settingsRouter = express.Router();
 
-// settingsRouter.get('/settings', userController.email_profile);
 
 settingsRouter.get('/settings/categories', settingsController.getCategories);
 settingsRouter.post('/settings/categories', settingsController.setCategories);
