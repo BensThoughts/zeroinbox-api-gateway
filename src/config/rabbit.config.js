@@ -42,7 +42,7 @@ if (RABBIT_URL) {
   }
 }
 
-const rabbit_topology = {
+const userTopology = {
   channels: {
     send: 'api.send.1'
   },
@@ -58,5 +58,5 @@ const rabbit_topology = {
 
 module.exports = {
     rabbit_config,
-    rabbit_topology
+    userTopology
 }

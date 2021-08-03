@@ -1,13 +1,13 @@
 const rabbit = require('zero-rabbit');
 const logger = require('../loggers/log4js');
 const {
-  rabbit_topology
+  userTopology
 } = require('../../config/rabbit.config');
 
 exports.publishGetMessagesUserId = function (userId, accessToken) {
   let sentAt = new Date().getTime();
-  let getMessagesExchange = rabbit_topology.exchanges.fanout.getMessages;
-  rabbit.publish(rabbit_topology.channels.send, getMessagesExchange, '', {
+  let getMessagesExchange = userTopology.exchanges.fanout.getMessages;
+  rabbit.publish(userTopology.channels.send, getMessagesExchange, '', {
     userId: userId,
     accessToken: accessToken,
   }, { 
@@ -22,8 +22,8 @@ exports.publishGetMessagesUserId = function (userId, accessToken) {
 
 exports.publishGetThreadsUserId = function(userId, accessToken) {
     let sentAt = new Date().getTime();
-    let getThreadsExchange = rabbit_topology.exchanges.fanout.getThreads;
-    rabbit.publish(rabbit_topology.channels.send, getThreadsExchange, '', {
+    let getThreadsExchange = userTopology.exchanges.fanout.getThreads;
+    rabbit.publish(userTopology.channels.send, getThreadsExchange, '', {
       userId: userId,
       accessToken: accessToken,
     }, { 
@@ -59,8 +59,8 @@ exports.publishActions = function(userId, accessToken, actionsObj, senderIds) {
     let unsubscribeEmail = actionsObj.unsubscribeEmail;
     let unsubscribeWeb = actionsObj.unsubscribeWeb;
 
-    let actionsExchange = rabbit_topology.exchanges.direct.actions;
-    rabbit.publish(rabbit_topology.channels.send, actionsExchange, '', {
+    let actionsExchange = userTopology.exchanges.direct.actions;
+    rabbit.publish(userTopology.channels.send, actionsExchange, '', {
         userId: userId,
         accessToken: accessToken,
         senderId: senderId,
