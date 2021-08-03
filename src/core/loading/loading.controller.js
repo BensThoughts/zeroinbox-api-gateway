@@ -26,7 +26,7 @@ const {
  */
 exports.loading_status = function (req, res) {
 
-  let userId = req.session.user_info.userId;
+  let userId = req.session.userInfo.userId;
   logger.trace(userId + ' - /v1/loadingStatus');
 
   findOneLoadingStatus(userId, (err, loadingDoc) => {
@@ -77,7 +77,7 @@ function checkLoadingDoc(loadingDoc) {
 }
 
 exports.first_run_status = function(req, res) {
-  let userId = req.session.user_info.userId;
+  let userId = req.session.userInfo.userId;
 
   logger.trace(userId + ' - Checking /firstRunStatus!');
 
@@ -134,10 +134,10 @@ function checkFirstRunEver(doc) {
 }
 
 exports.load_suggestions = function(req, res, next) {
-  let userId = req.session.user_info.userId;
-  let access_token = req.session.token.access_token;
+  let userId = req.session.userInfo.userId;
+  let accessToken = req.session.token.accessToken;
 
-  load_suggestions_meta(userId, access_token, (response) => {
+  load_suggestions_meta(userId, accessToken, (response) => {
     let status_code = response.status_code;
     let status = response.status;
     let status_message = response.status_message;
@@ -150,7 +150,7 @@ exports.load_suggestions = function(req, res, next) {
 }
 
 
-function load_suggestions_meta(userId, access_token, callback) {
+function load_suggestions_meta(userId, accessToken, callback) {
   findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
       logger.error(userId + ' - MongoDB Error at load_suggestions in history.findOne(): ' + err);
@@ -169,7 +169,7 @@ function load_suggestions_meta(userId, access_token, callback) {
           status_message: 'Already Loading',
         });
       } else {
-        publishGetMessagesUserId(userId, access_token);
+        publishGetMessagesUserId(userId, accessToken);
         updateLoadingStatus(userId, (err, doc) => {
           // We need to always make sure that updateLoadingHistory succeeds before giving the user a response
           if (err) {

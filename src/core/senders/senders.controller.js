@@ -4,7 +4,7 @@ const {
 } = require('../../libs/utils/mongoose.utils');
 
 exports.senders = function(req, res) {
-    let userId = req.session.user_info.userId;
+    let userId = req.session.userInfo.userId;
     findSenders(userId, (err, senders) => {
         if (err) {
             logger.error(userId + ' - Error in suggestion.find(): ' + err);

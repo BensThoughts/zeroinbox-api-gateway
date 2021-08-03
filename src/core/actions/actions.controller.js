@@ -14,8 +14,8 @@ const { publishActions } = require('../../libs/utils/rabbit.utils');
  */
 
 exports.postActions = function(req, res) {
-    let userId = req.session.user_info.userId;
-    let access_token = req.session.token.access_token
+    let userId = req.session.userInfo.userId;
+    let accessToken = req.session.token.accessToken
 
     let body = req.body;
 
@@ -38,7 +38,7 @@ exports.postActions = function(req, res) {
         unsubscribeWeb: unsubscribeWeb
     }
 
-    publishActions(userId, access_token, actionsObj, senderIds);
+    publishActions(userId, accessToken, actionsObj, senderIds);
 
     res.status(200).json({
         status: 'success',

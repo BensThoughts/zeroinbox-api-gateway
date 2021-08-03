@@ -30,10 +30,10 @@ function getEmailRequest() {
         url: '/v1/emailProfile',
         session: {
             token: {
-                access_token: 'test_token',
-                expiry_date: '1551501417831',
+                accessToken: 'test_token',
+                expiryDate: '1551501417831',
                 scope: 'https://www.googleapis.com/auth/gmail.readonly',
-                token_type: 'Bearer'
+                tokenType: 'Bearer'
             },
             user_info: {
                 userId: '12345abc'
@@ -57,10 +57,10 @@ function getBasicRequest() {
         url: '/v1/basicProfile',
         session: {
             token: {
-                access_token: 'test_token',
-                expiry_date: '1551501417831',
+                accessToken: 'test_token',
+                expiryDate: '1551501417831',
                 scope: 'https://www.googleapis.com/auth/gmail.readonly',
-                token_type: 'Bearer'
+                tokenType: 'Bearer'
             }
         },
         headers: {
@@ -137,7 +137,7 @@ describe('userController:', () => {
                 userController.basic_profile(basicRequest, basicResponse);
                 basicResponse.on('end', () => {
                     // console.log(basicRequest);
-                    expect(basicRequest.session.user_info.userId).to.eql('115399687284834648545');
+                    expect(basicRequest.session.userInfo.userId).to.eql('115399687284834648545');
                     done();
                 });
             });
@@ -237,7 +237,7 @@ describe('userController:', () => {
                 userController.email_profile(emailRequest, emailResponse);
                 emailResponse.on('end', () => {
                     // let response = JSON.parse(emailResponse._getData());
-                    expect(emailRequest.session.user_info.emailAddress).to.eql('test@gmail.com')
+                    expect(emailRequest.session.userInfo.emailAddress).to.eql('test@gmail.com')
                     done();
                 });
             });
@@ -247,7 +247,7 @@ describe('userController:', () => {
                 userController.email_profile(emailRequest, emailResponse);
                 emailResponse.on('end', () => {
                     let response = JSON.parse(emailResponse._getData());
-                    expect(emailRequest.session.user_info.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
+                    expect(emailRequest.session.userInfo.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058')
                     done();
                 });
             });
@@ -257,7 +257,7 @@ describe('userController:', () => {
                 userController.email_profile(emailRequest, emailResponse);
                 emailResponse.on('end', () => {
                     let response = JSON.parse(emailResponse._getData());
-                    let conditions = { userId: emailRequest.session.user_info.userId };
+                    let conditions = { userId: emailRequest.session.userInfo.userId };
                     let findFunc = function() {
                         Profile.findOne(conditions, (err, doc) => {
                             expect(doc.email.emailId).to.eql('1aedb8d9dc4751e229a335e371db8058');

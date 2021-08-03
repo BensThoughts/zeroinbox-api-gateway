@@ -13,12 +13,12 @@ function userIdErrors(req, res, next) {
 }
 
 function checkUserId(req, res, next) {
-    if (!req.session.user_info) {
+    if (!req.session.userInfo) {
       return res.status(400).json({
         status: 'error',
         status_message: 'Must call /v1/basicProfile before calling ' + req.route + '!'
       });
-    } else if (!req.session.user_info.userId) {
+    } else if (!req.session.userInfo.userId) {
       return res.status(400).json({
         status: 'error',
         status_message: 'Must call /v1/basicProfile before calling ' + req.route + '!'

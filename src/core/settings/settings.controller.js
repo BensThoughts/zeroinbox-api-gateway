@@ -6,7 +6,7 @@ const {
 } = require('../../libs/utils/mongoose.utils');
 
 exports.getCategories = function(req, res) {
-  let userId = req.session.user_info.userId;
+  let userId = req.session.userInfo.userId;
   findCategories(userId, (err, categoriesResponse) => {
     if (err) {
       logger.error(err);
@@ -64,7 +64,7 @@ function checkCategories(categories) {
 }
 
 exports.setCategories = function(req, res) {
-  let userId = req.session.user_info.userId;
+  let userId = req.session.userInfo.userId;
   let body = req.body;
   logger.trace(userId + ' - POST - /v1/settings/categories: ' + JSON.stringify(body));
   let add = body.add;

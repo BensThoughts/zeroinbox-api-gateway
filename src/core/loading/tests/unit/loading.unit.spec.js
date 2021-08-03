@@ -22,10 +22,10 @@ function getRequest() {
         url: '/v1/basicProfile',
         session: {
             token: {
-                access_token: 'test_token',
-                expiry_date: '1551501417831',
+                accessToken: 'test_token',
+                expiryDate: '1551501417831',
                 scope: 'https://www.googleapis.com/auth/gmail.readonly',
-                token_type: 'Bearer'
+                tokenType: 'Bearer'
             },
             user_info: {
                 userId: userId,

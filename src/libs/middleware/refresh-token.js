@@ -34,49 +34,49 @@ function refreshToken(req, res, next) {
 }
 
 function checkRefreshToken(req, res, next) {
-    let userId = req.session.user_info.userId;
+    let userId = req.session.userInfo.userId;
     let currentDate = new Date().getTime();
-    let expiry_date = req.session.token.expiry_date; // in millis since epoch
+    let expiryDate = req.session.token.expiryDate; // in millis since epoch
 
-    if (currentDate >= expiry_date) {
+    if (currentDate >= expiryDate) {
       logger.trace(userId + ' - Refreshing token!');
       
-      findRefreshToken(userId, (err, refresh_token) => {
+      findRefreshToken(userId, (err, refreshToken) => {
         if (err) {
           logger.error(userId + ' - ' + err);
           return res.status(401).json({
             status: 'error',
-            status_message: 'Error obtaining new access_token with refresh_token!'
+            status_message: 'Error obtaining new accessToken with refreshToken!'
           });
-        } else if (refresh_token === null) {
+        } else if (refreshToken === null) {
           logger.error(userId + ' - findStoredSession(userId, (err, storedSession)): storedSession === null');
           return res.status(401).json({
             status: 'error',
-            status_message: 'Error obtaining new access_token with refresh_token!'
+            status_message: 'Error obtaining new accessToken with refreshToken!'
           });
         } else {
-          logger.trace(userId + ' - Refresh token: ' + refresh_token);
+          logger.trace(userId + ' - Refresh token: ' + refreshToken);
   
-          httpRefreshTokenRequest(refresh_token).then((response) => {
+          httpRefreshTokenRequest(refreshToken).then((response) => {
             let parsedResponse = JSON.parse(response);
     
-            let expires_in = parsedResponse.expires_in; // this is in seconds, always 3600
-            // let expiry_date = req.session.token.expiry_date; // this is in milli (epoch)
+            let expiresIn = parsedResponse.expires_in; // this is in seconds, always 3600
+            // let expiryDate = req.session.token.expiryDate; // this is in milli (epoch)
             const TEN_MINUTES = 600000;
-            let new_expiry_date = currentDate + (expires_in * 1000) - TEN_MINUTES;
-            logger.trace('NEW EXPIRY DATE: ' + new_expiry_date);
+            let newExpiryDate = currentDate + (expiresIn * 1000) - TEN_MINUTES;
+            logger.trace('NEW EXPIRY DATE: ' + newExpiryDate);
   
-            let new_access_token = parsedResponse.access_token;
+            let newAccessToken = parsedResponse.access_token;
 
-            logger.trace(userId + ' - New access token: ' + new_access_token);
-            logger.trace(userId + ' - New expiry date: ' + new_expiry_date);
+            logger.trace(userId + ' - New access token: ' + newAccessToken);
+            logger.trace(userId + ' - New expiry date: ' + newExpiryDate);
             
-            req.session.token.access_token = new_access_token;
-            req.session.token.expiry_date = new_expiry_date;
+            req.session.token.accessToken = newAccessToken;
+            req.session.token.expiryDate = newExpiryDate;
   
-            sendNewTokenToMongo(userId, new_access_token, new_expiry_date);
+            sendNewTokenToMongo(userId, newAccessToken, newExpiryDate);
   
-            load_suggestions_meta(userId, new_access_token, (loadingResponse) => {
+            load_suggestions_meta(userId, newAccessToken, (loadingResponse) => {
               logger.trace('Reload senders from token refresh: ' + JSON.stringify(loadingResponse));
             });
   
@@ -85,7 +85,7 @@ function checkRefreshToken(req, res, next) {
             logger.error(userId + ' - ' + JSON.stringify(httpErr));
             return res.status(401).json({
               status: 'error',
-              status_message: 'Error obtaining new access_token with refresh_token!'
+              status_message: 'Error obtaining new accessToken with refreshToken!'
             });
           });
         }
@@ -96,11 +96,11 @@ function checkRefreshToken(req, res, next) {
     }
 }
 
-function sendNewTokenToMongo(userId, access_token, expiry_date) {
+function sendNewTokenToMongo(userId, accessToken, expiryDate) {
   let update = {
     "userId": userId,
-    "active.session.access_token": access_token,
-    "active.session.expiry_date": expiry_date
+    "active.session.accessToken": accessToken,
+    "active.session.expiryDate": expiryDate
   }
   upsertToHistory(userId, update, (err, res) => {
     if (err) return logger.error(userId + ' - ' + err);

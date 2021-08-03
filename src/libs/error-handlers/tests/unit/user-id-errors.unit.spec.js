@@ -12,10 +12,10 @@ let httpMocks = require('node-mocks-http');
 const userId = 'user_id';
 
 const token = {
-    access_token: 'test_token',
-    expiry_date: '1551501417831',
+    accessToken: 'test_token',
+    expiryDate: '1551501417831',
     scope: 'https://www.googleapis.com/auth/gmail.readonly',
-    token_type: 'Bearer'
+    tokenType: 'Bearer'
 }
 
 const cookie = 'connect.sid=s%3An6CClgs-7_2Sy82NG5N91iQj.GaVqQIA06eMWJbaDoZrmnMaqc4rmF';

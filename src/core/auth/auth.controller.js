@@ -81,18 +81,22 @@ exports.oauth2callback = function(req, res) {
         logger.error('Error in oauth2Client.getToken(): ' + err);
         return res.status(500).send('Something went wrong: check the logs.');// reject(err);
       }
-      
-      let refresh_token = token.refresh_token;
+
+      const accessToken = token.access_token;
+      const scope = token.scope;
+      const tokenType = token.token_type;
+
+      const refreshToken = token.refresh_token;
 
       const TEN_MINUTES = 600000;
-      let expiry_date = token.expiry_date - TEN_MINUTES; 
+      let expiryDate = token.expiry_date - TEN_MINUTES; 
 
       req.session.token = {
-        access_token: token.access_token,
-        scope: token.scope,
-        token_type: token.token_type,
-        expiry_date: expiry_date,
-        refresh_token: refresh_token
+        accessToken: accessToken,
+        scope: scope,
+        tokenType: tokenType,
+        expiryDate: expiryDate,
+        refreshToken: refreshToken
       };
 
       res.redirect(AUTH_SUCCESS_REDIRECT_URL);
@@ -103,7 +107,7 @@ exports.oauth2callback = function(req, res) {
 };
 
 exports.logout = function(req, res) {
-  let userId = req.session.user_info.userId;
+  let userId = req.session.userInfo.userId;
   req.session.destroy();
   
   let historyUpdate = {

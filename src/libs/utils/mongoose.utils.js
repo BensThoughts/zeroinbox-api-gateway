@@ -147,7 +147,7 @@ exports.updateLoadingStatus = function(userId, callback) {
 exports.findRefreshToken = function(userId, callback) {
     let conditions = { userId: userId }
     let projection = {
-        "active.session.refresh_token": 1,
+        "active.session.refreshToken": 1,
         _id: 0
     }
 
@@ -158,8 +158,8 @@ exports.findRefreshToken = function(userId, callback) {
         let errorMessage = 'Refresh token for ' + userId + ' not found!';
         callback(errorMessage, res);
       } else {
-        let refresh_token = res.active.session.refresh_token;
-        callback(err, refresh_token);
+        let refreshToken = res.active.session.refreshToken;
+        callback(err, refreshToken);
       }
     });
 }

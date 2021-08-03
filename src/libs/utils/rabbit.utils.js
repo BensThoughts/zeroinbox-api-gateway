@@ -4,12 +4,12 @@ const {
   rabbit_topology
 } = require('../../config/rabbit.config');
 
-exports.publishGetMessagesUserId = function (userId, access_token) {
+exports.publishGetMessagesUserId = function (userId, accessToken) {
   let sentAt = new Date().getTime();
   let getMessagesExchange = rabbit_topology.exchanges.fanout.getMessages;
   rabbit.publish(rabbit_topology.channels.send, getMessagesExchange, '', {
     userId: userId,
-    access_token: access_token,
+    accessToken: accessToken,
   }, { 
     contentType: 'application/json', 
     type: 'user',
@@ -20,12 +20,12 @@ exports.publishGetMessagesUserId = function (userId, access_token) {
   });
 }
 
-exports.publishGetThreadsUserId = function(userId, access_token) {
+exports.publishGetThreadsUserId = function(userId, accessToken) {
     let sentAt = new Date().getTime();
     let getThreadsExchange = rabbit_topology.exchanges.fanout.getThreads;
     rabbit.publish(rabbit_topology.channels.send, getThreadsExchange, '', {
       userId: userId,
-      access_token: access_token,
+      accessToken: accessToken,
     }, { 
       contentType: 'application/json', 
       type: 'user',
@@ -47,7 +47,7 @@ exports.publishGetThreadsUserId = function(userId, access_token) {
  *  unsubscribeEmail: string
  * }
  */
-exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
+exports.publishActions = function(userId, accessToken, actionsObj, senderIds) {
 
   for (i = 0; i < senderIds.length; i++) {
     let senderId = senderIds[i];
@@ -62,7 +62,7 @@ exports.publishActions = function(userId, access_token, actionsObj, senderIds) {
     let actionsExchange = rabbit_topology.exchanges.direct.actions;
     rabbit.publish(rabbit_topology.channels.send, actionsExchange, '', {
         userId: userId,
-        access_token: access_token,
+        accessToken: accessToken,
         senderId: senderId,
         actionType: actionType,
         filter: filter,

@@ -32,11 +32,11 @@ function retryHttpRequest(promiseCreator, retries, delay, delayMultiplier) {
       });
 }
 
-function httpGetPromise(url, access_token) {
+function httpGetPromise(url, accessToken) {
   const options = {
     url: url,
     headers: {
-      'Authorization': 'Bearer ' + access_token
+      'Authorization': 'Bearer ' + accessToken
     }
   };
   return new Promise((resolve, reject) => {
@@ -54,14 +54,14 @@ function httpGetPromise(url, access_token) {
   });
 }
 
-function httpPostRefreshTokenPromise(refresh_token) {
+function httpPostRefreshTokenPromise(refreshToken) {
   return new Promise((resolve, reject) => {
     let url = OAUTH_TOKEN_URL;
     request.post(url, {
       form: {
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
-        refresh_token: refresh_token,
+        refresh_token: refreshToken,
         grant_type: 'refresh_token'
       }
     }, (error, res, body) => {
@@ -78,20 +78,20 @@ function httpPostRefreshTokenPromise(refresh_token) {
   });
 }
 
-exports.httpGetRequest = function(url, access_token) {
+exports.httpGetRequest = function(url, accessToken) {
   let retries = GAPI_MAX_RETRIES;
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => httpGetPromise(url, access_token);
+  let promiseCreator = () => httpGetPromise(url, accessToken);
 
   return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
 }
 
-exports.httpRefreshTokenRequest = function(refresh_token) {
+exports.httpRefreshTokenRequest = function(refreshToken) {
   let retries = GAPI_MAX_RETRIES;
   let delay = GAPI_INIT_RETRY_DELAY;
   let delayMultiplier = GAPI_DELAY_MULTIPLIER;
-  let promiseCreator = () => httpPostRefreshTokenPromise(refresh_token);
+  let promiseCreator = () => httpPostRefreshTokenPromise(refreshToken);
 
   return retryHttpRequest(promiseCreator, retries, delay, delayMultiplier);
 }

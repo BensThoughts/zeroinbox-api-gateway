@@ -27,14 +27,14 @@ exports.basic_profile = function (req, res) {
 
   let token = req.session.token;
   let sessionID = req.sessionID;
-  let access_token = token.access_token;
+  let accessToken = token.accessToken;
 
-  httpGetRequest(BASIC_PROFILE_ENDPOINT, access_token).then((basic_profile_response) => {
+  httpGetRequest(BASIC_PROFILE_ENDPOINT, accessToken).then((basic_profile_response) => {
 
       let basic_profile = JSON.parse(basic_profile_response);
       let userId = basic_profile.id;
 
-      req.session.user_info = {
+      req.session.userInfo = {
         userId: basic_profile.id,
         emailId: '',
         emailAddress: '',
@@ -82,26 +82,26 @@ function sendBasicProfileToMongo(userId, basic_profile) {
 function sendTokenToMongo(userId, token, sessionID) {
   let update;
 
-  let refresh_token = token.refresh_token;
-  if (refresh_token) {
+  let refreshToken = token.refreshToken;
+  if (refreshToken) {
     update = {
       "userId": userId,
       "active.session.sessionID": sessionID,
-      "active.session.access_token": token.access_token,
-      "active.session.expiry_date": token.expiry_date,
+      "active.session.accessToken": token.accessToken,
+      "active.session.expiryDate": token.expiryDate,
       "active.session.scope": token.scope,
-      "active.session.token_type": token.token_type,
-      "active.session.refresh_token": token.refresh_token,
+      "active.session.tokenType": token.tokenType,
+      "active.session.refreshToken": token.refreshToken,
       "active.loggedIn": true
     }
   } else {
     update = {
       "userId": userId,
       "active.session.sessionID": sessionID,
-      "active.session.access_token": token.access_token,
-      "active.session.expiry_date": token.expiry_date,
+      "active.session.accessToken": token.accessToken,
+      "active.session.expiryDate": token.expiryDate,
       "active.session.scope": token.scope,
-      "active.session.token_type": token.token_type,
+      "active.session.tokenType": token.tokenType,
       "active.loggedIn": true
     }
   }
@@ -118,18 +118,18 @@ Get Email Profile
 
 exports.email_profile = function (req, res) {
 
-  let access_token = req.session.token.access_token;
+  let accessToken = req.session.token.accessToken;
 
-  httpGetRequest(GMAIL_PROFILE_ENDPOINT, access_token).then((email_profile_response) => {
+  httpGetRequest(GMAIL_PROFILE_ENDPOINT, accessToken).then((email_profile_response) => {
     let email_profile = JSON.parse(email_profile_response);
-    let userId = req.session.user_info.userId;
+    let userId = req.session.userInfo.userId;
 
     let md5sum = crypto.createHash('md5');
 
     md5sum.update(email_profile.emailAddress);
     let emailId = md5sum.digest('hex');
 
-    req.session.user_info = {
+    req.session.userInfo = {
       userId: userId,
       emailId: emailId,
       emailAddress: email_profile.emailAddress

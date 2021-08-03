@@ -27,10 +27,10 @@ function getRequest() {
         url: '/v1/basicProfile',
         session: {
             token: {
-                access_token: 'test_token',
-                expiry_date: '1551501417831',
+                accessToken: 'test_token',
+                expiryDate: '1551501417831',
                 scope: 'https://www.googleapis.com/auth/gmail.readonly',
-                token_type: 'Bearer'
+                tokenType: 'Bearer'
             },
             user_info: {
                 userId: '12345abc',
@@ -68,7 +68,7 @@ describe('loadingController:', () => {
         });
         before((done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             let options = {
                 multi: false,
@@ -76,10 +76,10 @@ describe('loadingController:', () => {
               }
             let activeUpdate = {
                 "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
+                "active.session.accessToken": request.session.token.accessToken,
+                "active.session.expiryDate": request.session.token.expiryDate,
                 "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
+                "active.session.tokenType": request.session.token.tokenType,
             }
             History.updateOne(conditions, activeUpdate, options, () => {
                 done();
@@ -92,7 +92,7 @@ describe('loadingController:', () => {
         it('should return firstRun: true if it is not already set in History', (done) => {
             let request = getRequest();
             let response = getResponse();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             // activeUpdate has already been applied if this route is being called
             // there are checks for this in route-errors, so we set it here first.
 
@@ -107,7 +107,7 @@ describe('loadingController:', () => {
         });
         it('should have set firstRun: true in History if it is not already set', (done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             History.findOne(conditions, (err, doc) => {
                 expect(doc.passive.firstRun).to.eql(true);
@@ -116,7 +116,7 @@ describe('loadingController:', () => {
         });
         it('should have set firstRunDate to a new Date object', (done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             History.findOne(conditions, (err, doc) => {
                 let date = new Date();
@@ -126,7 +126,7 @@ describe('loadingController:', () => {
         });
         it('should have set lastRunDate to a new Date object', (done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             History.findOne(conditions, (err, doc) => {
                 let date = new Date();
@@ -137,7 +137,7 @@ describe('loadingController:', () => {
         it('should return firstRun as doc.passive.firstRun if it is already set in History', (done) => {
             let request = getRequest();
             let response = getResponse();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             // activeUpdate has already been applied if this route is being called
             // there are checks for this in route-errors, so we set it here first.
             loadingController.first_run_status(request, response);
@@ -151,7 +151,7 @@ describe('loadingController:', () => {
         });
         it('should have a lastRunDate that is greater then the firstRunDate after being called again', (done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             History.findOne(conditions, (err, doc) => {
                 expect(doc.passive.lastRunDate).to.be.above(doc.passive.firstRunDate);
@@ -161,7 +161,7 @@ describe('loadingController:', () => {
         it('should return firstRun as false after first run has been set to false in History', (done) => {
             let request = getRequest();
             let response = getResponse();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             let options = {
                 multi: false,
@@ -203,7 +203,7 @@ describe('loadingController:', () => {
         });
         beforeEach((done) => {
             let request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             let options = {
                 multi: false,
@@ -211,10 +211,10 @@ describe('loadingController:', () => {
               }
             let activeUpdate = {
                 "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
+                "active.session.accessToken": request.session.token.accessToken,
+                "active.session.expiryDate": request.session.token.expiryDate,
                 "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
+                "active.session.tokenType": request.session.token.tokenType,
             }
             History.updateOne(conditions, activeUpdate, options, () => {
                 done();
@@ -280,7 +280,7 @@ describe('loadingController:', () => {
         it('should set loading to true before sending the response', (done) => { 
             let request = getRequest();
             let response = getResponse();
-            let conditions = { userId: request.session.user_info.userId };
+            let conditions = { userId: request.session.userInfo.userId };
             loadingController.load_suggestions(request, response);
             response.on('end', () => {
                 History.findOne(conditions, (err, doc) => {
@@ -306,7 +306,7 @@ describe('loadingController:', () => {
         });
         before((done) => {
             request = getRequest();
-            let userId = request.session.user_info.userId;
+            let userId = request.session.userInfo.userId;
             let conditions = { userId: userId };
             let options = {
                 multi: false,
@@ -314,10 +314,10 @@ describe('loadingController:', () => {
               }
             let activeUpdate = {
                 "active.session.cookie": request.headers.cookie,
-                "active.session.access_token": request.session.token.access_token,
-                "active.session.expiry_date": request.session.token.expiry_date,
+                "active.session.accessToken": request.session.token.accessToken,
+                "active.session.expiryDate": request.session.token.expiryDate,
                 "active.session.scope": request.session.token.scope,
-                "active.session.token_type": request.session.token.token_type,
+                "active.session.tokenType": request.session.token.tokenType,
                 "active.loadingStatus": true,
                 "active.percentLoaded": 5,
             }
@@ -345,7 +345,7 @@ describe('loadingController:', () => {
             expect(data.data.percentLoaded).to.eql(5);
         });
         it('should see a change in loadingStatus/percentLoaded if status is changed', (done) => {
-            let conditions = { userId: request.session.user_info.userId }
+            let conditions = { userId: request.session.userInfo.userId }
             let update = {
                 "active.loadingStatus": false,
                 "active.percentLoaded": 10
