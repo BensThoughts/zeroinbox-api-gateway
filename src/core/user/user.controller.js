@@ -151,7 +151,7 @@ exports.emailProfile = function(req, res) {
           },
         });
 
-        sendEmailProfileToMongo(userId, emailId, email_profile);
+        sendEmailProfileToMongo(userId, emailId, emailProfile);
       }).catch((err) => {
         logger.error('Error in getEmailProfile(): ' + err);
         res.status(500).json({
@@ -172,10 +172,10 @@ function sendEmailProfileToMongo(userId, emailId, emailProfile) {
     userId: userId,
     email: {
       emailId: emailId,
-      emailAddress: email_profile.emailAddress,
-      messagesTotal: email_profile.messagesTotal,
-      threadsTotal: email_profile.threadsTotal,
-      historyId: email_profile.historyId,
+      emailAddress: emailProfile.emailAddress,
+      messagesTotal: emailProfile.messagesTotal,
+      threadsTotal: emailProfile.threadsTotal,
+      historyId: emailProfile.historyId,
     },
   };
   upsertToProfile(userId, update, (err, doc) => {
