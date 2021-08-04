@@ -50,23 +50,23 @@ function checkRefreshToken(req, res, next) {
   const expiryDate = req.session.token.expiryDate; // in millis since epoch
 
   if (currentDate >= expiryDate) {
-    logger.trace(userId + ' - Refreshing token!');
+    logger.trace('Refreshing token!');
 
     findRefreshToken(userId, (err, refreshToken) => {
       if (err) {
-        logger.error(userId + ' - ' + err);
+        logger.error(err);
         return res.status(401).json({
           status: 'error',
           status_message: 'Error obtaining new accessToken with refreshToken!',
         });
       } else if (refreshToken === null) {
-        logger.error(userId + ' - findRefreshToken(): refreshToken === null');
+        logger.error('findRefreshToken(): refreshToken === null');
         return res.status(401).json({
           status: 'error',
           status_message: 'Error obtaining new accessToken with refreshToken!',
         });
       } else {
-        logger.trace(userId + ' - Refresh token: ' + refreshToken);
+        logger.trace('Refresh token: ' + refreshToken);
 
         httpRefreshTokenRequest(refreshToken).then((response) => {
           const parsedResponse = JSON.parse(response);
@@ -81,8 +81,8 @@ function checkRefreshToken(req, res, next) {
 
           const newAccessToken = parsedResponse.access_token;
 
-          logger.trace(userId + ' - New access token: ' + newAccessToken);
-          logger.trace(userId + ' - New expiry date: ' + newExpiryDate);
+          logger.trace('New access token: ' + newAccessToken);
+          logger.trace('New expiry date: ' + newExpiryDate);
 
           req.session.token.accessToken = newAccessToken;
           req.session.token.expiryDate = newExpiryDate;
@@ -95,8 +95,9 @@ function checkRefreshToken(req, res, next) {
           });
 
           return next();
-        }).catch((httpErr) => {
-          logger.error(userId + ' - ' + JSON.stringify(httpErr));
+        }).catch((err) => {
+          const httpErr = JSON.stringify(err);
+          logger.error('Http refresh token request error: ' + httpErr);
           return res.status(401).json({
             status: 'error',
             status_message: 'Error obtaining new accessToken ' +
@@ -122,7 +123,7 @@ function sendNewTokenToMongo(userId, accessToken, expiryDate) {
     'active.session.expiryDate': expiryDate,
   };
   upsertToHistory(userId, update, (err, res) => {
-    if (err) return logger.error(userId + ' - ' + err);
+    if (err) return logger.error(err);
   });
 }
 

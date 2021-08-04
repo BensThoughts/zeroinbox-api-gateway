@@ -35,15 +35,14 @@ exports.loadingStatus = function(req, res) {
           loadingStatus: loadingDoc.loadingStatus,
           percentLoaded: loadingDoc.percentLoaded,
         };
-        logger.trace(userId + ' - Loading Status: ' + JSON.stringify(data));
+        logger.trace('Loading Status: ' + JSON.stringify(data));
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
           data: data,
         });
       } else {
-        logger.error(userId +
-            ' - Was /loadSenders called? loadingDoc is null!');
+        logger.error('Was /loadSenders called? loadingDoc is null!');
         res.status(400).json({
           status: 'error',
           status_message:
@@ -77,12 +76,11 @@ function checkLoadingDoc(loadingDoc) {
 exports.firstRunStatus = function(req, res) {
   const userId = req.session.userInfo.userId;
 
-  logger.trace(userId + ' - Checking /firstRunStatus!');
+  logger.trace('Checking /firstRunStatus!');
 
   findOneHistory(userId, (err, doc) => {
     if (err) {
-      logger.error(userId +
-        ' - MongoDB Error at first_run_status in history.findOne(): ' + err);
+      logger.error('MongoDB Error in findOneHistory(): ' + err);
       res.status(500).json({
         status: 'error',
         status_message: 'internal server error at path /firstRunStatus',
@@ -97,7 +95,7 @@ exports.firstRunStatus = function(req, res) {
       const firstRunEver = checkFirstRunEver(doc);
       updatePassiveHistory(userId, firstRunEver);
       if (firstRunEver) {
-        logger.trace(userId + ' - First Run Ever!');
+        logger.trace('First Run Ever!');
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
@@ -106,7 +104,7 @@ exports.firstRunStatus = function(req, res) {
           },
         });
       } else {
-        logger.trace(userId + ' - /firstRunStatus: ' + doc.passive.firstRun);
+        logger.trace('/firstRunStatus: ' + doc.passive.firstRun);
         res.status(200).json({
           status: 'success',
           status_message: 'OK',
@@ -160,8 +158,7 @@ exports.loadSenders = function(req, res, next) {
 function loadSendersMeta(userId, accessToken, callback) {
   findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
-      logger.error(userId +
-        ' - MongoDB Error at load_suggestions in history.findOne(): ' + err);
+      logger.error('MongoDB Error in findOneLoadingStatus(): ' + err);
       callback({
         status: 'error',
         status_code: 500,
@@ -171,8 +168,7 @@ function loadSendersMeta(userId, accessToken, callback) {
     } else {
       const alreadyLoading = checkLoadingStatus(doc);
       if (alreadyLoading) {
-        logger.trace(userId +
-          ' - Tried to hit /loadSenders while already loading');
+        logger.trace('Tried to hit /loadSenders while already loading');
         callback({
           status: 'success',
           status_code: 200,
@@ -184,8 +180,7 @@ function loadSendersMeta(userId, accessToken, callback) {
           // We need to always make sure that updateLoadingStatus
           // succeeds before giving the user a response
           if (err) {
-            logger.error(userId +
-              ' - Error at load_suggestions in updateLoadingStatus(): ' + err);
+            logger.error('Error in updateLoadingStatus(): ' + err);
             callback({
               status: 'error',
               status_code: 500,
@@ -193,7 +188,7 @@ function loadSendersMeta(userId, accessToken, callback) {
                               'error setting loadingStatus in database',
             });
           } else {
-            logger.trace(userId + ' - Loading status updated in mongo to true');
+            logger.trace('Loading status updated in mongo to true');
             callback({
               status: 'success',
               status_code: 200,

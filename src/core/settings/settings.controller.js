@@ -17,8 +17,7 @@ exports.getCategories = function(req, res) {
       });
     } else {
       if (categories.length > 0) {
-        logger.trace(userId +
-          ' - Categories sent back' + JSON.stringify(categories));
+        logger.trace('Categories sent back' + JSON.stringify(categories));
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -38,7 +37,7 @@ exports.getCategories = function(req, res) {
           {name: 'Travel', value: 'Travel'},
           {name: 'Misc', value: 'Misc'},
         ]);
-        logger.trace(userId + ' - Categories created.');
+        logger.trace('Categories created.');
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -48,8 +47,8 @@ exports.getCategories = function(req, res) {
           },
         });
         addToCategories(userId, categories, (err, updateResponse) => {
-          if (err) return logger.error(userId + ' - ' + err);
-          logger.trace(userId + ' - categories initialize to default.');
+          if (err) return logger.error(err);
+          logger.trace('categories initialize to default.');
         });
       }
     }
@@ -59,22 +58,21 @@ exports.getCategories = function(req, res) {
 exports.setCategories = function(req, res) {
   const userId = req.session.userInfo.userId;
   const body = req.body;
-  logger.trace(userId +
-    ' - POST - /v1/settings/categories: ' + JSON.stringify(body));
+  logger.trace('POST - /v1/settings/categories: ' + JSON.stringify(body));
   const add = body.add;
   const category = body.category;
   if (add) {
     // let categories = [category];
     addToCategories(userId, category, (err, updateResponse) => {
       if (err) {
-        logger.error(userId + ' - ' + err);
+        logger.error(err);
         res.status(500).json({
           status: 'error',
           status_code: 500,
           status_message: 'Error adding to categories',
         });
       } else {
-        logger.trace(userId + ' - Category added: ' + JSON.stringify(category));
+        logger.trace('Category added: ' + JSON.stringify(category));
         res.status(200).json({
           status: 'success',
           status_code: 200,
@@ -85,15 +83,14 @@ exports.setCategories = function(req, res) {
   } else {
     removeCategory(userId, category, (err, updateResponse) => {
       if (err) {
-        logger.error(userId + ' - ' + err);
+        logger.error(err);
         res.status(500).json({
           status: 'error',
           status_code: 500,
           status_message: 'Error adding to categories',
         });
       } else {
-        logger.trace(userId +
-          ' - Category removed: ' + JSON.stringify(category));
+        logger.trace('Category removed: ' + JSON.stringify(category));
         res.status(200).json({
           status: 'success',
           status_code: 200,

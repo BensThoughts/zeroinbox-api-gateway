@@ -19,7 +19,7 @@ exports.postActions = function(req, res) {
 
   const body = req.body;
 
-  // logger.trace(userId + ' - POST request to /v1/actions received: ' +
+  // logger.trace('POST request to /v1/actions received: ' +
   // JSON.stringify(body));
 
   const senderIds = body.senderIds;
