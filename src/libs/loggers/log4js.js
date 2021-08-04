@@ -1,8 +1,20 @@
 const log4js = require('log4js');
 
+log4js.addLayout('kube-vision', function(config) {
+  return function(logEvent) {
+    return;
+  };
+});
+
 log4js.configure({
   appenders: {
-    stdout: {type: 'stdout'},
+    stdout: {
+      type: 'stdout',
+      layout: {
+        type: 'pattern',
+        pattern: '%[[%d] [%p] [ZeroInbox-Api-Gateway] -%] %X{userId}%m',
+      },
+    },
     stderr: {type: 'stderr'},
     debug: {
       type: 'file',
@@ -145,5 +157,6 @@ log4js.configure({
 const {LOG_LEVEL} = require('../../config/init.config');
 
 const logger = log4js.getLogger(LOG_LEVEL);
+logger.addContext('userId', '');
 
 module.exports = logger;

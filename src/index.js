@@ -120,6 +120,8 @@ googleApi.use(morgan(morganChalk.logError, {
 /**
 * EXPRESS MIDDLEWARE TO HANDLE IF REQUEST IS AUTHORIZED WITH A TOKEN
 *****************************************************************************/
+const userIdLogger = require('./libs/loggers/userid.logger');
+
 const sessionErrors = require('./libs/error-handlers/session-errors');
 const authErrors = require('./libs/error-handlers/auth-errors');
 const userIdErrors = require('./libs/error-handlers/user-id-errors');
@@ -129,7 +131,7 @@ const refreshToken = require('./libs/middleware/refresh-token');
 
 const actionPostErrors = require('./libs/error-handlers/action-post-errors');
 
-
+googleApi.use(userIdLogger);
 googleApi.use(sessionErrors);
 googleApi.use(authErrors);
 googleApi.use(userIdErrors);
