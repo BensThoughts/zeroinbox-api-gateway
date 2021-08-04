@@ -158,7 +158,7 @@ exports.loadSenders = function(req, res, next) {
  * @param  {string} accessToken
  * @param  {Function} callback
  */
-exports.loadSendersMeta = function(userId, accessToken, callback) {
+function loadSendersMeta(userId, accessToken, callback) {
   findOneLoadingStatus(userId, (err, doc) => {
     if (err) {
       logger.error(userId +
@@ -206,6 +206,8 @@ exports.loadSendersMeta = function(userId, accessToken, callback) {
     }
   });
 };
+
+exports.loadSendersMeta = loadSendersMeta;
 
 /**
  * @param  {LoadingStatus} doc
