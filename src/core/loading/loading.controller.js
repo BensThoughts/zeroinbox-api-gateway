@@ -19,11 +19,10 @@ const {
 
 exports.loadingStatus = function(req, res) {
   const userId = req.session.userInfo.userId;
-  logger.trace(userId + ' - /v1/loadingStatus');
 
   findOneLoadingStatus(userId, (err, loadingDoc) => {
     if (err) {
-      logger.error(userId + ' - MongoDB Error in findOneLoadingStatus: ' + err);
+      logger.error('MongoDB Error in findOneLoadingStatus: ' + err);
       const resError = 'Server error at /loadingStatus: ' + err;
       res.status(500).json({
         status: 'error',

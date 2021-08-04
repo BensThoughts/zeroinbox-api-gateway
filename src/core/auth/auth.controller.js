@@ -120,7 +120,7 @@ exports.logout = function(req, res) {
     if (err) return logger.error(err);
   });
 
-  logger.trace(userId + ' - Logged out successfully');
+  logger.trace('Logged out successfully');
 
   res.json({
     status: 'success',
