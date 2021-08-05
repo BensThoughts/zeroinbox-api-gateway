@@ -1,11 +1,5 @@
 const log4js = require('log4js');
 
-log4js.addLayout('kube-vision', function(config) {
-  return function(logEvent) {
-    return;
-  };
-});
-
 log4js.configure({
   appenders: {
     stdout: {
@@ -15,7 +9,13 @@ log4js.configure({
         pattern: '%[[%d] [%p] [ZeroInbox-Api-Gateway] -%] %X{userId}%m',
       },
     },
-    stderr: {type: 'stderr'},
+    stderr: {
+      type: 'stderr',
+      layout: {
+        type: 'pattern',
+        pattern: '%[[%d] [%p] [ZeroInbox-Api-Gateway] -%] %X{userId}%m',
+      },
+    },
     debug: {
       type: 'file',
       filename: './logs/debug.log',
@@ -73,15 +73,6 @@ log4js.configure({
       maxLevel: 'info',
     },
 
-    /** Prod Setting */
-    _stdout_prod: {
-      type: 'logLevelFilter',
-      appender: 'stdout',
-      level: 'info',
-      maxLevel: 'info',
-    },
-
-
     /** Dev Setting */
     _stderr_debug: {
       type: 'logLevelFilter',
@@ -96,6 +87,12 @@ log4js.configure({
       appender: 'stderr',
       level: 'warn',
       maxLevel: 'fatal',
+    },
+    _stdout_prod: {
+      type: 'logLevelFilter',
+      appender: 'stdout',
+      level: 'info',
+      maxLevel: 'info',
     },
 
   },
