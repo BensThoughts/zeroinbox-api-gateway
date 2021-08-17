@@ -220,13 +220,26 @@ function processHandler(server) {
 }
 
 const shutdown = (server, signal, value) => {
-  logger.info(`Server stopped by ${signal} with value ${value}`);
-  server.close(() => {
-    logger.info('expressjs server closed');
-    rabbit.disconnect(() => {
-      logger.info('disconnected from zero-rabbit (RabbitMQ)');
-      mongoose.disconnect().then(() => {
-        logger.info('disconnected from mongoose (MongoDB)');
+  logger.info(`Api-Gateway service stopped by ${signal} with value ${value}`);
+  server.close((serverErr) => {
+    if (serverErr) {
+      logger.error('ExpressJS server close error: ' + serverErr);
+      process.exitCode = 1;
+    }
+    logger.info('ExpressJS server closed');
+    rabbit.disconnect((rabbitErr) => {
+      if (rabbitErr) {
+        logger.error('RabbitMQ disconnect error: ' + rabbitErr);
+        process.exitCode = 1;
+      }
+      logger.info('disconnected from RabbitMQ!');
+      mongoose.disconnect((mongooseErr) => {
+        if (mongooseErr) {
+          logger.error('MongoDB disconnect error: ' + mongooseErr);
+          process.exitCode = 1;
+        }
+        logger.info('disconnected from MongoDB!');
+        process.exit(); // TODO: someway to exit process without?
       });
     });
   });
