@@ -10,11 +10,12 @@ const configLogger = require('./libs/loggers/config.logger');
 configLogger.logConfig();
 
 const {
-  EXPRESS_HOST,
+  // EXPRESS_HOST,
   EXPRESS_PORT,
   CORS_WHITELIST,
-  SESSION_REDIS_HOST,
-  SESSION_REDIS_PORT,
+  // SESSION_REDIS_HOST,
+  // SESSION_REDIS_PORT,
+  // SESSION_REDIS_URL,
   SESSION_SECRET,
   MONGO_URI,
 } = require('./config/init.config');
@@ -65,30 +66,45 @@ googleApi.use(express.urlencoded({extended: false, limit: '5mb'}));
 /**
 * EXPRESS WITH SESSIONS (uses cookies) AND REDIS SETUP
 *****************************************************************************/
-const redis = require('redis');
-const session = require('express-session');
-const RedisStore = require('connect-redis')(session);
-const REDIS_URL = 'redis://' + SESSION_REDIS_HOST + ':' + SESSION_REDIS_PORT;
-const redisClient = redis.createClient(REDIS_URL);
-const genuuid = require('uid-safe');
+// const session = require('express-session');
+// const RedisStore = require('connect-redis')(session);
+// const redis = require('redis');
 
-googleApi.use(
-    session({
-      store: new RedisStore({
-        client: redisClient,
-      }),
-      resave: false,
-      genid: function(req) {
-        return genuuid.sync(18); // use UUIDs for session IDs
-      },
-      secret: SESSION_SECRET,
-      cookie: {
-        expires: new Date(2147483647000),
-      // maxAge: 60 * 60 * 1000
-      },
-      saveUninitialized: false,
-    }),
-);
+
+// let REDIS_URL = 'redis://' + SESSION_REDIS_HOST + ':' + SESSION_REDIS_PORT;
+// if (SESSION_REDIS_URL) {
+//   REDIS_URL = SESSION_REDIS_URL;
+// }
+
+// const genuuid = require('uid-safe');
+
+
+// const redisClient = redis.createClient(REDIS_URL);
+// googleApi.use(
+//     session({
+//     // store: new RedisStore({
+//     //   client: redisClient,
+//     // }),
+//       resave: false,
+//       genid: function(req) {
+//         return genuuid.sync(18); // use UUIDs for session IDs
+//       },
+//       secret: SESSION_SECRET,
+//       cookie: {
+//         expires: new Date(2147483647000),
+//         // maxAge: 60 * 60 * 1000
+//       },
+//       saveUninitialized: false,
+//     }),
+// );
+const cookieSession = require('cookie-session');
+
+googleApi.use(cookieSession({
+  name: '__session',
+  keys: [SESSION_SECRET],
+  sameSite: 'lax',
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+}));
 
 /**
 * LOGGING INIT (MORGAN) Http request logging
@@ -186,9 +202,12 @@ mongoose.connect(MONGO_URI,
 
           // If getting EADDR Already in use, probably rabbit.connect has
           // tried to reconnect/reload
-          const server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+          // const server = googleApi.listen(EXPRESS_PORT, EXPRESS_HOST);
+          const server = googleApi.listen(EXPRESS_PORT, () => {
+            logger.info('Express server started');
+          });
+          logger.info(JSON.stringify(server.address()));
           processHandler(server);
-          logger.info(`Running on http://${EXPRESS_HOST}:${EXPRESS_PORT}`);
         });
       }
     },
