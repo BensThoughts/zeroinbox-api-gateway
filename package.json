@@ -10,9 +10,10 @@
     "test": "./node_modules/mocha/bin/_mocha ./src/**/*.spec.js --exit",
     "unit": "./node_modules/mocha/bin/_mocha ./src/**/unit/*.spec.js --timeout 10000 --exit",
     "integration": "./node_modules/mocha/bin/_mocha ./src/**/integration/*.spec.js --exit",
+    "start": "node ./src/index.js",
     "start:nodemon": "nodemon /usr/src/app/src/index.js",
     "start:dev": "nodemon --inspect-brk=0.0.0.0 /usr/src/app/src/index.js",
-    "dev": "cd ./src && node index.js"
+    "dev": "nodemon --require ./node_modules/dotenv/config.js ./src/index.js"
   },
   "author": "",
   "license": "ISC",
@@ -22,19 +23,20 @@
     "chalk": "^4.1.1",
     "connect-redis": "^6.0.0",
     "cookie-parser": "^1.4.5",
+    "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "express-request-id": "^1.4.1",
-    "express-session": "^1.17.2",
+    "express-session": "^1.17.3",
     "googleapis": "^82.0.0",
     "log4js": "^6.3.0",
     "mongoose": "^5.13.3",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.12",
-    "redis": "^3.1.2",
+    "redis": "^4.6.5",
     "request": "^2.88.2",
     "uid-safe": "^2.1.5",
-    "zero-rabbit": "^1.1.0"
+    "zero-rabbit": "^1.1.2"
   },
   "devDependencies": {
     "chai": "^4.3.4",
