@@ -43,7 +43,8 @@ exports.oauth2init = function(req, res) {
   // Reset the session after init because redirect from website to login
   // and then coming back to it after login creates 2 sessions, and one
   // is empty
-  req.session.destroy();
+  // req.session.destroy();
+  req.session = null;
 
   if (authUrl === undefined) {
     res.json({
@@ -109,7 +110,8 @@ exports.oauth2callback = function(req, res) {
 
 exports.logout = function(req, res) {
   const userId = req.session.userInfo.userId;
-  req.session.destroy();
+  // req.session.destroy();
+  req.session = null;
 
   const historyUpdate = {
     'userId': userId,
