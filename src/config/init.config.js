@@ -1,4 +1,5 @@
 module.exports = {
+  NODE_ENV: String(process.env.NODE_ENV),
   // Express
   EXPRESS_PORT: Number(process.env.EXPRESS_PORT),
   EXPRESS_HOST: String(process.env.EXPRESS_HOST),
