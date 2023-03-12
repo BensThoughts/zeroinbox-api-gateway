@@ -3,8 +3,9 @@ module.exports = {
   EXPRESS_PORT: Number(process.env.EXPRESS_PORT),
   EXPRESS_HOST: String(process.env.EXPRESS_HOST),
   CORS_WHITELIST: String(process.env.CORS_WHITELIST || ''),
-  SESSION_REDIS_HOST: String(process.env.SESSION_REDIS_HOST),
-  SESSION_REDIS_PORT: Number(process.env.SESSION_REDIS_PORT),
+  // SESSION_REDIS_HOST: String(process.env.SESSION_REDIS_HOST),
+  // SESSION_REDIS_PORT: Number(process.env.SESSION_REDIS_PORT),
+  // SESSION_REDIS_URL: String(process.env.SESSION_REDIS_URL),
   SESSION_SECRET: String(process.env.SESSION_SECRET),
   LOG_LEVEL: String(process.env.LOG_LEVEL || 'production'),
 
