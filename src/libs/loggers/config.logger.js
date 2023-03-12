@@ -22,19 +22,19 @@ function logConfig() {
 
   // init env vars
   logger.info('');
-  logger.info('********INIT ENV VARS********');
+  logger.info('******** INIT ENV VARS ********');
   Object.keys(initEnvVars).forEach((envVar) => {
     logger.info(envVar + ': ' + initEnvVars[envVar]);
   });
   // authentication env vars
   logger.info('');
-  logger.info('********AUTH ENV VARS********');
+  logger.info('******** AUTH ENV VARS ********');
   Object.keys(authEnvVars).forEach((envVar) => {
     logger.info(envVar + ': ' + authEnvVars[envVar]);
   });
 
   logger.info('');
-  logger.info('********RABBIT CONNECTION********');
+  logger.info('******** RABBIT CONNECTION ********');
   if (RABBIT_URL) {
     logger.info('RABBIT_URL: ' + RABBIT_URL);
   } else if (RABBIT_CONNECTION) {
