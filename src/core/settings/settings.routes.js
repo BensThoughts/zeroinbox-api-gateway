@@ -1,6 +1,6 @@
 const express = require('express');
 const settingsController = require('./settings.controller');
-
+// eslint-disable-next-line new-cap
 const settingsRouter = express.Router();
 
 

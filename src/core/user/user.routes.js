@@ -1,4 +1,5 @@
 const express = require('express');
+// eslint-disable-next-line new-cap
 const userRouter = express.Router();
 
 const userController = require('./user.controller');
