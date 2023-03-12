@@ -38,6 +38,7 @@ exports.oauth2init = function(req, res) {
       'https://www.googleapis.com/auth/gmail.settings.basic',
     ],
     prompt: PROMPT,
+    // include_granted_scopes: true,
   });
 
   // Reset the session after init because redirect from website to login
@@ -85,6 +86,8 @@ exports.oauth2callback = function(req, res) {
             .status(500)
             .send('Something went wrong: check the logs.');
       }
+
+      logger.trace(`returned token from googleapis oauth2Client`, token);
 
       const accessToken = token.access_token;
       const scope = token.scope;
