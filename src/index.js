@@ -10,12 +10,9 @@ const configLogger = require('./libs/loggers/config.logger');
 configLogger.logConfig();
 
 const {
-  // EXPRESS_HOST,
+  // NODE_ENV,
   EXPRESS_PORT,
   CORS_WHITELIST,
-  // SESSION_REDIS_HOST,
-  // SESSION_REDIS_PORT,
-  // SESSION_REDIS_URL,
   SESSION_SECRET,
   MONGO_URI,
 } = require('./config/init.config');
@@ -66,42 +63,13 @@ googleApi.use(express.urlencoded({extended: false, limit: '5mb'}));
 /**
 * EXPRESS WITH SESSIONS (uses cookies) AND REDIS SETUP
 *****************************************************************************/
-// const session = require('express-session');
-// const RedisStore = require('connect-redis')(session);
-// const redis = require('redis');
-
-
-// let REDIS_URL = 'redis://' + SESSION_REDIS_HOST + ':' + SESSION_REDIS_PORT;
-// if (SESSION_REDIS_URL) {
-//   REDIS_URL = SESSION_REDIS_URL;
-// }
-
-// const genuuid = require('uid-safe');
-
-
-// const redisClient = redis.createClient(REDIS_URL);
-// googleApi.use(
-//     session({
-//     // store: new RedisStore({
-//     //   client: redisClient,
-//     // }),
-//       resave: false,
-//       genid: function(req) {
-//         return genuuid.sync(18); // use UUIDs for session IDs
-//       },
-//       secret: SESSION_SECRET,
-//       cookie: {
-//         expires: new Date(2147483647000),
-//         // maxAge: 60 * 60 * 1000
-//       },
-//       saveUninitialized: false,
-//     }),
-// );
 const cookieSession = require('cookie-session');
 
 googleApi.use(cookieSession({
-  name: '__session',
+  name: '_zeroinbox_session',
   keys: [SESSION_SECRET],
+  // secure: NODE_ENV === 'production' ? true : false,
+  // secure: false,
   sameSite: 'lax',
   maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
 }));
