@@ -1,0 +1,68 @@
+# fly.toml file generated for zeroinbox-api-gateway on 2023-03-11T23:07:26-07:00
+
+app = "zeroinbox-api-gateway"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[build]
+  builder = "heroku/buildpacks:20"
+
+[env]
+  AUTH_FAILURE_REDIRECT_URL = "https://zeroinbox.app/"
+  AUTH_SUCCESS_REDIRECT_URL = "https://zeroinbox.app/loading"
+  BASIC_PROFILE_ENDPOINT = "https://www.googleapis.com/oauth2/v2/userinfo"
+  CORS_WHITELIST = "https://zeroinbox.app"
+  DEFAULT_PERCENT_LOADED = "10"
+  EXPRESS_PORT = "8080"
+  GAPI_DELAY_MULTIPLIER = "2"
+  GAPI_INIT_RETRY_DELAY = "500"
+  GAPI_MAX_RETRIES = "3"
+  GMAIL_PROFILE_ENDPOINT = "https://www.googleapis.com/gmail/v1/users/me/profile"
+  G_OAUTH_ACCESS_TYPE = "offline"
+  G_OAUTH_PROMPT = "select_account"
+  G_OAUTH_REDIRECT_URL = "https://api.zeroinbox.app/v1/oauth2callback"
+  # LOG_LEVEL = "production_trace"
+  OAUTH_TOKEN_URL = "https://www.googleapis.com/oauth2/v4/token"
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[experimental]
+  auto_rollback = true
+  # cmd = ['node', '/src/index.js']
+
+[[services]]
+  internal_port = 8080
+  processes = ["app"]
+  protocol = "tcp"
+  script_checks = []
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+    type = "connections"
+
+  [[services.http_checks]]
+    grace_period = "5s"
+    interval = "10s"
+    method = "get"
+    path = "/healthcheck"
+    protocol = "http"
+    timeout = "2s"
+    tls_skip_verify = false
+    [services.http_checks.headers]
+      health-check = "true"
+
+  [[services.ports]]
+    force_https = true
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "15s"
+    restart_limit = 0
+    timeout = "2s"
